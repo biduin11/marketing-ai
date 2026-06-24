@@ -1,7 +1,7 @@
 # AI Marketing OS — CLAUDE.md
 
 > Этот файл читается Claude Code при старте сессии. Не удалять, не перемещать из корня.
-> Последнее обновление: Итерация 0 завершена.
+> Последнее обновление: Итерация 2 завершена.
 
 ---
 
@@ -10,7 +10,7 @@
 **Название:** AI Marketing OS
 **Репозиторий:** github.com/biduin11/marketing-ai
 **Деплой:** Vercel (iad1, Next.js framework preset)
-**Текущая итерация:** 1 ✅ → **2 (Audience + Competitor + Offer)** — следующая
+**Текущая итерация:** 2 ✅ → **3 (CJM + Content Factory)** — следующая
 
 ---
 
@@ -86,7 +86,8 @@ prisma/
 
 **Enum ProjectStatus:** DRAFT | ACTIVE | PAUSED | ARCHIVED
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
-  STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 (расширяется с каждой итерацией)
+  STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
+  AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER (расширяется с каждой итерацией)
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
@@ -172,7 +173,7 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 |---|---|---|
 | 0 | Фундамент (каркас, auth, БД, деплой) | ✅ Завершена |
 | 1 | Company Intelligence + Strategy Engine | ✅ Завершена |
-| 2 | Audience + Competitor + Offer | ⏳ |
+| 2 | Audience + Competitor + Offer | ✅ Завершена |
 | 3 | CJM + Content Factory | ⏳ |
 | 4 | Analytics + Reports | ⏳ |
 | 5 | AI Marketing Director | ⏳ |
@@ -193,3 +194,13 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 Обнови CLAUDE.md: итерация [N] завершена. Добавь новые модели БД
 в раздел «Применённые», обнови статус итерации, добавь новые env если появились.
 ```
+
+## graphify
+
+This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+
+Rules:
+- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
+- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
+- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
+- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).

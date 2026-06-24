@@ -1,21 +1,21 @@
-import { Crosshair } from "lucide-react"
+import { Tag } from "lucide-react"
 import { EmptyState } from "@/components/empty-state"
-import { CompetitorView } from "@/components/competitors/competitor-view"
+import { OffersView } from "@/components/offers/offers-view"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getProject } from "@/lib/actions/projects"
 import { getLatestArtifact } from "@/lib/services/artifacts"
-import { competitorAnalysisSchema } from "@/lib/ai/schemas/competitorAnalysis"
+import { offerSchema } from "@/lib/ai/schemas/offer"
 
-export default async function CompetitorsPage() {
+export default async function OffersPage() {
   const projectId = await getActiveProjectId()
 
   if (!projectId) {
     return (
       <div className="flex h-full items-center justify-center">
         <EmptyState
-          icon={Crosshair}
+          icon={Tag}
           title="Нет активного проекта"
-          description="Создайте или выберите проект, чтобы анализировать конкурентов."
+          description="Создайте или выберите проект, чтобы создавать офферы."
         />
       </div>
     )
@@ -26,7 +26,7 @@ export default async function CompetitorsPage() {
     return (
       <div className="flex h-full items-center justify-center">
         <EmptyState
-          icon={Crosshair}
+          icon={Tag}
           title="Проект не найден"
           description="Выберите другой проект в переключателе."
         />
@@ -34,15 +34,13 @@ export default async function CompetitorsPage() {
     )
   }
 
-  const artifact = await getLatestArtifact(project.id, "COMPETITOR_ANALYSIS")
-  const parsed = artifact
-    ? competitorAnalysisSchema.safeParse(artifact.payload)
-    : null
+  const artifact = await getLatestArtifact(project.id, "OFFER")
+  const parsed = artifact ? offerSchema.safeParse(artifact.payload) : null
 
   return (
-    <CompetitorView
+    <OffersView
       projectId={project.id}
-      analysis={parsed?.success ? parsed.data : null}
+      offer={parsed?.success ? parsed.data : null}
       version={artifact?.version ?? null}
     />
   )

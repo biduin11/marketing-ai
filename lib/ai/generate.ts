@@ -23,11 +23,10 @@ export async function generateStructured<T extends z.ZodType>({
   toolDescription,
   maxTokens = 8000,
 }: GenerateStructuredArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
-  // Zod 4 native JSON Schema — used as the tool input_schema.
-  const inputSchema = z.toJSONSchema(schema, { target: "draft-7" }) as Record<
-    string,
-    unknown
-  >
+  // Zod 4 native JSON Schema — strip $schema meta-field; Anthropic rejects it.
+  const { $schema: _unused, ...inputSchema } = z.toJSONSchema(schema, {
+    target: "draft-7",
+  }) as Record<string, unknown>
 
   const response = await anthropic.messages.create({
     model: AI_MODEL,

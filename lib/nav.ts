@@ -9,6 +9,7 @@ import {
   LayoutList,
   Megaphone,
   Settings,
+  Tag,
   Users,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -25,6 +26,7 @@ export const navItems: NavItem[] = [
   { label: "Анализ компании", href: "/company", icon: Building2 },
   { label: "Аудитория", href: "/audience", icon: Users },
   { label: "Конкуренты", href: "/competitors", icon: Crosshair },
+  { label: "Офферы", href: "/offers", icon: Tag },
   { label: "Стратегия", href: "/strategy", icon: ChartLine },
   { label: "Контент-план", href: "/content", icon: LayoutList },
   { label: "Кампании", href: "/campaigns", icon: Megaphone },
