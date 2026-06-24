@@ -19,6 +19,7 @@ import { generateDirectorAnalysis } from "@/lib/services/director.service"
 import { listMetrics } from "@/lib/actions/metrics"
 import { filterByRange } from "@/lib/services/analytics.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
+import { canGenerateAi } from "@/lib/gates"
 import { z } from "zod"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
 
@@ -41,12 +42,21 @@ async function ownedProject(projectId: string) {
   })
 }
 
+async function checkAiGate(userId: string): Promise<ActionResult | null> {
+  const gate = await canGenerateAi(userId)
+  if (!gate.allowed) return { success: false, error: gate.reason ?? "Лимит генераций исчерпан" }
+  return null
+}
+
 export async function runCompanyAnalysis(
   projectId: string,
   force = false
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     await generateCompanyAnalysis(project, { force })
@@ -72,6 +82,9 @@ export async function runStrategy(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
   try {
     await generateStrategy(project, parsedHorizon.data, { force })
     revalidatePath("/strategy")
@@ -89,6 +102,9 @@ export async function runAudienceSegments(
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     await generateAudienceSegments(project, { force })
@@ -108,6 +124,9 @@ export async function runBuyerPersona(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
   try {
     await generateBuyerPersona(project, { force })
     revalidatePath("/audience")
@@ -125,6 +144,9 @@ export async function runJtbd(
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     await generateJtbd(project, { force })
@@ -144,6 +166,9 @@ export async function runCompetitorAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
   try {
     await generateCompetitorAnalysis(project, { force })
     revalidatePath("/competitors")
@@ -161,6 +186,9 @@ export async function runOffer(
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     await generateOffer(project, { force })
@@ -180,6 +208,9 @@ export async function runCjm(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
   try {
     await generateCjm(project, { force })
     revalidatePath("/journey")
@@ -197,6 +228,9 @@ export async function runContentPlan(
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     await generateContentPlan(project, { force })
@@ -221,6 +255,9 @@ export async function runReport(
 
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     const allMetrics = await listMetrics(projectId)
@@ -250,6 +287,9 @@ export async function runDirectorAnalysis(
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
 
   try {
     const metrics = await listMetrics(projectId)

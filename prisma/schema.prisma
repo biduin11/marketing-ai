@@ -35,14 +35,22 @@ enum ArtifactType {
   DIRECTOR_DAILY
 }
 
+enum Plan {
+  FREE
+  PRO
+}
+
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String?
-  passwordHash String
-  projects     Project[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  name                 String?
+  passwordHash         String
+  plan                 Plan      @default(FREE)
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  projects             Project[]
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }
 
 model Project {

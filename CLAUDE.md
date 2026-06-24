@@ -1,7 +1,7 @@
 # AI Marketing OS — CLAUDE.md
 
 > Этот файл читается Claude Code при старте сессии. Не удалять, не перемещать из корня.
-> Последнее обновление: Итерация 5 завершена.
+> Последнее обновление: Итерация 6 завершена.
 
 ---
 
@@ -10,7 +10,7 @@
 **Название:** AI Marketing OS
 **Репозиторий:** github.com/biduin11/marketing-ai
 **Деплой:** Vercel (iad1, Next.js framework preset)
-**Текущая итерация:** 5 ✅ → **6 (SaaS — биллинг, лимиты)** — следующая
+**Текущая итерация:** 6 ✅ — все итерации завершены
 
 ---
 
@@ -166,9 +166,12 @@ DATABASE_URL=          # Neon connection string
 AUTH_SECRET=           # openssl rand -base64 32
 AUTH_URL=              # https://твой-домен.vercel.app (на проде)
 ANTHROPIC_API_KEY=     # sk-ant-...  (нужен с Итерации 1)
-BLOB_READ_WRITE_TOKEN= # (нужен с Итерации 4)
-STRIPE_SECRET_KEY=     # (нужен с Итерации 6)
-STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
+BLOB_READ_WRITE_TOKEN=    # (нужен с Итерации 4)
+STRIPE_SECRET_KEY=        # (нужен с Итерации 6)
+STRIPE_WEBHOOK_SECRET=    # (нужен с Итерации 6)
+STRIPE_PRO_PRICE_ID=      # price_xxx из Stripe Dashboard (нужен с Итерации 6)
+NEXT_PUBLIC_APP_URL=      # https://твой-домен.vercel.app (нужен с Итерации 6)
+CRON_SECRET=              # случайная строка для защиты /api/cron/director
 ```
 
 ---
@@ -183,7 +186,7 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 | 3 | CJM + Content Factory | ✅ Завершена |
 | 4 | Analytics + Reports | ✅ Завершена |
 | 5 | AI Marketing Director | ✅ Завершена |
-| 6 | SaaS (биллинг, лимиты) | ⏳ |
+| 6 | SaaS (биллинг, лимиты) | ✅ Завершена |
 
 ---
 

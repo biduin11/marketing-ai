@@ -1,14 +1,19 @@
-import { Settings } from "lucide-react"
-import { EmptyState } from "@/components/empty-state"
+import { redirect } from "next/navigation"
+import { auth } from "@/auth"
+import { getUsageThisMonth } from "@/lib/services/usage.service"
+import { SettingsView } from "@/components/settings/settings-view"
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const session = await auth()
+  if (!session?.user?.id) redirect("/login")
+
+  const usage = await getUsageThisMonth(session.user.id)
+
   return (
-    <div className="flex h-full items-center justify-center">
-      <EmptyState
-        icon={Settings}
-        title="Настройки"
-        description="Настройки аккаунта, интеграции и параметры проекта. Доступно в следующих итерациях."
-      />
-    </div>
+    <SettingsView
+      name={session.user.name ?? null}
+      email={session.user.email ?? ""}
+      usage={usage}
+    />
   )
 }

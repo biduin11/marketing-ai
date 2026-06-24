@@ -12,6 +12,8 @@ export const createProjectSchema = z.object({
     .optional()
     .or(z.literal("")),
   goals: z.string().max(1000).optional(),
+  budget: z.number().int().min(0).optional(),
+  competitors: z.array(z.string()).optional(),
 })
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>

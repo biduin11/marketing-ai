@@ -1,4 +1,3 @@
-import { FolderOpen, Plus } from "lucide-react"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { listProjects } from "@/lib/actions/projects"
 import { listMetrics } from "@/lib/actions/metrics"
@@ -11,9 +10,10 @@ import {
 } from "@/lib/services/analytics.service"
 import { directorAnalysisSchema } from "@/lib/ai/schemas/directorAnalysis"
 import { EmptyState } from "@/components/empty-state"
-import { NewProjectDialog } from "@/components/new-project-dialog"
 import { ProjectCard } from "@/components/project-card"
 import { DashboardView } from "@/components/dashboard/dashboard-view"
+import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard"
+import { FolderOpen } from "lucide-react"
 
 export default async function HomePage() {
   const [projectId, projects] = await Promise.all([
@@ -23,22 +23,8 @@ export default async function HomePage() {
 
   if (projects.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <EmptyState
-          icon={FolderOpen}
-          title="Нет проектов"
-          description="Создайте первый проект, чтобы начать работу с AI Marketing OS"
-          action={
-            <NewProjectDialog
-              trigger={
-                <div className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/80">
-                  <Plus className="size-3.5" />
-                  Создать первый проект
-                </div>
-              }
-            />
-          }
-        />
+      <div className="flex min-h-[70vh] items-center justify-center px-4">
+        <OnboardingWizard />
       </div>
     )
   }
@@ -49,7 +35,8 @@ export default async function HomePage() {
         <div>
           <h2 className="text-lg font-semibold text-foreground">Проекты</h2>
           <p className="text-sm text-muted-foreground">
-            {projects.length} {projects.length === 1 ? "проект" : "проектов"}
+            {projects.length}{" "}
+            {projects.length === 1 ? "проект" : "проектов"}
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

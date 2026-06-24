@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { createProjectSchema, updateProjectSchema } from "@/lib/validations/project"
 import type { CreateProjectInput, UpdateProjectInput } from "@/lib/validations/project"
 import type { Prisma } from "@prisma/client"
+import { canCreateProject } from "@/lib/gates"
 
 export type ProjectListItem = Prisma.ProjectGetPayload<{
   select: {
@@ -29,12 +30,17 @@ export async function createProject(
     return { success: false, error: "Нет доступа" }
   }
 
+  const gate = await canCreateProject(session.user.id)
+  if (!gate.allowed) {
+    return { success: false, error: gate.reason ?? "Лимит проектов исчерпан" }
+  }
+
   const parsed = createProjectSchema.safeParse(input)
   if (!parsed.success) {
     return { success: false, error: "Ошибка валидации" }
   }
 
-  const { name, niche, website, goals } = parsed.data
+  const { name, niche, website, goals, budget, competitors } = parsed.data
 
   try {
     const project = await prisma.project.create({
@@ -44,6 +50,8 @@ export async function createProject(
         niche: niche ?? null,
         website: website || null,
         goals: goals ?? null,
+        budget: budget ?? null,
+        competitors: competitors ?? [],
       },
     })
 
