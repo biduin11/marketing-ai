@@ -1,21 +1,21 @@
-import { LayoutList } from "lucide-react"
+import { Route } from "lucide-react"
 import { EmptyState } from "@/components/empty-state"
-import { ContentView } from "@/components/content/content-view"
+import { JourneyView } from "@/components/journey/journey-view"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getProject } from "@/lib/actions/projects"
 import { getLatestArtifact } from "@/lib/services/artifacts"
-import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
+import { cjmSchema } from "@/lib/ai/schemas/cjm"
 
-export default async function ContentPage() {
+export default async function JourneyPage() {
   const projectId = await getActiveProjectId()
 
   if (!projectId) {
     return (
       <div className="flex h-full items-center justify-center">
         <EmptyState
-          icon={LayoutList}
+          icon={Route}
           title="Нет активного проекта"
-          description="Создайте или выберите проект, чтобы сгенерировать контент-план."
+          description="Создайте или выберите проект, чтобы построить Customer Journey Map."
         />
       </div>
     )
@@ -26,7 +26,7 @@ export default async function ContentPage() {
     return (
       <div className="flex h-full items-center justify-center">
         <EmptyState
-          icon={LayoutList}
+          icon={Route}
           title="Проект не найден"
           description="Выберите другой проект в переключателе."
         />
@@ -34,13 +34,13 @@ export default async function ContentPage() {
     )
   }
 
-  const artifact = await getLatestArtifact(project.id, "CONTENT_PLAN")
-  const parsed = artifact ? contentPlanSchema.safeParse(artifact.payload) : null
+  const artifact = await getLatestArtifact(project.id, "CJM")
+  const parsed = artifact ? cjmSchema.safeParse(artifact.payload) : null
 
   return (
-    <ContentView
+    <JourneyView
       projectId={project.id}
-      plan={parsed?.success ? parsed.data : null}
+      cjm={parsed?.success ? parsed.data : null}
       version={artifact?.version ?? null}
     />
   )

@@ -1,7 +1,7 @@
 # AI Marketing OS — CLAUDE.md
 
 > Этот файл читается Claude Code при старте сессии. Не удалять, не перемещать из корня.
-> Последнее обновление: Итерация 2 завершена.
+> Последнее обновление: Итерация 3 завершена.
 
 ---
 
@@ -10,7 +10,7 @@
 **Название:** AI Marketing OS
 **Репозиторий:** github.com/biduin11/marketing-ai
 **Деплой:** Vercel (iad1, Next.js framework preset)
-**Текущая итерация:** 2 ✅ → **3 (CJM + Content Factory)** — следующая
+**Текущая итерация:** 3 ✅ → **4 (Analytics + Reports)** — следующая
 
 ---
 
@@ -75,7 +75,7 @@ prisma/
 
 ## База данных (текущая схема)
 
-### Применённые модели (Итерации 0–1)
+### Применённые модели (Итерации 0–3)
 - `User` — id, email, name, passwordHash, createdAt, updatedAt
 - `Project` — id, userId, name, niche, website, socials (Json), regions (String[]),
   products (String[]), competitors (String[]), budget (Int), goals, status (ProjectStatus), timestamps
@@ -87,7 +87,8 @@ prisma/
 **Enum ProjectStatus:** DRAFT | ACTIVE | PAUSED | ARCHIVED
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
-  AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER (расширяется с каждой итерацией)
+  AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER |
+  CJM | CONTENT_PLAN (расширяется с каждой итерацией)
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
@@ -174,7 +175,7 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 | 0 | Фундамент (каркас, auth, БД, деплой) | ✅ Завершена |
 | 1 | Company Intelligence + Strategy Engine | ✅ Завершена |
 | 2 | Audience + Competitor + Offer | ✅ Завершена |
-| 3 | CJM + Content Factory | ⏳ |
+| 3 | CJM + Content Factory | ✅ Завершена |
 | 4 | Analytics + Reports | ⏳ |
 | 5 | AI Marketing Director | ⏳ |
 | 6 | SaaS (биллинг, лимиты) | ⏳ |

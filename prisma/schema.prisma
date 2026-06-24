@@ -27,6 +27,8 @@ enum ArtifactType {
   JTBD
   COMPETITOR_ANALYSIS
   OFFER
+  CJM
+  CONTENT_PLAN
 }
 
 model User {

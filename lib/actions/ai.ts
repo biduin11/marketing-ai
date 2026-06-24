@@ -12,6 +12,8 @@ import {
 } from "@/lib/services/audience.service"
 import { generateCompetitorAnalysis } from "@/lib/services/competitor.service"
 import { generateOffer } from "@/lib/services/offer.service"
+import { generateCjm } from "@/lib/services/cjm.service"
+import { generateContentPlan } from "@/lib/services/contentPlan.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
 
@@ -155,6 +157,42 @@ export async function runOffer(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Не удалось сгенерировать офферы"
+    return { success: false, error: message }
+  }
+}
+
+export async function runCjm(
+  projectId: string,
+  force = false
+): Promise<ActionResult> {
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  try {
+    await generateCjm(project, { force })
+    revalidatePath("/journey")
+    return { success: true }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось сгенерировать CJM"
+    return { success: false, error: message }
+  }
+}
+
+export async function runContentPlan(
+  projectId: string,
+  force = false
+): Promise<ActionResult> {
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  try {
+    await generateContentPlan(project, { force })
+    revalidatePath("/content")
+    return { success: true }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось сгенерировать контент-план"
     return { success: false, error: message }
   }
 }
