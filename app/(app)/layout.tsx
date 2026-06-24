@@ -14,12 +14,11 @@ export default async function AppLayout({
 
   const projects = await listProjects()
 
-  // Serialize ProjectListItem (omit createdAt to keep it serializable simply)
   const projectItems = projects.map((p) => ({
     id: p.id,
     name: p.name,
     niche: p.niche,
-    status: p.status as "DRAFT" | "ACTIVE" | "PAUSED" | "ARCHIVED",
+    status: p.status,
   }))
 
   return (

@@ -5,6 +5,17 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { createProjectSchema } from "@/lib/validations/project"
 import type { CreateProjectInput } from "@/lib/validations/project"
+import type { Prisma } from "@prisma/client"
+
+export type ProjectListItem = Prisma.ProjectGetPayload<{
+  select: {
+    id: true
+    name: true
+    niche: true
+    status: true
+    createdAt: true
+  }
+}>
 
 type ActionResult<T = void> =
   | { success: true; data: T }
@@ -43,7 +54,7 @@ export async function createProject(
   }
 }
 
-export async function listProjects() {
+export async function listProjects(): Promise<ProjectListItem[]> {
   const session = await auth()
   if (!session?.user?.id) return []
 
