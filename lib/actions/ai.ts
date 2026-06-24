@@ -15,6 +15,7 @@ import { generateOffer } from "@/lib/services/offer.service"
 import { generateCjm } from "@/lib/services/cjm.service"
 import { generateContentPlan } from "@/lib/services/contentPlan.service"
 import { generateExecutiveReport } from "@/lib/services/report.service"
+import { generateDirectorAnalysis } from "@/lib/services/director.service"
 import { listMetrics } from "@/lib/actions/metrics"
 import { filterByRange } from "@/lib/services/analytics.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
@@ -239,6 +240,26 @@ export async function runReport(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Не удалось сгенерировать отчёт"
+    return { success: false, error: message }
+  }
+}
+
+export async function runDirectorAnalysis(
+  projectId: string,
+  force = false
+): Promise<ActionResult> {
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  try {
+    const metrics = await listMetrics(projectId)
+    await generateDirectorAnalysis(project, metrics, { force })
+    revalidatePath("/")
+    revalidatePath("/director")
+    return { success: true }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось запустить AI Директора"
     return { success: false, error: message }
   }
 }

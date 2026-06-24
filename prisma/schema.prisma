@@ -32,6 +32,7 @@ enum ArtifactType {
   REPORT_WEEKLY
   REPORT_MONTHLY
   REPORT_QUARTERLY
+  DIRECTOR_DAILY
 }
 
 model User {

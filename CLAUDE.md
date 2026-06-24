@@ -1,7 +1,7 @@
 # AI Marketing OS — CLAUDE.md
 
 > Этот файл читается Claude Code при старте сессии. Не удалять, не перемещать из корня.
-> Последнее обновление: Итерация 4 завершена.
+> Последнее обновление: Итерация 5 завершена.
 
 ---
 
@@ -10,7 +10,7 @@
 **Название:** AI Marketing OS
 **Репозиторий:** github.com/biduin11/marketing-ai
 **Деплой:** Vercel (iad1, Next.js framework preset)
-**Текущая итерация:** 4 ✅ → **5 (AI Marketing Director)** — следующая
+**Текущая итерация:** 5 ✅ → **6 (SaaS — биллинг, лимиты)** — следующая
 
 ---
 
@@ -86,11 +86,14 @@ prisma/
 - `Metric` — id, projectId, channel, date (Date), spend, revenue (Float), leads, clicks, impressions (Int),
   createdAt, updatedAt (unique [projectId, channel, date]; index [projectId])
 
+> DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
+> Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
+
 **Enum ProjectStatus:** DRAFT | ACTIVE | PAUSED | ARCHIVED
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
   AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER |
-  CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY (расширяется с каждой итерацией)
+  CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY | DIRECTOR_DAILY (расширяется с каждой итерацией)
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
@@ -179,7 +182,7 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 | 2 | Audience + Competitor + Offer | ✅ Завершена |
 | 3 | CJM + Content Factory | ✅ Завершена |
 | 4 | Analytics + Reports | ✅ Завершена |
-| 5 | AI Marketing Director | ⏳ |
+| 5 | AI Marketing Director | ✅ Завершена |
 | 6 | SaaS (биллинг, лимиты) | ⏳ |
 
 ---
