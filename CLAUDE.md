@@ -1,7 +1,7 @@
 # AI Marketing OS — CLAUDE.md
 
 > Этот файл читается Claude Code при старте сессии. Не удалять, не перемещать из корня.
-> Последнее обновление: Итерация 3 завершена.
+> Последнее обновление: Итерация 4 завершена.
 
 ---
 
@@ -10,7 +10,7 @@
 **Название:** AI Marketing OS
 **Репозиторий:** github.com/biduin11/marketing-ai
 **Деплой:** Vercel (iad1, Next.js framework preset)
-**Текущая итерация:** 3 ✅ → **4 (Analytics + Reports)** — следующая
+**Текущая итерация:** 4 ✅ → **5 (AI Marketing Director)** — следующая
 
 ---
 
@@ -75,7 +75,7 @@ prisma/
 
 ## База данных (текущая схема)
 
-### Применённые модели (Итерации 0–3)
+### Применённые модели (Итерации 0–4)
 - `User` — id, email, name, passwordHash, createdAt, updatedAt
 - `Project` — id, userId, name, niche, website, socials (Json), regions (String[]),
   products (String[]), competitors (String[]), budget (Int), goals, status (ProjectStatus), timestamps
@@ -83,12 +83,14 @@ prisma/
   model, inputHash, createdAt
 - `StrategyTask` — id, projectId, artifactId, taskKey, done (Boolean), updatedAt
   (состояние чекбоксов задач стратегии; unique [artifactId, taskKey])
+- `Metric` — id, projectId, channel, date (Date), spend, revenue (Float), leads, clicks, impressions (Int),
+  createdAt, updatedAt (unique [projectId, channel, date]; index [projectId])
 
 **Enum ProjectStatus:** DRAFT | ACTIVE | PAUSED | ARCHIVED
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
   AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER |
-  CJM | CONTENT_PLAN (расширяется с каждой итерацией)
+  CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY (расширяется с каждой итерацией)
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
@@ -176,7 +178,7 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 | 1 | Company Intelligence + Strategy Engine | ✅ Завершена |
 | 2 | Audience + Competitor + Offer | ✅ Завершена |
 | 3 | CJM + Content Factory | ✅ Завершена |
-| 4 | Analytics + Reports | ⏳ |
+| 4 | Analytics + Reports | ✅ Завершена |
 | 5 | AI Marketing Director | ⏳ |
 | 6 | SaaS (биллинг, лимиты) | ⏳ |
 
@@ -198,7 +200,7 @@ STRIPE_WEBHOOK_SECRET= # (нужен с Итерации 6)
 
 ## graphify
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+This project has a knowledge graph at graphify-out/ with ключевые узлы, community structure, and cross-file relationships.
 
 Rules:
 - For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.

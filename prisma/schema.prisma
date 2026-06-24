@@ -29,6 +29,9 @@ enum ArtifactType {
   OFFER
   CJM
   CONTENT_PLAN
+  REPORT_WEEKLY
+  REPORT_MONTHLY
+  REPORT_QUARTERLY
 }
 
 model User {
@@ -42,25 +45,44 @@ model User {
 }
 
 model Project {
-  id           String         @id @default(cuid())
-  userId       String
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name         String
-  niche        String?
-  website      String?
-  socials      Json           @default("{}")
-  regions      String[]       @default([])
-  products     String[]       @default([])
-  competitors  String[]       @default([])
-  budget       Int?
-  goals        String?
-  status       ProjectStatus  @default(DRAFT)
-  artifacts    AiArtifact[]
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  niche         String?
+  website       String?
+  socials       Json           @default("{}")
+  regions       String[]       @default([])
+  products      String[]       @default([])
+  competitors   String[]       @default([])
+  budget        Int?
+  goals         String?
+  status        ProjectStatus  @default(DRAFT)
+  artifacts     AiArtifact[]
   strategyTasks StrategyTask[]
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  metrics       Metric[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   @@index([userId])
+}
+
+model Metric {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  channel     String
+  date        DateTime @db.Date
+  spend       Float    @default(0)
+  revenue     Float    @default(0)
+  leads       Int      @default(0)
+  clicks      Int      @default(0)
+  impressions Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([projectId, channel, date])
+  @@index([projectId])
 }
 
 model AiArtifact {

@@ -14,8 +14,19 @@ import { generateCompetitorAnalysis } from "@/lib/services/competitor.service"
 import { generateOffer } from "@/lib/services/offer.service"
 import { generateCjm } from "@/lib/services/cjm.service"
 import { generateContentPlan } from "@/lib/services/contentPlan.service"
+import { generateExecutiveReport } from "@/lib/services/report.service"
+import { listMetrics } from "@/lib/actions/metrics"
+import { filterByRange } from "@/lib/services/analytics.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
+import { z } from "zod"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
+
+const reportInputSchema = z.object({
+  type: z.enum(["REPORT_WEEKLY", "REPORT_MONTHLY", "REPORT_QUARTERLY"]),
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  period: z.string().min(1),
+})
 
 type ActionResult =
   | { success: true }
@@ -193,6 +204,41 @@ export async function runContentPlan(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Не удалось сгенерировать контент-план"
+    return { success: false, error: message }
+  }
+}
+
+export async function runReport(
+  projectId: string,
+  raw: unknown,
+  force = false
+): Promise<ActionResult> {
+  const parsed = reportInputSchema.safeParse(raw)
+  if (!parsed.success) {
+    return { success: false, error: "Неверные параметры отчёта" }
+  }
+
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  try {
+    const allMetrics = await listMetrics(projectId)
+    const from = new Date(parsed.data.from)
+    const to = new Date(parsed.data.to)
+    const metrics = filterByRange(allMetrics, from, to)
+
+    await generateExecutiveReport(
+      project,
+      parsed.data.type,
+      metrics,
+      parsed.data.period,
+      { force }
+    )
+    revalidatePath("/reports")
+    return { success: true }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось сгенерировать отчёт"
     return { success: false, error: message }
   }
 }
