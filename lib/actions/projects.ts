@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { createProjectSchema } from "@/lib/validations/project"
-import type { CreateProjectInput } from "@/lib/validations/project"
+import { createProjectSchema, updateProjectSchema } from "@/lib/validations/project"
+import type { CreateProjectInput, UpdateProjectInput } from "@/lib/validations/project"
 import type { Prisma } from "@prisma/client"
 
 export type ProjectListItem = Prisma.ProjectGetPayload<{
@@ -78,4 +78,53 @@ export async function getProject(projectId: string) {
   return prisma.project.findFirst({
     where: { id: projectId, userId: session.user.id },
   })
+}
+
+export async function updateProject(
+  projectId: string,
+  input: UpdateProjectInput
+): Promise<ActionResult<{ id: string }>> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return { success: false, error: "Нет доступа" }
+  }
+
+  const parsed = updateProjectSchema.safeParse(input)
+  if (!parsed.success) {
+    return { success: false, error: "Ошибка валидации" }
+  }
+
+  const owned = await prisma.project.findFirst({
+    where: { id: projectId, userId: session.user.id },
+    select: { id: true },
+  })
+  if (!owned) {
+    return { success: false, error: "Проект не найден" }
+  }
+
+  const { name, niche, website, goals, products, competitors, regions, budget, socials } =
+    parsed.data
+
+  try {
+    await prisma.project.update({
+      where: { id: projectId },
+      data: {
+        name,
+        niche: niche || null,
+        website: website || null,
+        goals: goals || null,
+        products,
+        competitors,
+        regions,
+        budget,
+        socials: socials ?? {},
+        status: "ACTIVE",
+      },
+    })
+
+    revalidatePath("/", "layout")
+    return { success: true, data: { id: projectId } }
+  } catch {
+    return { success: false, error: "Не удалось сохранить карточку" }
+  }
 }

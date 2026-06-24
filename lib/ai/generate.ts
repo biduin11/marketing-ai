@@ -1,0 +1,58 @@
+import { z } from "zod"
+import { anthropic, AI_MODEL } from "@/lib/ai/client"
+
+interface GenerateStructuredArgs<T extends z.ZodType> {
+  system: string
+  user: string
+  schema: T
+  toolName: string
+  toolDescription: string
+  maxTokens?: number
+}
+
+/**
+ * Calls Claude with a single forced tool (structured output) and validates
+ * the tool input against the provided zod schema. Returns the parsed result
+ * plus the model id used (for persisting on the artifact).
+ */
+export async function generateStructured<T extends z.ZodType>({
+  system,
+  user,
+  schema,
+  toolName,
+  toolDescription,
+  maxTokens = 8000,
+}: GenerateStructuredArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
+  // Zod 4 native JSON Schema — used as the tool input_schema.
+  const inputSchema = z.toJSONSchema(schema, { target: "draft-7" }) as Record<
+    string,
+    unknown
+  >
+
+  const response = await anthropic.messages.create({
+    model: AI_MODEL,
+    max_tokens: maxTokens,
+    system,
+    tools: [
+      {
+        name: toolName,
+        description: toolDescription,
+        input_schema: inputSchema as never,
+      },
+    ],
+    tool_choice: { type: "tool", name: toolName },
+    messages: [{ role: "user", content: user }],
+  })
+
+  const toolUse = response.content.find((block) => block.type === "tool_use")
+  if (!toolUse || toolUse.type !== "tool_use") {
+    throw new Error("AI не вернул структурированный ответ")
+  }
+
+  const parsed = schema.safeParse(toolUse.input)
+  if (!parsed.success) {
+    throw new Error("AI-ответ не прошёл валидацию схемы")
+  }
+
+  return { data: parsed.data, model: AI_MODEL }
+}

@@ -13,6 +13,17 @@ enum ProjectStatus {
   ARCHIVED
 }
 
+enum ArtifactType {
+  COMPANY_ANALYSIS
+  SWOT
+  POSITIONING
+  GROWTH_POINTS
+  STRATEGY_30
+  STRATEGY_90
+  STRATEGY_180
+  STRATEGY_365
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -24,21 +35,53 @@ model User {
 }
 
 model Project {
-  id          String        @id @default(cuid())
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name        String
-  niche       String?
-  website     String?
-  socials     Json          @default("{}")
-  regions     String[]      @default([])
-  products    String[]      @default([])
-  competitors String[]      @default([])
-  budget      Int?
-  goals       String?
-  status      ProjectStatus @default(DRAFT)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id           String         @id @default(cuid())
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  niche        String?
+  website      String?
+  socials      Json           @default("{}")
+  regions      String[]       @default([])
+  products     String[]       @default([])
+  competitors  String[]       @default([])
+  budget       Int?
+  goals        String?
+  status       ProjectStatus  @default(DRAFT)
+  artifacts    AiArtifact[]
+  strategyTasks StrategyTask[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([userId])
+}
+
+model AiArtifact {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      ArtifactType
+  version   Int          @default(1)
+  payload   Json
+  model     String
+  inputHash String
+  createdAt DateTime     @default(now())
+
+  tasks StrategyTask[]
+
+  @@index([projectId, type])
+}
+
+model StrategyTask {
+  id         String     @id @default(cuid())
+  projectId  String
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  artifactId String
+  artifact   AiArtifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+  taskKey    String
+  done       Boolean    @default(false)
+  updatedAt  DateTime   @updatedAt
+
+  @@unique([artifactId, taskKey])
+  @@index([projectId])
 }

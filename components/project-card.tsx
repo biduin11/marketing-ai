@@ -1,7 +1,10 @@
 "use client"
 
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Building2, Calendar } from "lucide-react"
 import { useProjectStore } from "@/lib/store/project-store"
+import { setActiveProject } from "@/lib/actions/active-project"
 import { cn } from "@/lib/utils"
 
 interface ProjectCardItem {
@@ -28,11 +31,21 @@ const statusColor: Record<ProjectCardItem["status"], string> = {
 
 export function ProjectCard({ project }: { project: ProjectCardItem }) {
   const { activeProjectId, setActiveProjectId } = useProjectStore()
+  const router = useRouter()
+  const [, startTransition] = useTransition()
   const isActive = activeProjectId === project.id
+
+  function handleSelect() {
+    setActiveProjectId(project.id)
+    startTransition(async () => {
+      await setActiveProject(project.id)
+      router.refresh()
+    })
+  }
 
   return (
     <button
-      onClick={() => setActiveProjectId(project.id)}
+      onClick={handleSelect}
       className={cn(
         "group flex flex-col gap-4 rounded-2xl border bg-card p-6 text-left transition-all hover:border-foreground/20 hover:shadow-sm",
         isActive

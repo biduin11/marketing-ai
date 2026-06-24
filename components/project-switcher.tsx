@@ -1,5 +1,7 @@
 "use client"
 
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { ChevronsUpDown, FolderOpen, Plus } from "lucide-react"
 import {
   DropdownMenu,
@@ -10,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useProjectStore } from "@/lib/store/project-store"
+import { setActiveProject } from "@/lib/actions/active-project"
 import { cn } from "@/lib/utils"
 
 export interface ProjectListItem {
@@ -29,8 +32,18 @@ export function ProjectSwitcher({
   onNewProject,
 }: ProjectSwitcherProps) {
   const { activeProjectId, setActiveProjectId } = useProjectStore()
+  const router = useRouter()
+  const [, startTransition] = useTransition()
 
   const activeProject = projects.find((p) => p.id === activeProjectId)
+
+  function handleSelect(id: string) {
+    setActiveProjectId(id)
+    startTransition(async () => {
+      await setActiveProject(id)
+      router.refresh()
+    })
+  }
 
   return (
     <DropdownMenu>
@@ -56,7 +69,7 @@ export function ProjectSwitcher({
             {projects.map((project) => (
               <DropdownMenuItem
                 key={project.id}
-                onClick={() => setActiveProjectId(project.id)}
+                onClick={() => handleSelect(project.id)}
                 className={cn(
                   activeProjectId === project.id &&
                     "bg-accent text-accent-foreground"

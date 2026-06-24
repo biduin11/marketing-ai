@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { createProject } from "@/lib/actions/projects"
+import { setActiveProject } from "@/lib/actions/active-project"
 import { createProjectSchema } from "@/lib/validations/project"
 import { useProjectStore } from "@/lib/store/project-store"
 
@@ -86,6 +87,7 @@ export function NewProjectDialog({
       }
       toast.success(`Проект «${result.data.name}» создан`)
       setActiveProjectId(result.data.id)
+      await setActiveProject(result.data.id)
       handleOpenChange(false)
       router.refresh()
     } catch {
