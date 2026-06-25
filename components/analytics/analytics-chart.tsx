@@ -11,6 +11,7 @@ import {
   Legend,
 } from "recharts"
 import type { TimeSeriesPoint } from "@/lib/services/analytics.service"
+import { formatRub } from "@/lib/utils"
 
 interface AnalyticsChartProps {
   data: TimeSeriesPoint[]
@@ -21,9 +22,6 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" })
 }
 
-function formatRub(value: number): string {
-  return `${value.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`
-}
 
 export function AnalyticsChart({ data }: AnalyticsChartProps) {
   if (!data.length) {

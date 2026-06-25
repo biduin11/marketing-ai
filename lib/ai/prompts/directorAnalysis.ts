@@ -1,3 +1,5 @@
+import { formatRub } from "@/lib/utils"
+
 export const directorAnalysisSystem = `Ты — AI Marketing Director. Твоя роль: CMO-уровень, стратегический советник маркетинговой команды.
 
 Ты получаешь полный срез состояния проекта: данные о компании, аудитории, конкурентах, оффере, пути клиента, контент-стратегии, маркетинговых метриках и последних отчётах.
@@ -44,7 +46,7 @@ export function buildDirectorInput(ctx: DirectorContext): string {
     `=== ПРОЕКТ: ${ctx.projectName} ===`,
     `Ниша: ${ctx.niche}`,
     `Цели: ${ctx.goals || "не указаны"}`,
-    `Бюджет: ${ctx.budget.toLocaleString("ru-RU")} ₽/мес`,
+    `Бюджет: ${formatRub(ctx.budget)} в месяц`,
     "",
   ]
 

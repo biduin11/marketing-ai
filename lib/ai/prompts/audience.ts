@@ -1,4 +1,5 @@
 import type { CompanyCard } from "@/lib/ai/prompts/companyAnalysis"
+import { formatRub } from "@/lib/utils"
 
 export type { CompanyCard }
 
@@ -42,7 +43,7 @@ function formatCard(card: CompanyCard): string {
 Регионы работы: ${card.regions.length ? card.regions.join(", ") : "не указаны"}
 Продукты / услуги: ${card.products.length ? card.products.join(", ") : "не указаны"}
 Конкуренты: ${card.competitors.length ? card.competitors.join(", ") : "не указаны"}
-Маркетинговый бюджет (в месяц, USD): ${card.budget ?? "не указан"}
+Бюджет: ${formatRub(card.budget)} в месяц
 Цели и задачи: ${card.goals ?? "не указаны"}`
 }
 

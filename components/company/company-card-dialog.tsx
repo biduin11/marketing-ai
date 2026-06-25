@@ -52,7 +52,7 @@ export function CompanyCardDialog({ project }: CompanyCardDialogProps) {
       products: form.products,
       competitors: form.competitors,
       regions: form.regions,
-      budget: form.budget ? Number(form.budget) : undefined,
+      budget: form.budget || undefined,
       goals: form.goals,
     })
 
@@ -116,11 +116,12 @@ export function CompanyCardDialog({ project }: CompanyCardDialogProps) {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="c-budget">Бюджет / мес (USD)</Label>
+                  <Label htmlFor="c-budget">Бюджет / мес (₽)</Label>
                   <Input
                     id="c-budget"
                     type="number"
                     min="0"
+                    placeholder="500 000"
                     value={form.budget}
                     onChange={(e) => update("budget", e.target.value)}
                     disabled={loading}

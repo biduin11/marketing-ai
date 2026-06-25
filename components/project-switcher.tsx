@@ -6,6 +6,7 @@ import { ChevronsUpDown, FolderOpen, Plus } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -65,25 +66,27 @@ export function ProjectSwitcher({
       <DropdownMenuContent align="start" className="w-56">
         {projects.length > 0 && (
           <>
-            <DropdownMenuLabel>Проекты</DropdownMenuLabel>
-            {projects.map((project) => (
-              <DropdownMenuItem
-                key={project.id}
-                onClick={() => handleSelect(project.id)}
-                className={cn(
-                  activeProjectId === project.id &&
-                    "bg-accent text-accent-foreground"
-                )}
-              >
-                <span className="truncate">{project.name}</span>
-                {project.niche && (
-                  <span className="ml-auto truncate text-xs text-muted-foreground">
-                    {project.niche}
-                  </span>
-                )}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>Проекты</DropdownMenuLabel>
+              {projects.map((project) => (
+                <DropdownMenuItem
+                  key={project.id}
+                  onClick={() => handleSelect(project.id)}
+                  className={cn(
+                    activeProjectId === project.id &&
+                      "bg-accent text-accent-foreground"
+                  )}
+                >
+                  <span className="truncate">{project.name}</span>
+                  {project.niche && (
+                    <span className="ml-auto truncate text-xs text-muted-foreground">
+                      {project.niche}
+                    </span>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+            {onNewProject && <DropdownMenuSeparator />}
           </>
         )}
         {onNewProject && (

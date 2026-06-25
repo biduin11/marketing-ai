@@ -12,42 +12,33 @@ export const createProjectSchema = z.object({
     .optional()
     .or(z.literal("")),
   goals: z.string().max(1000).optional(),
-  budget: z.number().int().min(0).optional(),
+  budget: z.coerce.number().min(0).optional(),
   competitors: z.array(z.string()).optional(),
 })
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>
 
-// Comma/newline separated string → trimmed string array (drops empties).
-const stringList = z
-  .string()
-  .optional()
-  .transform((val) =>
-    (val ?? "")
-      .split(/[\n,]/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-  )
+const toStringArray = (val: unknown) =>
+  typeof val === "string"
+    ? val.split(",").map((s) => s.trim()).filter(Boolean)
+    : val
 
 export const updateProjectSchema = z.object({
   name: z
     .string()
     .min(1, "Название обязательно")
     .max(100, "Название не более 100 символов"),
-  niche: z.string().max(200).optional(),
+  niche: z.string().optional().or(z.literal("")),
   website: z
     .string()
     .url("Введите корректный URL")
     .optional()
     .or(z.literal("")),
-  goals: z.string().max(2000).optional(),
-  products: stringList,
-  competitors: stringList,
-  regions: stringList,
-  budget: z
-    .union([z.number().int().min(0), z.nan()])
-    .optional()
-    .transform((v) => (v === undefined || Number.isNaN(v) ? null : v)),
+  goals: z.string().optional().or(z.literal("")),
+  products: z.preprocess(toStringArray, z.array(z.string()).default([])),
+  competitors: z.preprocess(toStringArray, z.array(z.string()).default([])),
+  regions: z.preprocess(toStringArray, z.array(z.string()).default([])),
+  budget: z.coerce.number().min(0).optional(),
   socials: z.record(z.string(), z.string()).optional(),
 })
 

@@ -1,5 +1,6 @@
 import type { CompanyCard } from "@/lib/ai/prompts/companyAnalysis"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
+import { formatRub } from "@/lib/utils"
 
 export const strategySystem = `Ты — Principal-уровня маркетинговый директор.
 Твоя задача — построить чёткую маркетинговую стратегию на заданный горизонт планирования.
@@ -31,7 +32,7 @@ export function buildStrategyInput(
 Регионы работы: ${card.regions.length ? card.regions.join(", ") : "не указаны"}
 Продукты / услуги: ${card.products.length ? card.products.join(", ") : "не указаны"}
 Конкуренты: ${card.competitors.length ? card.competitors.join(", ") : "не указаны"}
-Маркетинговый бюджет (в месяц, USD): ${card.budget ?? "не указан"}
+Бюджет: ${formatRub(card.budget)} в месяц
 Цели и задачи: ${card.goals ?? "не указаны"}
 
 Горизонт планирования: ${horizonLabel[horizon]}. Установи horizon = ${horizon}.`

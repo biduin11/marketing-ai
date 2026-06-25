@@ -1,4 +1,5 @@
 import type { Project } from "@prisma/client"
+import { formatRub } from "@/lib/utils"
 
 export const companyAnalysisSystem = `Ты — Principal-уровня маркетинговый стратег и бизнес-аналитик.
 Твоя задача — провести глубокий маркетинговый анализ компании по её карточке.
@@ -21,7 +22,7 @@ export function buildCompanyAnalysisInput(card: CompanyCard): string {
 Регионы работы: ${card.regions.length ? card.regions.join(", ") : "не указаны"}
 Продукты / услуги: ${card.products.length ? card.products.join(", ") : "не указаны"}
 Конкуренты: ${card.competitors.length ? card.competitors.join(", ") : "не указаны"}
-Маркетинговый бюджет (в месяц, USD): ${card.budget ?? "не указан"}
+Бюджет: ${formatRub(card.budget)} в месяц
 Цели и задачи: ${card.goals ?? "не указаны"}
 Соцсети: ${formatSocials(card.socials)}`
 }
