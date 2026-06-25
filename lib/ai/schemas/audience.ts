@@ -39,6 +39,16 @@ export const buyerPersonaSchema = z.object({
         quote: z
           .string()
           .describe("Характерная цитата от лица персонажа в первом лице"),
+        psychotype: z
+          .enum(["traditionalist", "independent", "aesthete", "hedonist"])
+          .optional()
+          .describe(
+            "Доминирующий психотип персонажа: traditionalist (Традиционалист), independent (Независимый), aesthete (Эстет), hedonist (Гедонист)"
+          ),
+        psychotypeReason: z
+          .string()
+          .optional()
+          .describe("Почему именно этот психотип доминирует у персонажа"),
       })
     )
     .describe("2-4 Buyer Persona для этой компании"),
