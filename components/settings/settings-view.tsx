@@ -3,15 +3,21 @@
 import { User } from "lucide-react"
 import { PlanCard } from "@/components/settings/plan-card"
 import { UsageBar } from "@/components/settings/usage-bar"
+import { DeleteProjectSection } from "@/components/settings/delete-project-section"
 import type { UsageInfo } from "@/lib/services/usage.service"
+import type { ProjectListItem } from "@/lib/actions/projects"
 
 interface SettingsViewProps {
   name: string | null
   email: string
   usage: UsageInfo
+  projects: ProjectListItem[]
+  activeProjectId: string | null
 }
 
-export function SettingsView({ name, email, usage }: SettingsViewProps) {
+export function SettingsView({ name, email, usage, projects, activeProjectId }: SettingsViewProps) {
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null
+
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
@@ -37,6 +43,15 @@ export function SettingsView({ name, email, usage }: SettingsViewProps) {
 
       <PlanCard planName={usage.planName} />
       <UsageBar usage={usage} />
+
+      {/* Danger zone */}
+      {activeProject && (
+        <DeleteProjectSection
+          projectId={activeProject.id}
+          projectName={activeProject.name}
+          isSingleProject={projects.length <= 1}
+        />
+      )}
     </div>
   )
 }

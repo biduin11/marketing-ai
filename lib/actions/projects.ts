@@ -88,6 +88,43 @@ export async function getProject(projectId: string) {
   })
 }
 
+export async function deleteProject(
+  projectId: string
+): Promise<ActionResult<{ nextProjectId: string | null }>> {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false, error: "Нет доступа" }
+
+  const owned = await prisma.project.findFirst({
+    where: { id: projectId, userId: session.user.id },
+    select: { id: true },
+  })
+  if (!owned) return { success: false, error: "Проект не найден" }
+
+  const count = await prisma.project.count({ where: { userId: session.user.id } })
+  if (count <= 1) {
+    return {
+      success: false,
+      error: "Нельзя удалить единственный проект. Создайте новый перед удалением.",
+    }
+  }
+
+  await prisma.$transaction([
+    prisma.aiArtifact.deleteMany({ where: { projectId } }),
+    prisma.metric.deleteMany({ where: { projectId } }),
+    prisma.strategyTask.deleteMany({ where: { projectId } }),
+    prisma.project.delete({ where: { id: projectId } }),
+  ])
+
+  const next = await prisma.project.findFirst({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  })
+
+  revalidatePath("/", "layout")
+  return { success: true, data: { nextProjectId: next?.id ?? null } }
+}
+
 export async function updateProject(
   projectId: string,
   input: UpdateProjectInput
