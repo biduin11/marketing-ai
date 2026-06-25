@@ -93,19 +93,14 @@ export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
             <p className="text-sm text-muted-foreground">{cjm.summary}</p>
           </div>
 
-          {/* Stage Pipeline — horizontal scroll */}
+          {/* Stage Pipeline — vertical */}
           <div>
-            <h3 className="mb-3 text-sm font-medium text-foreground">
+            <h3 className="mb-4 text-sm font-medium text-foreground">
               Этапы пути клиента
             </h3>
-            <div className="flex gap-3 overflow-x-auto pb-2">
+            <div className="flex flex-col gap-6">
               {cjm.stages.map((stage, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <JourneyStageCard stage={stage} index={i} />
-                  {i < cjm.stages.length - 1 && (
-                    <div className="mt-8 shrink-0 text-muted-foreground">→</div>
-                  )}
-                </div>
+                <JourneyStageCard key={i} stage={stage} index={i} />
               ))}
             </div>
           </div>
