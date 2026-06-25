@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils"
 interface AnalyticsViewProps {
   projectId: string
   metrics: Metric[]
+  channels: string[]
 }
 
 type Range = "7d" | "30d" | "90d"
@@ -40,7 +41,7 @@ function getRangeDates(days: number): { from: Date; to: Date } {
   return { from, to }
 }
 
-export function AnalyticsView({ projectId, metrics }: AnalyticsViewProps) {
+export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewProps) {
   const [range, setRange] = useState<Range>("30d")
 
   const { current, previous } = useMemo(() => {
@@ -55,7 +56,7 @@ export function AnalyticsView({ projectId, metrics }: AnalyticsViewProps) {
 
   const summary = useMemo(() => computeSummary(current), [current])
   const prevSummary = useMemo(() => computeSummary(previous), [previous])
-  const channels = useMemo(() => computeChannelBreakdown(current), [current])
+  const channelBreakdown = useMemo(() => computeChannelBreakdown(current), [current])
   const timeSeries = useMemo(() => computeTimeSeries(current), [current])
 
   const deltas = useMemo(
@@ -95,7 +96,7 @@ export function AnalyticsView({ projectId, metrics }: AnalyticsViewProps) {
               </button>
             ))}
           </div>
-          <MetricFormDialog projectId={projectId} />
+          <MetricFormDialog projectId={projectId} channels={channels} />
         </div>
       </div>
 
@@ -111,7 +112,7 @@ export function AnalyticsView({ projectId, metrics }: AnalyticsViewProps) {
         <div className="space-y-4">
           <AnalyticsCards summary={summary} deltas={deltas} />
           <AnalyticsChart data={timeSeries} />
-          <AnalyticsTable channels={channels} />
+          <AnalyticsTable channels={channelBreakdown} />
         </div>
       )}
     </div>

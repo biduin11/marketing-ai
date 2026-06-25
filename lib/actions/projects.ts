@@ -112,6 +112,7 @@ export async function deleteProject(
     prisma.aiArtifact.deleteMany({ where: { projectId } }),
     prisma.metric.deleteMany({ where: { projectId } }),
     prisma.strategyTask.deleteMany({ where: { projectId } }),
+    prisma.customChannel.deleteMany({ where: { projectId } }),
     prisma.project.delete({ where: { id: projectId } }),
   ])
 

@@ -11,11 +11,10 @@ import { createMetric } from "@/lib/actions/metrics"
 
 interface MetricFormDialogProps {
   projectId: string
+  channels: string[]
 }
 
-const CHANNELS = ["Instagram", "Facebook", "Google Ads", "VK", "Telegram", "YouTube", "Email"]
-
-export function MetricFormDialog({ projectId }: MetricFormDialogProps) {
+export function MetricFormDialog({ projectId, channels }: MetricFormDialogProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -91,7 +90,7 @@ export function MetricFormDialog({ projectId }: MetricFormDialogProps) {
                 required
               />
               <datalist id="channels-list">
-                {CHANNELS.map((c) => <option key={c} value={c} />)}
+                {channels.map((c) => <option key={c} value={c} />)}
               </datalist>
             </div>
             <div>

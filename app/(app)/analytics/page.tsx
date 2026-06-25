@@ -4,6 +4,7 @@ import { AnalyticsView } from "@/components/analytics/analytics-view"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getProject } from "@/lib/actions/projects"
 import { listMetrics } from "@/lib/actions/metrics"
+import { getChannels } from "@/lib/actions/channels"
 
 export default async function AnalyticsPage() {
   const projectId = await getActiveProjectId()
@@ -33,7 +34,12 @@ export default async function AnalyticsPage() {
     )
   }
 
-  const metrics = await listMetrics(projectId)
+  const [metrics, channelItems] = await Promise.all([
+    listMetrics(projectId),
+    getChannels(projectId),
+  ])
 
-  return <AnalyticsView projectId={project.id} metrics={metrics} />
+  const channels = channelItems.map((c) => c.name)
+
+  return <AnalyticsView projectId={project.id} metrics={metrics} channels={channels} />
 }

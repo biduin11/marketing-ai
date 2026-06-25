@@ -3,9 +3,11 @@
 import { User } from "lucide-react"
 import { PlanCard } from "@/components/settings/plan-card"
 import { UsageBar } from "@/components/settings/usage-bar"
+import { ChannelsSection } from "@/components/settings/channels-section"
 import { DeleteProjectSection } from "@/components/settings/delete-project-section"
 import type { UsageInfo } from "@/lib/services/usage.service"
 import type { ProjectListItem } from "@/lib/actions/projects"
+import type { ChannelItem } from "@/lib/actions/channels"
 
 interface SettingsViewProps {
   name: string | null
@@ -13,9 +15,10 @@ interface SettingsViewProps {
   usage: UsageInfo
   projects: ProjectListItem[]
   activeProjectId: string | null
+  channels: ChannelItem[]
 }
 
-export function SettingsView({ name, email, usage, projects, activeProjectId }: SettingsViewProps) {
+export function SettingsView({ name, email, usage, projects, activeProjectId, channels }: SettingsViewProps) {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null
 
   return (
@@ -43,6 +46,10 @@ export function SettingsView({ name, email, usage, projects, activeProjectId }: 
 
       <PlanCard planName={usage.planName} />
       <UsageBar usage={usage} />
+
+      {activeProject && (
+        <ChannelsSection projectId={activeProject.id} initialChannels={channels} />
+      )}
 
       {/* Danger zone */}
       {activeProject && (

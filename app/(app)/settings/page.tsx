@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { getUsageThisMonth } from "@/lib/services/usage.service"
 import { listProjects } from "@/lib/actions/projects"
 import { getActiveProjectId } from "@/lib/actions/active-project"
+import { getChannels } from "@/lib/actions/channels"
 import { SettingsView } from "@/components/settings/settings-view"
 
 export default async function SettingsPage() {
@@ -15,6 +16,8 @@ export default async function SettingsPage() {
     getActiveProjectId(),
   ])
 
+  const channels = activeProjectId ? await getChannels(activeProjectId) : []
+
   return (
     <SettingsView
       name={session.user.name ?? null}
@@ -22,6 +25,7 @@ export default async function SettingsPage() {
       usage={usage}
       projects={projects}
       activeProjectId={activeProjectId}
+      channels={channels}
     />
   )
 }
