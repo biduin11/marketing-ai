@@ -111,8 +111,20 @@ export async function updateProject(
     return { success: false, error: "Проект не найден" }
   }
 
-  const { name, niche, website, goals, products, competitors, regions, budget, socials } =
-    parsed.data
+  const {
+    name, niche, website, goals, products, competitors, regions, budget, socials,
+    industry, dealCycle, brandTone, brandWords,
+    clientType, audienceSegments, clientValues, objections, clientLanguage,
+    currentChannels, marketingGoal, socialLinks, proofFacts,
+    margin, conversionRate, currentCpl, leadsPerMonth, salesPerMonth, avgCheck,
+    competitorsDetailed,
+  } = parsed.data
+
+  // Keep competitors[] in sync with detailed list for AI prompts backward compat
+  const competitorNames =
+    competitorsDetailed && competitorsDetailed.length > 0
+      ? competitorsDetailed.map((c) => c.name ?? "").filter(Boolean)
+      : competitors
 
   try {
     await prisma.project.update({
@@ -123,11 +135,31 @@ export async function updateProject(
         website: website || null,
         goals: goals || null,
         products,
-        competitors,
+        competitors: competitorNames,
         regions,
-        budget,
+        budget: budget ?? null,
         socials: socials ?? {},
         status: "ACTIVE",
+        industry: industry || null,
+        dealCycle: dealCycle || null,
+        brandTone: brandTone || null,
+        brandWords: brandWords || null,
+        clientType: clientType || null,
+        audienceSegments: audienceSegments || null,
+        clientValues: clientValues || null,
+        objections: objections || null,
+        clientLanguage: clientLanguage || null,
+        currentChannels: currentChannels || null,
+        marketingGoal: marketingGoal || null,
+        socialLinks: socialLinks || null,
+        proofFacts: proofFacts || null,
+        margin: margin ?? null,
+        conversionRate: conversionRate ?? null,
+        currentCpl: currentCpl ?? null,
+        leadsPerMonth: leadsPerMonth ?? null,
+        salesPerMonth: salesPerMonth ?? null,
+        avgCheck: avgCheck ?? null,
+        competitorsDetailed: competitorsDetailed ?? undefined,
       },
     })
 

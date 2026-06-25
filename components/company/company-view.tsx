@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { ScoreCard } from "@/components/shared/score-card"
 import { RecommendationCard } from "@/components/company/recommendation-card"
-import { CompanyCardDialog } from "@/components/company/company-card-dialog"
+import { CompanyWizard } from "@/components/company/company-wizard"
 import { runCompanyAnalysis } from "@/lib/actions/ai"
 import type { CompanyAnalysis } from "@/lib/ai/schemas/companyAnalysis"
 
@@ -94,7 +94,7 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <CompanyCardDialog project={project} />
+          <CompanyWizard project={project} />
           {analysis ? (
             <Button
               variant="outline"

@@ -67,6 +67,28 @@ model Project {
   budget        Int?
   goals         String?
   status        ProjectStatus  @default(DRAFT)
+
+  // Extended company profile (Iteration 7)
+  industry            String?
+  dealCycle           String?
+  brandTone           String?
+  brandWords          String?
+  clientType          String?
+  audienceSegments    String?
+  clientValues        String?
+  objections          String?
+  clientLanguage      String?
+  currentChannels     String?
+  marketingGoal       String?
+  socialLinks         String?
+  proofFacts          String?
+  margin              Int?
+  conversionRate      Int?
+  currentCpl          Int?
+  leadsPerMonth       Int?
+  salesPerMonth       Int?
+  avgCheck            Int?
+  competitorsDetailed Json?
   artifacts     AiArtifact[]
   strategyTasks StrategyTask[]
   metrics       Metric[]
