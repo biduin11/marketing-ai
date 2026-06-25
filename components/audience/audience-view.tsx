@@ -154,7 +154,7 @@ export function AudienceView({
                   <p className="text-sm text-muted-foreground">{segments.summary}</p>
                 </div>
               )}
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {segments.segments.map((seg, i) => (
                   <SegmentCard key={i} segment={seg} />
                 ))}
