@@ -48,7 +48,7 @@ export function DeleteProjectSection({
       }
       toast.success("Проект удалён")
       setOpen(false)
-      router.push("/dashboard")
+      router.push("/")
     })
   }
 

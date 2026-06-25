@@ -76,7 +76,7 @@ export function ProjectSwitcher({
       }
       toast.success("Проект удалён")
       setDeleteTarget(null)
-      router.push("/dashboard")
+      router.push("/")
     })
   }
 
