@@ -16,9 +16,37 @@ interface JourneyViewProps {
   version: number | null
 }
 
+const stageIcons = ["👁", "🔍", "💡", "🛒", "🤝", "❤️", "⭐"]
+
+// Рекомендации хранятся как string[] — делим на заголовок (первое предложение) и остаток
+function splitRecommendation(rec: string): { title: string; description: string } {
+  const idx = rec.search(/[.!?]\s/)
+  if (idx === -1) return { title: rec.trim(), description: "" }
+  return {
+    title: rec.slice(0, idx + 1).trim(),
+    description: rec.slice(idx + 2).trim(),
+  }
+}
+
+// mainDrop отсутствует в схеме — вычисляем этап с наименьшей конверсией
+function computeMainDrop(metrics: Cjm["funnelMetrics"]): string | null {
+  let worst: { stage: string; value: number } | null = null
+  for (const m of metrics) {
+    const match = m.conversion.match(/(\d+(?:[.,]\d+)?)/)
+    if (!match) continue
+    const value = parseFloat(match[1].replace(",", "."))
+    if (Number.isNaN(value)) continue
+    if (worst === null || value < worst.value) {
+      worst = { stage: m.stage, value }
+    }
+  }
+  return worst?.stage ?? null
+}
+
 export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const mainDrop = cjm ? computeMainDrop(cjm.funnelMetrics) : null
 
   async function generate(force: boolean) {
     setLoading(true)
@@ -112,54 +140,83 @@ export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
               {/* Воронка конверсий */}
               {cjm.funnelMetrics.length > 0 && (
                 <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
-                  <h3 className="mb-6 text-base font-semibold text-[#111]">
-                    Воронка конверсий
-                  </h3>
-                  <div className="space-y-3">
+                  <div className="mb-6 flex items-center gap-2">
+                    <span className="text-lg">▼</span>
+                    <h3 className="text-lg font-semibold text-[#111]">Воронка конверсий</h3>
+                  </div>
+
+                  <div className="space-y-4">
                     {cjm.funnelMetrics.map((m, i) => {
-                      const widths = [100, 82, 65, 50, 38, 28]
-                      const width = widths[i] ?? Math.max(20, 100 - i * 15)
+                      const widths = [100, 78, 58, 42, 30, 20, 14]
+                      const width = widths[i] ?? 14
                       return (
-                        <div key={i}>
-                          <div className="mb-1 flex items-center justify-between">
-                            <span className="text-xs text-[#6b7280]">{m.stage}</span>
-                            <span className="text-xs font-medium text-[#111]">{m.conversion}</span>
+                        <div key={i} className="flex items-center gap-4">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#eaeaea] bg-white text-base">
+                            {stageIcons[i] ?? "•"}
                           </div>
-                          <div className="flex justify-center">
+                          <div className="min-w-0 flex-1">
+                            <p className="mb-1.5 text-sm font-medium text-[#111]">{m.stage}</p>
                             <div
-                              className="flex h-8 items-center justify-center rounded-lg bg-[#111] transition-all"
-                              style={{ width: `${width}%` }}
+                              className="flex h-9 items-center rounded-lg bg-[#111] px-3"
+                              style={{ width: `${width}%`, minWidth: "120px" }}
                             >
-                              <span className="truncate px-2 text-xs font-medium text-white">
+                              <span className="truncate text-xs font-medium text-white">
                                 {m.stage}
                               </span>
                             </div>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-sm font-semibold text-[#111]">{m.conversion}</p>
                           </div>
                         </div>
                       )
                     })}
                   </div>
+
+                  {mainDrop && (
+                    <div className="mt-6 flex items-center gap-2 border-t border-[#eaeaea] pt-4">
+                      <span className="text-sm text-[#6b7280]">📊</span>
+                      <p className="text-sm text-[#6b7280]">
+                        Основная просадка на этапе:
+                        <span className="font-medium text-[#111]"> {mainDrop}</span>
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Рекомендации */}
               {cjm.recommendations.length > 0 && (
                 <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
-                  <h3 className="mb-6 text-base font-semibold text-[#111]">
-                    Рекомендации
-                  </h3>
-                  <div className="space-y-3">
-                    {cjm.recommendations.map((rec, i) => (
-                      <div
-                        key={i}
-                        className="flex gap-3 rounded-xl border border-[#eaeaea] bg-[#fafafa] p-3"
-                      >
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#111] text-xs font-semibold text-white mt-0.5">
-                          {i + 1}
-                        </span>
-                        <p className="text-sm leading-relaxed text-[#111]">{rec}</p>
-                      </div>
-                    ))}
+                  <div className="mb-6 flex items-center gap-2">
+                    <span className="text-lg">🎯</span>
+                    <h3 className="text-lg font-semibold text-[#111]">Рекомендации</h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    {cjm.recommendations.map((rec, i) => {
+                      const { title, description } = splitRecommendation(rec)
+                      return (
+                        <div
+                          key={i}
+                          className="flex gap-4 border-b border-[#eaeaea] pb-4 last:border-0 last:pb-0"
+                        >
+                          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#111] text-sm font-semibold text-white">
+                            {i + 1}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="mb-1 text-sm font-semibold leading-snug text-[#111]">
+                              {title}
+                            </p>
+                            {description && (
+                              <p className="text-sm leading-relaxed text-[#6b7280]">
+                                {description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               )}
