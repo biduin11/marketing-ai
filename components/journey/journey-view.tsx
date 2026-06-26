@@ -150,23 +150,25 @@ export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
                       const widths = [100, 78, 58, 42, 30, 20, 14]
                       const width = widths[i] ?? 14
                       return (
-                        <div key={i} className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#eaeaea] bg-white text-base">
-                            {stageIcons[i] ?? "•"}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="mb-1.5 text-sm font-medium text-[#111]">{m.stage}</p>
-                            <div
-                              className="flex h-9 items-center rounded-lg bg-[#111] px-3"
-                              style={{ width: `${width}%`, minWidth: "120px" }}
-                            >
-                              <span className="truncate text-xs font-medium text-white">
-                                {m.stage}
-                              </span>
+                        <div key={i} className="space-y-1.5">
+                          {/* Строка 1: иконка + название + процент */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#eaeaea] bg-white text-base">
+                              {stageIcons[i] ?? "•"}
                             </div>
+                            <p className="min-w-0 flex-1 text-sm font-medium text-[#111]">
+                              {m.stage}
+                            </p>
+                            <span className="shrink-0 text-sm font-semibold text-[#111]">
+                              {m.conversion}
+                            </span>
                           </div>
-                          <div className="shrink-0 text-right">
-                            <p className="text-sm font-semibold text-[#111]">{m.conversion}</p>
+                          {/* Строка 2: бар без текста */}
+                          <div className="pl-12">
+                            <div
+                              className="h-8 rounded-lg bg-[#111]"
+                              style={{ width: `${width}%`, minWidth: "80px" }}
+                            />
                           </div>
                         </div>
                       )
