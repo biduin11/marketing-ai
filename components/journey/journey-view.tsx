@@ -150,25 +150,28 @@ export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
                       const widths = [100, 78, 58, 42, 30, 20, 14]
                       const width = widths[i] ?? 14
                       return (
-                        <div key={i} className="space-y-1.5">
-                          {/* Строка 1: иконка + название + процент */}
+                        <div key={i} className="space-y-2">
+                          {/* Строка 1: иконка + название этапа */}
                           <div className="flex items-center gap-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#eaeaea] bg-white text-base">
                               {stageIcons[i] ?? "•"}
                             </div>
-                            <p className="min-w-0 flex-1 text-sm font-medium text-[#111]">
+                            <p className="text-sm font-medium text-[#111]">
                               {m.stage}
                             </p>
-                            <span className="shrink-0 text-sm font-semibold text-[#111]">
-                              {m.conversion}
-                            </span>
                           </div>
-                          {/* Строка 2: бар без текста */}
+                          {/* Строка 2: бар — сужается */}
                           <div className="pl-12">
                             <div
                               className="h-8 rounded-lg bg-[#111]"
                               style={{ width: `${width}%`, minWidth: "80px" }}
                             />
+                          </div>
+                          {/* Строка 3: конверсия под баром */}
+                          <div className="pl-12">
+                            <p className="text-xs leading-relaxed text-[#6b7280]">
+                              {m.conversion}
+                            </p>
                           </div>
                         </div>
                       )
