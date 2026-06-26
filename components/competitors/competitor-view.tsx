@@ -3,7 +3,10 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, Crosshair } from "lucide-react"
+import {
+  Sparkles, RefreshCw, Loader2, Crosshair, Star, Globe,
+  MessageSquare, TrendingUp, AlertCircle,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { runCompetitorAnalysis } from "@/lib/actions/ai"
@@ -13,6 +16,91 @@ interface CompetitorViewProps {
   projectId: string
   analysis: CompetitorAnalysis | null
   version: number | null
+}
+
+function RatingBadge({
+  label,
+  rating,
+  count,
+}: {
+  label: string
+  rating?: number
+  count?: number
+}) {
+  if (rating === undefined) return null
+  return (
+    <span className="flex items-center gap-1 rounded-md border border-[#eaeaea] bg-neutral-50 px-2 py-1 text-xs">
+      <Star className="size-3 fill-[#d97706] text-[#d97706]" />
+      <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
+      {count !== undefined && (
+        <span className="text-muted-foreground">({count})</span>
+      )}
+      <span className="text-muted-foreground">{label}</span>
+    </span>
+  )
+}
+
+function PresenceBadge({
+  label,
+  active,
+  variant = "neutral",
+}: {
+  label: string
+  active?: boolean
+  variant?: "neutral" | "success" | "warning"
+}) {
+  if (active === undefined) return null
+  const colors = {
+    neutral: active
+      ? "bg-neutral-100 text-foreground border-neutral-200"
+      : "bg-white text-muted-foreground border-[#eaeaea] line-through",
+    success: active
+      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+      : "bg-white text-muted-foreground border-[#eaeaea] line-through",
+    warning: active
+      ? "bg-orange-50 text-orange-700 border-orange-200"
+      : "bg-white text-muted-foreground border-[#eaeaea] line-through",
+  }
+  return (
+    <span
+      className={`rounded border px-2 py-0.5 text-xs font-medium ${colors[variant]}`}
+    >
+      {label}
+    </span>
+  )
+}
+
+function SocialActivityBadge({ activity }: { activity?: string }) {
+  if (!activity) return null
+  const map: Record<string, { label: string; cls: string }> = {
+    active: { label: "Активны", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    moderate: { label: "Умеренно", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    low: { label: "Редко", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+    none: { label: "Нет активности", cls: "bg-neutral-100 text-muted-foreground border-neutral-200" },
+  }
+  const item = map[activity]
+  if (!item) return null
+  return (
+    <span className={`rounded border px-2 py-0.5 text-xs font-medium ${item.cls}`}>
+      {item.label}
+    </span>
+  )
+}
+
+function PriorityBadge({ priority }: { priority?: string }) {
+  if (!priority) return null
+  const map: Record<string, { label: string; cls: string }> = {
+    high: { label: "Высокий", cls: "bg-red-50 text-[#dc2626] border-red-200" },
+    medium: { label: "Средний", cls: "bg-orange-50 text-[#d97706] border-orange-200" },
+    low: { label: "Низкий", cls: "bg-neutral-100 text-muted-foreground border-neutral-200" },
+  }
+  const item = map[priority]
+  if (!item) return null
+  return (
+    <span className={`rounded border px-1.5 py-0.5 text-xs font-medium ${item.cls}`}>
+      {item.label}
+    </span>
+  )
 }
 
 export function CompetitorView({
@@ -47,7 +135,7 @@ export function CompetitorView({
         <div>
           <h2 className="text-lg font-semibold text-foreground">Конкуренты</h2>
           <p className="text-sm text-muted-foreground">
-            Сравнительный анализ и возможности захвата рынка
+            Анализ на основе живых данных из интернета
             {version && <span className="ml-2 text-xs">· версия {version}</span>}
           </p>
         </div>
@@ -82,7 +170,7 @@ export function CompetitorView({
           <EmptyState
             icon={Crosshair}
             title="Анализ конкурентов не создан"
-            description="Нажмите «Сгенерировать», чтобы AI проанализировал конкурентов и нашёл возможности захвата рынка."
+            description="Нажмите «Сгенерировать» — AI найдёт конкурентов в интернете, проверит отзывы, позиции и онлайн-присутствие."
           />
         </div>
       ) : (
@@ -92,88 +180,199 @@ export function CompetitorView({
             <p className="text-sm text-muted-foreground">{analysis.summary}</p>
           </div>
 
-          {/* Competitors table */}
+          {/* Competitor cards */}
           {analysis.competitors.length > 0 && (
-            <div>
-              <h3 className="mb-3 text-sm font-medium text-foreground">
-                Сравнение конкурентов
-              </h3>
-              <div className="overflow-x-auto rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-                <table className="w-full min-w-[640px] text-sm">
-                  <thead>
-                    <tr className="border-b border-[#eaeaea]">
-                      <th className="px-4 py-3 text-left font-medium text-foreground">
-                        Конкурент
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium text-foreground">
-                        Позиционирование
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium text-foreground">
-                        Сильные стороны
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium text-foreground">
-                        Слабые стороны
-                      </th>
-                      <th className="px-4 py-3 text-left font-medium text-foreground">
-                        Каналы
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {analysis.competitors.map((c, i) => (
-                      <tr
-                        key={i}
-                        className="border-b border-[#eaeaea] last:border-0"
-                      >
-                        <td className="px-4 py-3 font-medium text-foreground">
-                          {c.name}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {c.positioning}
-                        </td>
-                        <td className="px-4 py-3">
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-foreground">Конкуренты</h3>
+              {analysis.competitors.map((c, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+                >
+                  {/* Card header: name + ratings */}
+                  <div className="mb-3 flex flex-wrap items-start gap-2">
+                    <span className="text-base font-semibold text-foreground">
+                      {c.name}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      <RatingBadge
+                        label="Яндекс"
+                        rating={c.yandexRating}
+                        count={c.yandexReviewsCount}
+                      />
+                      <RatingBadge
+                        label="2ГИС"
+                        rating={c.gisRating}
+                        count={c.gisReviewsCount}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Positioning */}
+                  <p className="mb-3 text-sm text-muted-foreground">{c.positioning}</p>
+
+                  {/* Search & ads presence */}
+                  {(c.yandexPosition !== undefined || c.hasContextAds !== undefined) && (
+                    <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                      {c.yandexPosition !== undefined && (
+                        <span className="flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                          <TrendingUp className="size-3" />
+                          Яндекс #{c.yandexPosition}
+                        </span>
+                      )}
+                      {c.hasContextAds === true && (
+                        <span className="rounded border border-orange-200 bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700">
+                          Директ
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Online presence */}
+                  {(c.hasSite !== undefined ||
+                    c.hasPrices !== undefined ||
+                    c.hasCalculator !== undefined ||
+                    c.hasOnlineForm !== undefined) && (
+                    <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                      {c.hasSite !== undefined && (
+                        <PresenceBadge label="Сайт" active={c.hasSite} variant="neutral" />
+                      )}
+                      {c.siteUrl && c.hasSite && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Globe className="size-3" />
+                          {c.siteUrl.replace(/^https?:\/\//, "").split("/")[0]}
+                        </span>
+                      )}
+                      {c.hasPrices !== undefined && (
+                        <PresenceBadge label="Цены" active={c.hasPrices} variant="success" />
+                      )}
+                      {c.hasCalculator !== undefined && (
+                        <PresenceBadge
+                          label="Калькулятор"
+                          active={c.hasCalculator}
+                          variant="success"
+                        />
+                      )}
+                      {c.hasOnlineForm !== undefined && (
+                        <PresenceBadge label="Форма заявки" active={c.hasOnlineForm} variant="success" />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Social presence */}
+                  {(c.instagram || c.vk || c.telegram || c.socialActivity) && (
+                    <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                      {c.instagram && (
+                        <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                          Instagram
+                        </span>
+                      )}
+                      {c.vk && (
+                        <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                          ВКонтакте
+                        </span>
+                      )}
+                      {c.telegram && (
+                        <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                          Telegram
+                        </span>
+                      )}
+                      <SocialActivityBadge activity={c.socialActivity} />
+                    </div>
+                  )}
+
+                  {/* Strengths & weaknesses */}
+                  <div className="mb-3 grid gap-3 sm:grid-cols-2">
+                    {c.strengths.length > 0 && (
+                      <div>
+                        <p className="mb-1.5 text-xs font-medium text-[#16a34a]">
+                          Сильные стороны
+                        </p>
+                        <ul className="space-y-1">
+                          {c.strengths.map((s, j) => (
+                            <li
+                              key={j}
+                              className="flex items-start gap-1.5 text-sm text-foreground"
+                            >
+                              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#16a34a]" />
+                              {s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {c.weaknesses.length > 0 && (
+                      <div>
+                        <p className="mb-1.5 text-xs font-medium text-[#dc2626]">
+                          Слабые стороны
+                        </p>
+                        <ul className="space-y-1">
+                          {c.weaknesses.map((w, j) => (
+                            <li
+                              key={j}
+                              className="flex items-start gap-1.5 text-sm text-foreground"
+                            >
+                              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#dc2626]" />
+                              {w}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Complaints & praise from reviews */}
+                  {((c.commonComplaints && c.commonComplaints.length > 0) ||
+                    (c.commonPraise && c.commonPraise.length > 0)) && (
+                    <div className="grid gap-3 rounded-xl border border-[#eaeaea] bg-neutral-50 p-3 sm:grid-cols-2">
+                      {c.commonComplaints && c.commonComplaints.length > 0 && (
+                        <div>
+                          <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-[#d97706]">
+                            <AlertCircle className="size-3" />
+                            Жалобы клиентов
+                          </p>
                           <ul className="space-y-1">
-                            {c.strengths.map((s, j) => (
-                              <li
-                                key={j}
-                                className="flex items-start gap-1.5 text-[#16a34a]"
-                              >
-                                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#16a34a]" />
-                                {s}
+                            {c.commonComplaints.map((complaint, j) => (
+                              <li key={j} className="text-xs text-muted-foreground">
+                                · {complaint}
                               </li>
                             ))}
                           </ul>
-                        </td>
-                        <td className="px-4 py-3">
+                        </div>
+                      )}
+                      {c.commonPraise && c.commonPraise.length > 0 && (
+                        <div>
+                          <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-[#16a34a]">
+                            <MessageSquare className="size-3" />
+                            Хвалят
+                          </p>
                           <ul className="space-y-1">
-                            {c.weaknesses.map((w, j) => (
-                              <li
-                                key={j}
-                                className="flex items-start gap-1.5 text-[#dc2626]"
-                              >
-                                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#dc2626]" />
-                                {w}
+                            {c.commonPraise.map((praise, j) => (
+                              <li key={j} className="text-xs text-muted-foreground">
+                                · {praise}
                               </li>
                             ))}
                           </ul>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1">
-                            {c.channels.map((ch, j) => (
-                              <span
-                                key={j}
-                                className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-xs text-foreground"
-                              >
-                                {ch}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Marketing channels */}
+                  {c.channels.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {c.channels.map((ch, j) => (
+                        <span
+                          key={j}
+                          className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-xs text-foreground"
+                        >
+                          {ch}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
 
@@ -189,17 +388,14 @@ export function CompetitorView({
                     key={i}
                     className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
                   >
-                    <div className="mb-2 flex items-start gap-2">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="shrink-0 rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-muted-foreground">
                         {opp.competitor}
                       </span>
+                      <PriorityBadge priority={opp.priority} />
                     </div>
-                    <p className="mb-1 text-sm font-medium text-foreground">
-                      {opp.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {opp.description}
-                    </p>
+                    <p className="mb-1 text-sm font-medium text-foreground">{opp.title}</p>
+                    <p className="text-sm text-muted-foreground">{opp.description}</p>
                   </div>
                 ))}
               </div>
@@ -216,9 +412,28 @@ export function CompetitorView({
                 {analysis.ourAdvantages.map((adv, i) => (
                   <span
                     key={i}
-                    className="rounded-lg border border-[#eaeaea] bg-neutral-50 px-3 py-1.5 text-sm text-foreground"
+                    className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700"
                   >
                     {adv}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Our weaknesses */}
+          {analysis.ourWeaknesses && analysis.ourWeaknesses.length > 0 && (
+            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+              <h3 className="mb-3 text-sm font-medium text-foreground">
+                Наши зоны роста
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {analysis.ourWeaknesses.map((w, i) => (
+                  <span
+                    key={i}
+                    className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm text-orange-700"
+                  >
+                    {w}
                   </span>
                 ))}
               </div>
