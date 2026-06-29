@@ -42,6 +42,7 @@ export default async function JourneyPage() {
       projectId={project.id}
       cjm={parsed?.success ? parsed.data : null}
       version={artifact?.version ?? null}
+      cjmCreatedAt={artifact?.createdAt.toISOString() ?? null}
     />
   )
 }

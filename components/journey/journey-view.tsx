@@ -1,12 +1,31 @@
 "use client"
 
+import type { ReactNode } from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, Route } from "lucide-react"
+import {
+  Sparkles,
+  RefreshCw,
+  Loader2,
+  Route,
+  Download,
+  Calendar,
+  ChevronDown,
+  Map,
+  Phone,
+  AlertTriangle,
+  Lightbulb,
+  TrendingUp,
+  Target,
+  Smile,
+  Users,
+  ArrowRight,
+} from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
-import { JourneyStageCard } from "@/components/journey/journey-stage-card"
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { runCjm } from "@/lib/actions/ai"
 import type { Cjm } from "@/lib/ai/schemas/cjm"
 
@@ -14,39 +33,128 @@ interface JourneyViewProps {
   projectId: string
   cjm: Cjm | null
   version: number | null
+  cjmCreatedAt: string | null
 }
 
-const stageIcons = ["👁", "🔍", "💡", "🛒", "🤝", "❤️", "⭐"]
-
-// Рекомендации хранятся как string[] — делим на заголовок (первое предложение) и остаток
-function splitRecommendation(rec: string): { title: string; description: string } {
-  const idx = rec.search(/[.!?]\s/)
-  if (idx === -1) return { title: rec.trim(), description: "" }
-  return {
-    title: rec.slice(0, idx + 1).trim(),
-    description: rec.slice(idx + 2).trim(),
-  }
+function fmtDate(iso: string | null): string {
+  if (!iso) return "—"
+  return new Date(iso).toLocaleDateString("ru-RU", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  })
 }
 
-// mainDrop отсутствует в схеме — вычисляем этап с наименьшей конверсией
-function computeMainDrop(metrics: Cjm["funnelMetrics"]): string | null {
-  let worst: { stage: string; value: number } | null = null
-  for (const m of metrics) {
-    const match = m.conversion.match(/(\d+(?:[.,]\d+)?)/)
-    if (!match) continue
-    const value = parseFloat(match[1].replace(",", "."))
-    if (Number.isNaN(value)) continue
-    if (worst === null || value < worst.value) {
-      worst = { stage: m.stage, value }
-    }
-  }
-  return worst?.stage ?? null
+function getEmotionScore(stage: Cjm["stages"][0]): number {
+  if (stage.emotionScore != null) return stage.emotionScore
+  return stage.emotion === "positive" ? 4 : stage.emotion === "neutral" ? 2.5 : 1.5
 }
 
-export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
+function getEmotionEmoji(score: number): string {
+  if (score >= 4.5) return "😄"
+  if (score >= 3.5) return "😊"
+  if (score >= 2.5) return "😐"
+  if (score >= 1.5) return "😕"
+  return "😞"
+}
+
+function getEmotionLabel(stage: Cjm["stages"][0]): string {
+  if (stage.emotionLabel) return stage.emotionLabel
+  const score = getEmotionScore(stage)
+  if (score >= 4.5) return "Восторг"
+  if (score >= 3.5) return "Доволен"
+  if (score >= 2.5) return "Нейтрально"
+  if (score >= 1.5) return "Сомневается"
+  return "Недоволен"
+}
+
+interface EmotionChartPoint {
+  label: string
+  score: number
+  emoji: string
+}
+
+interface RechartsDotProps {
+  cx?: number
+  cy?: number
+  payload?: EmotionChartPoint
+}
+
+function EmotionChart({
+  stages,
+  height = 80,
+}: {
+  stages: Cjm["stages"]
+  height?: number
+}) {
+  const data: EmotionChartPoint[] = stages.map((s) => ({
+    label: getEmotionLabel(s),
+    score: getEmotionScore(s),
+    emoji: getEmotionEmoji(getEmotionScore(s)),
+  }))
+
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <LineChart data={data} margin={{ top: 22, right: 20, bottom: 4, left: 20 }}>
+        <XAxis
+          dataKey="label"
+          tick={{ fontSize: 10, fill: "#6b7280" }}
+          axisLine={false}
+          tickLine={false}
+          interval={0}
+        />
+        <YAxis domain={[1, 5]} hide />
+        <Line
+          type="monotone"
+          dataKey="score"
+          stroke="#111"
+          strokeWidth={1.5}
+          activeDot={false}
+          dot={(props: RechartsDotProps) => {
+            const cx = props.cx ?? 0
+            const cy = props.cy ?? 0
+            const emoji = props.payload?.emoji ?? "😐"
+            return (
+              <text
+                key={`dot-${cx}-${cy}`}
+                x={cx}
+                y={cy - 6}
+                textAnchor="middle"
+                dominantBaseline="auto"
+                fontSize={16}
+              >
+                {emoji}
+              </text>
+            )
+          }}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  )
+}
+
+function RowLabel({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <div className="flex items-start gap-2 border-b border-r border-[#eaeaea] bg-[#fafafa] p-4">
+      <span className="mt-0.5 shrink-0 text-[#6b7280]">{icon}</span>
+      <span className="text-xs font-medium leading-tight text-[#6b7280]">
+        {label}
+      </span>
+    </div>
+  )
+}
+
+const INSIGHT_ICONS = [Target, TrendingUp, Users, Lightbulb] as const
+
+export function JourneyView({
+  projectId,
+  cjm,
+  version,
+  cjmCreatedAt,
+}: JourneyViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const mainDrop = cjm ? computeMainDrop(cjm.funnelMetrics) : null
+  const [activeTab, setActiveTab] = useState("map")
 
   async function generate(force: boolean) {
     setLoading(true)
@@ -65,45 +173,71 @@ export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
     }
   }
 
+  const stages = cjm?.stages ?? []
+  const n = stages.length
+
+  const touchpointsCount = stages.reduce((s, st) => s + st.touchpoints.length, 0)
+  const problemsCount = stages.reduce((s, st) => s + st.painPoints.length, 0)
+  const opportunitiesCount = stages.reduce((s, st) => s + st.opportunities.length, 0)
+
+  const insights =
+    cjm?.keyInsights?.slice(0, 4) ?? cjm?.recommendations.slice(0, 4) ?? []
+
+  const allPains = stages.flatMap((s) =>
+    s.painPoints.map((p) => ({ text: p, stage: s.name }))
+  )
+  const allOpportunities = stages.flatMap((s) =>
+    s.opportunities.map((o) => ({ text: o, stage: s.name }))
+  )
+  const allRecs = [
+    ...stages.flatMap((s) =>
+      s.recommendation ? [{ text: s.recommendation, stage: s.name }] : []
+    ),
+    ...(cjm?.recommendations.map((r) => ({ text: r, stage: null as string | null })) ?? []),
+  ]
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Customer Journey Map
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Путь клиента: этапы, точки контакта, риски потери
-            {version && (
-              <span className="ml-2 text-xs">· версия {version}</span>
-            )}
-          </p>
+        <h1 className="text-2xl font-semibold text-[#111]">
+          Карта пути клиента (CJM)
+        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="flex items-center gap-2 rounded-lg border border-[#eaeaea] px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]">
+            <Download size={15} />
+            Экспорт
+          </button>
+          <button className="flex items-center gap-2 rounded-lg border border-[#eaeaea] px-3 py-2 text-sm text-[#6b7280]">
+            <Calendar size={15} />
+            {fmtDate(cjmCreatedAt)}
+            <ChevronDown size={14} />
+          </button>
+          {cjm ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => generate(true)}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
+              Регенерировать
+            </Button>
+          ) : (
+            <Button size="sm" onClick={() => generate(false)} disabled={loading}>
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="size-3.5" />
+              )}
+              Сгенерировать
+            </Button>
+          )}
         </div>
-        {cjm ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => generate(true)}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="size-3.5" />
-            )}
-            Регенерировать
-          </Button>
-        ) : (
-          <Button size="sm" onClick={() => generate(false)} disabled={loading}>
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="size-3.5" />
-            )}
-            Сгенерировать
-          </Button>
-        )}
       </div>
 
       {!cjm ? (
@@ -115,120 +249,466 @@ export function JourneyView({ projectId, cjm, version }: JourneyViewProps) {
           />
         </div>
       ) : (
-        <div className="space-y-6">
-          {/* Summary */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
-            <p className="text-sm text-muted-foreground">{cjm.summary}</p>
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="h-auto flex-wrap gap-1">
+            <TabsTrigger value="map">Карта пути</TabsTrigger>
+            <TabsTrigger value="touchpoints">Точки контакта</TabsTrigger>
+            <TabsTrigger value="problems">Проблемы и возможности</TabsTrigger>
+            <TabsTrigger value="emotions">Эмоции</TabsTrigger>
+            <TabsTrigger value="recommendations">Рекомендации</TabsTrigger>
+          </TabsList>
 
-          {/* Stage Pipeline — vertical */}
-          <div>
-            <h3 className="mb-4 text-sm font-medium text-foreground">
-              Этапы пути клиента
-            </h3>
-            <div className="flex flex-col gap-6">
-              {cjm.stages.map((stage, i) => (
-                <JourneyStageCard key={i} stage={stage} index={i} />
-              ))}
-            </div>
-          </div>
-
-          {/* Funnel + Recommendations grid */}
-          {(cjm.funnelMetrics.length > 0 || cjm.recommendations.length > 0) && (
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-
-              {/* Воронка конверсий */}
-              {cjm.funnelMetrics.length > 0 && (
-                <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
-                  <div className="mb-6 flex items-center gap-2">
-                    <span className="text-lg">▼</span>
-                    <h3 className="text-lg font-semibold text-[#111]">Воронка конверсий</h3>
-                  </div>
-
-                  <div className="space-y-4">
-                    {cjm.funnelMetrics.map((m, i) => {
-                      const widths = [100, 78, 58, 42, 30, 20, 14]
-                      const width = widths[i] ?? 14
-                      return (
-                        <div key={i} className="space-y-2">
-                          {/* Строка 1: иконка + название этапа */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#eaeaea] bg-white text-base">
-                              {stageIcons[i] ?? "•"}
-                            </div>
-                            <p className="text-sm font-medium text-[#111]">
-                              {m.stage}
-                            </p>
-                          </div>
-                          {/* Строка 2: бар — сужается */}
-                          <div className="pl-12">
-                            <div
-                              className="h-8 rounded-lg bg-[#111]"
-                              style={{ width: `${width}%`, minWidth: "80px" }}
-                            />
-                          </div>
-                          {/* Строка 3: конверсия под баром */}
-                          <div className="pl-12">
-                            <p className="text-xs leading-relaxed text-[#6b7280]">
-                              {m.conversion}
-                            </p>
-                          </div>
+          {/* ─── КАРТА ПУТИ ─── */}
+          <TabsContent value="map" className="mt-6 space-y-6">
+            {/* Секция 1 — Обзор */}
+            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_auto]">
+                <div>
+                  <h2 className="mb-3 text-base font-semibold text-[#111]">
+                    Обзор CJM
+                  </h2>
+                  <p className="max-w-md text-sm leading-relaxed text-[#6b7280]">
+                    {cjm.summary}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {(
+                    [
+                      {
+                        label: "Этапов пути",
+                        value: n,
+                        sub: "ключевых этапов",
+                        icon: <Map size={18} className="text-[#6b7280]" />,
+                      },
+                      {
+                        label: "Точек контакта",
+                        value: touchpointsCount,
+                        sub: "с клиентом",
+                        icon: <Phone size={18} className="text-[#6b7280]" />,
+                      },
+                      {
+                        label: "Проблемных зон",
+                        value: problemsCount,
+                        sub: "требуют внимания",
+                        icon: (
+                          <AlertTriangle
+                            size={18}
+                            className="text-[#6b7280]"
+                          />
+                        ),
+                      },
+                      {
+                        label: "Возможностей",
+                        value: opportunitiesCount,
+                        sub: "для роста",
+                        icon: (
+                          <TrendingUp size={18} className="text-[#6b7280]" />
+                        ),
+                      },
+                      ...(cjm.cesScore != null
+                        ? [
+                            {
+                              label: "Общий опыт (CES)",
+                              value: `${cjm.cesScore}/10`,
+                              sub: cjm.cesLevel ?? "",
+                              icon: (
+                                <Smile size={18} className="text-[#6b7280]" />
+                              ),
+                            },
+                          ]
+                        : []),
+                    ] as const
+                  ).map((m) => (
+                    <div
+                      key={m.label}
+                      className="min-w-[120px] rounded-xl border border-[#eaeaea] p-4"
+                    >
+                      <p className="mb-2 text-xs leading-snug text-[#6b7280]">
+                        {m.label}
+                      </p>
+                      <div className="flex items-end justify-between gap-2">
+                        <div>
+                          <p className="tabular-nums text-2xl font-bold text-[#111]">
+                            {m.value}
+                          </p>
+                          {m.sub && (
+                            <p className="text-xs text-[#6b7280]">{m.sub}</p>
+                          )}
                         </div>
-                      )
-                    })}
-                  </div>
+                        {m.icon}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
 
-                  {mainDrop && (
-                    <div className="mt-6 flex items-center gap-2 border-t border-[#eaeaea] pt-4">
-                      <span className="text-sm text-[#6b7280]">📊</span>
+            {/* Секция 2 — Таблица этапов */}
+            {n > 0 && (
+              <div className="overflow-hidden rounded-2xl border border-[#eaeaea] bg-white">
+                <div className="overflow-x-auto">
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: `180px repeat(${n}, minmax(170px, 1fr))`,
+                      minWidth: 180 + n * 170,
+                    }}
+                  >
+                    {/* Stage headers */}
+                    <div className="border-b border-r border-[#eaeaea] bg-[#fafafa] p-4">
+                      <span className="text-xs font-semibold text-[#6b7280]">
+                        Этапы
+                      </span>
+                    </div>
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-b border-r border-[#eaeaea] bg-[#fafafa] p-4 last:border-r-0"
+                      >
+                        <p className="text-xs font-bold text-[#111]">
+                          {i + 1}. {s.name}
+                        </p>
+                        <p className="mt-1 text-xs leading-snug text-[#6b7280]">
+                          {s.description}
+                        </p>
+                      </div>
+                    ))}
+
+                    {/* Цели клиента */}
+                    <RowLabel
+                      icon={<Target size={13} />}
+                      label="Цели клиента"
+                    />
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-b border-r border-[#eaeaea] p-4 last:border-r-0"
+                      >
+                        <p className="text-xs leading-relaxed text-[#111]">
+                          {s.customerGoal ?? s.description}
+                        </p>
+                      </div>
+                    ))}
+
+                    {/* Действия клиента */}
+                    <RowLabel
+                      icon={<ArrowRight size={13} />}
+                      label="Действия клиента"
+                    />
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-b border-r border-[#eaeaea] p-4 last:border-r-0"
+                      >
+                        <ul className="space-y-1">
+                          {s.customerActions.slice(0, 3).map((a, j) => (
+                            <li
+                              key={j}
+                              className="flex items-start gap-1.5 text-xs text-[#111]"
+                            >
+                              <span className="mt-0.5 shrink-0 text-[#6b7280]">
+                                •
+                              </span>
+                              {a}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+
+                    {/* Точки контакта */}
+                    <RowLabel
+                      icon={<Phone size={13} />}
+                      label="Точки контакта"
+                    />
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-b border-r border-[#eaeaea] p-4 last:border-r-0"
+                      >
+                        <p className="text-xs leading-relaxed text-[#6b7280]">
+                          {s.touchpoints.join(", ")}
+                        </p>
+                      </div>
+                    ))}
+
+                    {/* Эмоции — spanning all stage columns */}
+                    <div className="flex items-start gap-2 border-b border-r border-[#eaeaea] bg-[#fafafa] p-4">
+                      <Smile
+                        size={13}
+                        className="mt-0.5 shrink-0 text-[#6b7280]"
+                      />
+                      <span className="text-xs font-medium leading-tight text-[#6b7280]">
+                        Эмоции клиента
+                      </span>
+                    </div>
+                    <div
+                      style={{ gridColumn: `2 / ${n + 2}` }}
+                      className="border-b border-[#eaeaea] px-2 py-1"
+                    >
+                      <EmotionChart stages={stages} height={80} />
+                    </div>
+
+                    {/* Проблемы */}
+                    <RowLabel
+                      icon={<AlertTriangle size={13} />}
+                      label="Проблемы"
+                    />
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-b border-r border-[#eaeaea] p-4 last:border-r-0"
+                      >
+                        {s.painPoints.slice(0, 2).map((p, j) => (
+                          <div
+                            key={j}
+                            className="mb-1.5 flex items-start gap-1.5 last:mb-0"
+                          >
+                            <AlertTriangle
+                              size={11}
+                              className="mt-0.5 shrink-0 text-[#d97706]"
+                            />
+                            <p className="text-xs leading-snug text-[#111]">
+                              {p}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {/* Возможности */}
+                    <RowLabel
+                      icon={<Lightbulb size={13} />}
+                      label="Возможности"
+                    />
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-b border-r border-[#eaeaea] p-4 last:border-r-0"
+                      >
+                        {s.opportunities.slice(0, 2).map((o, j) => (
+                          <div
+                            key={j}
+                            className="mb-1.5 flex items-start gap-1.5 last:mb-0"
+                          >
+                            <Lightbulb
+                              size={11}
+                              className="mt-0.5 shrink-0 text-[#6b7280]"
+                            />
+                            <p className="text-xs leading-snug text-[#111]">
+                              {o}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+
+                    {/* Рекомендации */}
+                    <RowLabel
+                      icon={<TrendingUp size={13} />}
+                      label="Рекомендации"
+                    />
+                    {stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="border-r border-[#eaeaea] p-4 last:border-r-0"
+                      >
+                        {s.recommendation ? (
+                          <div className="flex items-start gap-1.5">
+                            <TrendingUp
+                              size={11}
+                              className="mt-0.5 shrink-0 text-[#6b7280]"
+                            />
+                            <p className="text-xs leading-snug text-[#111]">
+                              {s.recommendation}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-[#6b7280]">—</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Секция 3 — Ключевые инсайты */}
+            {insights.length > 0 && (
+              <div>
+                <h2 className="mb-4 text-base font-semibold text-[#111]">
+                  Ключевые инсайты
+                </h2>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {insights.map((insight, i) => {
+                    const Icon = INSIGHT_ICONS[i % INSIGHT_ICONS.length]
+                    return (
+                      <div
+                        key={i}
+                        className="rounded-2xl border border-[#eaeaea] bg-white p-5"
+                      >
+                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f5]">
+                          <Icon size={16} className="text-[#6b7280]" />
+                        </div>
+                        <p className="text-sm leading-relaxed text-[#111]">
+                          {insight}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* ─── ТОЧКИ КОНТАКТА ─── */}
+          <TabsContent value="touchpoints" className="mt-6 space-y-4">
+            {stages.map((s, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-[#eaeaea] bg-white p-5"
+              >
+                <h3 className="mb-3 text-sm font-semibold text-[#111]">
+                  {i + 1}. {s.name}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {s.touchpoints.map((tp, j) => (
+                    <span
+                      key={j}
+                      className="rounded-lg border border-[#eaeaea] px-3 py-1.5 text-xs text-[#111]"
+                    >
+                      {tp}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </TabsContent>
+
+          {/* ─── ПРОБЛЕМЫ И ВОЗМОЖНОСТИ ─── */}
+          <TabsContent value="problems" className="mt-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+                <h2 className="mb-4 text-base font-semibold text-[#111]">
+                  Проблемы и барьеры
+                </h2>
+                <div className="space-y-3">
+                  {allPains.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-xl border border-[#eaeaea] p-3"
+                    >
+                      <AlertTriangle
+                        size={14}
+                        className="mt-0.5 shrink-0 text-[#d97706]"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm text-[#111]">{item.text}</p>
+                        <p className="mt-0.5 text-xs text-[#6b7280]">
+                          {item.stage}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+                <h2 className="mb-4 text-base font-semibold text-[#111]">
+                  Возможности для роста
+                </h2>
+                <div className="space-y-3">
+                  {allOpportunities.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-3 rounded-xl border border-[#eaeaea] p-3"
+                    >
+                      <Lightbulb
+                        size={14}
+                        className="mt-0.5 shrink-0 text-[#6b7280]"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm text-[#111]">{item.text}</p>
+                        <p className="mt-0.5 text-xs text-[#6b7280]">
+                          {item.stage}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ─── ЭМОЦИИ ─── */}
+          <TabsContent value="emotions" className="mt-6 space-y-6">
+            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+              <h2 className="mb-6 text-base font-semibold text-[#111]">
+                Эмоциональный путь клиента
+              </h2>
+              <EmotionChart stages={stages} height={160} />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {stages.map((s, i) => {
+                const score = getEmotionScore(s)
+                const riskColor =
+                  s.churnRisk === "high"
+                    ? "text-[#dc2626]"
+                    : s.churnRisk === "medium"
+                      ? "text-[#d97706]"
+                      : "text-[#16a34a]"
+                const riskLabel =
+                  s.churnRisk === "high"
+                    ? "Высокий риск"
+                    : s.churnRisk === "medium"
+                      ? "Средний риск"
+                      : "Низкий риск"
+                return (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-[#eaeaea] bg-white p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-[#111]">
+                        {i + 1}. {s.name}
+                      </p>
+                      <span className={`text-xs ${riskColor}`}>{riskLabel}</span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <span className="text-2xl">{getEmotionEmoji(score)}</span>
                       <p className="text-sm text-[#6b7280]">
-                        Основная просадка на этапе:
-                        <span className="font-medium text-[#111]"> {mainDrop}</span>
+                        {getEmotionLabel(s)}
                       </p>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {/* Рекомендации */}
-              {cjm.recommendations.length > 0 && (
-                <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
-                  <div className="mb-6 flex items-center gap-2">
-                    <span className="text-lg">🎯</span>
-                    <h3 className="text-lg font-semibold text-[#111]">Рекомендации</h3>
                   </div>
-
-                  <div className="space-y-4">
-                    {cjm.recommendations.map((rec, i) => {
-                      const { title, description } = splitRecommendation(rec)
-                      return (
-                        <div
-                          key={i}
-                          className="flex gap-4 border-b border-[#eaeaea] pb-4 last:border-0 last:pb-0"
-                        >
-                          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#111] text-sm font-semibold text-white">
-                            {i + 1}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="mb-1 text-sm font-semibold leading-snug text-[#111]">
-                              {title}
-                            </p>
-                            {description && (
-                              <p className="text-sm leading-relaxed text-[#6b7280]">
-                                {description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
+                )
+              })}
             </div>
-          )}
-        </div>
+          </TabsContent>
+
+          {/* ─── РЕКОМЕНДАЦИИ ─── */}
+          <TabsContent value="recommendations" className="mt-6">
+            <div className="space-y-3">
+              {allRecs.map((rec, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-4 rounded-2xl border border-[#eaeaea] bg-white p-5"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#111] text-sm font-semibold text-white">
+                    {i + 1}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm leading-relaxed text-[#111]">
+                      {rec.text}
+                    </p>
+                    {rec.stage && (
+                      <p className="mt-1 text-xs text-[#6b7280]">{rec.stage}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   )
