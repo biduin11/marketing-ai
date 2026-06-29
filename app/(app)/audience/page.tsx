@@ -59,6 +59,7 @@ export default async function AudiencePage() {
       projectId={project.id}
       segments={segmentsParsed?.success ? segmentsParsed.data : null}
       segmentsVersion={segmentsArtifact?.version ?? null}
+      segmentsCreatedAt={segmentsArtifact?.createdAt.toISOString() ?? null}
       persona={personaParsed?.success ? personaParsed.data : null}
       personaVersion={personaArtifact?.version ?? null}
       jtbd={jtbdParsed?.success ? jtbdParsed.data : null}
