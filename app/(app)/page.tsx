@@ -1,5 +1,5 @@
+import { auth } from "@/auth"
 import { getActiveProjectId } from "@/lib/actions/active-project"
-import { listProjects } from "@/lib/actions/projects"
 import { listMetrics } from "@/lib/actions/metrics"
 import { prisma } from "@/lib/prisma"
 import { getLatestArtifact } from "@/lib/services/artifacts"
@@ -9,16 +9,23 @@ import {
   filterByRange,
 } from "@/lib/services/analytics.service"
 import { directorAnalysisSchema } from "@/lib/ai/schemas/directorAnalysis"
-import { EmptyState } from "@/components/empty-state"
-import { ProjectCard } from "@/components/project-card"
 import { DashboardView } from "@/components/dashboard/dashboard-view"
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard"
-import { FolderOpen } from "lucide-react"
+import { ArtifactType } from "@prisma/client"
 
 export default async function HomePage() {
+  const session = await auth()
+  const userId = session?.user?.id ?? ""
+
   const [projectId, projects] = await Promise.all([
     getActiveProjectId(),
-    listProjects(),
+    userId
+      ? prisma.project.findMany({
+          where: { userId },
+          orderBy: { updatedAt: "desc" },
+          select: { id: true, name: true, niche: true, status: true, updatedAt: true },
+        })
+      : [],
   ])
 
   if (projects.length === 0) {
@@ -29,52 +36,77 @@ export default async function HomePage() {
     )
   }
 
+  const serializedProjects = projects.map((p) => ({
+    ...p,
+    status: p.status as string,
+    updatedAt: p.updatedAt.toISOString(),
+  }))
+
   if (!projectId) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Проекты</h2>
-          <p className="text-sm text-muted-foreground">
-            {projects.length}{" "}
-            {projects.length === 1 ? "проект" : "проектов"}
-          </p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
-      </div>
+      <DashboardView
+        projectId={null}
+        projectName={null}
+        projects={serializedProjects}
+        analysis={null}
+        summary={null}
+        channels={[]}
+        tasks={[]}
+        reports={[]}
+      />
     )
   }
 
-  const [project, metrics, directorArtifact] = await Promise.all([
+  const now = new Date()
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
+  const [project, metrics, directorArtifact, tasks, reports] = await Promise.all([
     prisma.project.findUnique({ where: { id: projectId } }),
     listMetrics(projectId),
     getLatestArtifact(projectId, "DIRECTOR_DAILY"),
+    prisma.strategyTask.findMany({
+      where: { projectId, done: false },
+      take: 5,
+      orderBy: { updatedAt: "asc" },
+    }),
+    prisma.aiArtifact.findMany({
+      where: {
+        projectId,
+        type: {
+          in: [
+            ArtifactType.REPORT_WEEKLY,
+            ArtifactType.REPORT_MONTHLY,
+            ArtifactType.REPORT_QUARTERLY,
+          ],
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { id: true, type: true, createdAt: true },
+    }),
   ])
 
   if (!project) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <EmptyState
-          icon={FolderOpen}
-          title="Проект не найден"
-          description="Выберите проект в боковой панели"
-        />
-      </div>
+      <DashboardView
+        projectId={projectId}
+        projectName={null}
+        projects={serializedProjects}
+        analysis={null}
+        summary={null}
+        channels={[]}
+        tasks={[]}
+        reports={[]}
+      />
     )
   }
 
-  const to = new Date()
-  const from = new Date()
-  from.setDate(from.getDate() - 30)
-  const recentMetrics = filterByRange(metrics, from, to)
-
-  const summary = recentMetrics.length > 0 ? computeSummary(recentMetrics) : null
-  const channels = recentMetrics.length > 0
-    ? computeChannelBreakdown(recentMetrics).sort((a, b) => b.roi - a.roi)
-    : []
+  const monthlyMetrics = filterByRange(metrics, monthStart, now)
+  const summary = monthlyMetrics.length > 0 ? computeSummary(monthlyMetrics) : null
+  const channels =
+    monthlyMetrics.length > 0
+      ? computeChannelBreakdown(monthlyMetrics).sort((a, b) => b.roi - a.roi)
+      : []
 
   const parseResult = directorArtifact
     ? directorAnalysisSchema.safeParse(directorArtifact.payload)
@@ -85,9 +117,21 @@ export default async function HomePage() {
     <DashboardView
       projectId={projectId}
       projectName={project.name}
+      projects={serializedProjects}
       analysis={analysis}
       summary={summary}
       channels={channels}
+      tasks={tasks.map((t) => ({
+        id: t.id,
+        artifactId: t.artifactId,
+        taskKey: t.taskKey,
+        done: t.done,
+      }))}
+      reports={reports.map((r) => ({
+        id: r.id,
+        type: r.type as string,
+        createdAt: r.createdAt.toISOString(),
+      }))}
     />
   )
 }
