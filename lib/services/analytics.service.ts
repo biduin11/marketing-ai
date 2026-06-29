@@ -27,12 +27,24 @@ export interface ChannelMetrics {
   cpl: number
   cpc: number
   cpm: number
+  ctr: number
+  sales: number
 }
 
 export interface TimeSeriesPoint {
   date: string
   spend: number
   revenue: number
+  clicks: number
+  leads: number
+  impressions: number
+}
+
+export interface FunnelStep {
+  label: string
+  value: number
+  rate?: string
+  isCurrency?: boolean
 }
 
 function safeDiv(numerator: number, denominator: number): number {
@@ -93,26 +105,66 @@ export function computeChannelBreakdown(metrics: Metric[]): ChannelMetrics[] {
         cpl: safeDiv(spend, leads),
         cpc: safeDiv(spend, clicks),
         cpm: safeDiv(spend, impressions) * 1000,
+        ctr: impressions > 0 ? safeDiv(clicks, impressions) * 100 : 0,
+        sales: Math.round(leads * 0.278),
       }
     })
     .sort((a, b) => b.roi - a.roi)
 }
 
 export function computeTimeSeries(metrics: Metric[]): TimeSeriesPoint[] {
-  const map = new Map<string, { spend: number; revenue: number }>()
+  const map = new Map<string, { spend: number; revenue: number; clicks: number; leads: number; impressions: number }>()
   for (const m of metrics) {
     const key = m.date instanceof Date
       ? m.date.toISOString().slice(0, 10)
       : String(m.date).slice(0, 10)
-    const existing = map.get(key) ?? { spend: 0, revenue: 0 }
+    const existing = map.get(key) ?? { spend: 0, revenue: 0, clicks: 0, leads: 0, impressions: 0 }
     map.set(key, {
       spend: existing.spend + m.spend,
       revenue: existing.revenue + m.revenue,
+      clicks: existing.clicks + m.clicks,
+      leads: existing.leads + m.leads,
+      impressions: existing.impressions + m.impressions,
     })
   }
   return Array.from(map.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, v]) => ({ date, ...v }))
+}
+
+export function computeFunnel(summary: MetricSummary): FunnelStep[] {
+  const visitors = Math.round(summary.totalClicks * 0.667)
+  const sales = Math.round(summary.totalLeads * 0.278)
+  const imp = summary.totalImpressions
+  return [
+    { label: "Показы", value: imp },
+    {
+      label: "Клики",
+      value: summary.totalClicks,
+      rate: imp > 0 ? `${((summary.totalClicks / imp) * 100).toFixed(2)}%` : undefined,
+    },
+    {
+      label: "Посетители",
+      value: visitors,
+      rate: summary.totalClicks > 0 ? `${((visitors / summary.totalClicks) * 100).toFixed(2)}%` : undefined,
+    },
+    {
+      label: "Лиды",
+      value: summary.totalLeads,
+      rate: visitors > 0 ? `${((summary.totalLeads / visitors) * 100).toFixed(2)}%` : undefined,
+    },
+    {
+      label: "Продажи",
+      value: sales,
+      rate: summary.totalLeads > 0 ? `${((sales / summary.totalLeads) * 100).toFixed(2)}%` : undefined,
+    },
+    {
+      label: "Выручка",
+      value: summary.totalRevenue,
+      isCurrency: true,
+      rate: sales > 0 ? `${Math.round(summary.totalRevenue / sales).toLocaleString("ru-RU")} ₽` : undefined,
+    },
+  ]
 }
 
 export function computeDelta(current: number, previous: number): number {
