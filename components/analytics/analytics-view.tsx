@@ -241,11 +241,17 @@ export function AnalyticsView({
       )}
 
       {tab === "content" && (
-        <ContentTab contentPlan={contentPlan} />
+        <ContentTab channels={channelBreakdown} timeSeries={timeSeries} contentPlan={contentPlan} />
       )}
 
       {tab === "audience" && (
-        <AudienceTab audienceSegments={audienceSegments} buyerPersona={buyerPersona} />
+        <AudienceTab
+          summary={summary}
+          channels={channelBreakdown}
+          timeSeries={timeSeries}
+          audienceSegments={audienceSegments}
+          buyerPersona={buyerPersona}
+        />
       )}
 
       {tab === "channels" && (
