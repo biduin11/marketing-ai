@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import type { Metric } from "@prisma/client"
 import { BarChart3, Download, MessageSquare, Settings2 } from "lucide-react"
+import { MetricsList } from "@/components/analytics/metrics-list"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { AnalyticsCards } from "@/components/analytics/analytics-cards"
@@ -87,6 +88,7 @@ export function AnalyticsView({
 }: AnalyticsViewProps) {
   const [range, setRange] = useState<Range>("30d")
   const [tab, setTab] = useState<Tab>("overview")
+  const [editingMetric, setEditingMetric] = useState<Metric | null>(null)
 
   const { current, previous, from, to, prevFrom, prevTo } = useMemo(() => {
     const days = RANGES.find((r) => r.value === range)!.days
@@ -192,7 +194,12 @@ export function AnalyticsView({
             <Settings2 className="size-3.5" />
           </Button>
 
-          <MetricFormDialog projectId={projectId} channels={channels} />
+          <MetricFormDialog
+            projectId={projectId}
+            channels={channels}
+            editingMetric={editingMetric}
+            onEditClose={() => setEditingMetric(null)}
+          />
         </div>
       </div>
 
@@ -236,6 +243,7 @@ export function AnalyticsView({
             </div>
             <AnalyticsDonuts channels={channelBreakdown} />
             <AnalyticsBottom channels={channelBreakdown} summary={summary} />
+            <MetricsList metrics={metrics} onEdit={(m) => setEditingMetric(m)} />
           </div>
         )
       )}
