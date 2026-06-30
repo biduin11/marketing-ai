@@ -137,8 +137,16 @@ const CARDS: CardDef[] = [
 ]
 
 function getValue(summary: MetricSummary, key: CardKey): number {
-  if (key === "sales") return Math.round(summary.totalLeads * 0.278)
-  return summary[key as keyof MetricSummary] as number
+  switch (key) {
+    case "sales":
+      return Math.round(summary.totalLeads * 0.278)
+    case "ctr":
+      return summary.totalImpressions > 0
+        ? (summary.totalClicks / summary.totalImpressions) * 100
+        : 0
+    default:
+      return (summary as unknown as Record<string, number>)[key] ?? 0
+  }
 }
 
 export function AnalyticsCards({
