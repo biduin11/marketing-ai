@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import type { Metric } from "@prisma/client"
-import { BarChart3, Download, Plus, Settings2, MessageSquare } from "lucide-react"
+import { BarChart3, Download, MessageSquare, Settings2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { AnalyticsCards } from "@/components/analytics/analytics-cards"
@@ -12,12 +12,24 @@ import { AnalyticsFunnel } from "@/components/analytics/analytics-funnel"
 import { AnalyticsDonuts } from "@/components/analytics/analytics-donuts"
 import { AnalyticsBottom } from "@/components/analytics/analytics-bottom"
 import { MetricFormDialog } from "@/components/analytics/metric-form-dialog"
+import { ContentTab } from "@/components/analytics/tabs/content-tab"
+import { AudienceTab } from "@/components/analytics/tabs/audience-tab"
+import { ChannelsTab } from "@/components/analytics/tabs/channels-tab"
+import { CampaignsTab } from "@/components/analytics/tabs/campaigns-tab"
+import { ConversionsTab } from "@/components/analytics/tabs/conversions-tab"
+import { AttributionTab } from "@/components/analytics/tabs/attribution-tab"
+import { AiInsightsTab } from "@/components/analytics/tabs/ai-insights-tab"
+import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
+import type { AudienceSegments, BuyerPersona } from "@/lib/ai/schemas/audience"
 import {
   computeSummary,
   computeChannelBreakdown,
   computeTimeSeries,
   computeDelta,
   computeFunnel,
+  computeChannelTimeSeries,
+  computeAttribution,
+  computeHealthScore,
   filterByRange,
   getPreviousRange,
 } from "@/lib/services/analytics.service"
@@ -27,6 +39,9 @@ interface AnalyticsViewProps {
   projectId: string
   metrics: Metric[]
   channels: string[]
+  contentPlan: ContentPlan | null
+  audienceSegments: AudienceSegments | null
+  buyerPersona: BuyerPersona | null
 }
 
 type Range = "7d" | "30d" | "90d"
@@ -62,7 +77,14 @@ function formatDateRu(d: Date): string {
   return d.toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" })
 }
 
-export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewProps) {
+export function AnalyticsView({
+  projectId,
+  metrics,
+  channels,
+  contentPlan,
+  audienceSegments,
+  buyerPersona,
+}: AnalyticsViewProps) {
   const [range, setRange] = useState<Range>("30d")
   const [tab, setTab] = useState<Tab>("overview")
 
@@ -85,6 +107,9 @@ export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewPro
   const channelBreakdown = useMemo(() => computeChannelBreakdown(current), [current])
   const timeSeries = useMemo(() => computeTimeSeries(current), [current])
   const funnelSteps = useMemo(() => computeFunnel(summary), [summary])
+  const channelTimeSeries = useMemo(() => computeChannelTimeSeries(current), [current])
+  const attribution = useMemo(() => computeAttribution(channelBreakdown), [channelBreakdown])
+  const healthScore = useMemo(() => computeHealthScore(summary, channelBreakdown), [summary, channelBreakdown])
 
   const deltas = useMemo(() => {
     const keys = [
@@ -103,7 +128,6 @@ export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewPro
         prevSummary[k as keyof typeof prevSummary] as number
       )
     }
-    // CTR delta
     const currCtr = summary.totalImpressions > 0
       ? (summary.totalClicks / summary.totalImpressions) * 100
       : 0
@@ -111,14 +135,12 @@ export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewPro
       ? (prevSummary.totalClicks / prevSummary.totalImpressions) * 100
       : 0
     result["ctr"] = computeDelta(currCtr, prevCtr)
-    // Sales delta
     const currSales = Math.round(summary.totalLeads * 0.278)
     const prevSales = Math.round(prevSummary.totalLeads * 0.278)
     result["sales"] = computeDelta(currSales, prevSales)
     return result
   }, [summary, prevSummary])
 
-  // Funnel derived stats
   const totalSales = Math.round(summary.totalLeads * 0.278)
   const convRate =
     summary.totalImpressions > 0
@@ -144,8 +166,7 @@ export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewPro
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Range selector */}
-          <div className="flex rounded-lg border border-[#eaeaea] bg-white overflow-hidden">
+          <div className="flex overflow-hidden rounded-lg border border-[#eaeaea] bg-white">
             {RANGES.map((r) => (
               <button
                 key={r.value}
@@ -194,7 +215,7 @@ export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewPro
       </div>
 
       {/* Tab content */}
-      {tab === "overview" ? (
+      {tab === "overview" && (
         metrics.length === 0 ? (
           <div className="flex h-[50vh] items-center justify-center">
             <EmptyState
@@ -205,50 +226,52 @@ export function AnalyticsView({ projectId, metrics, channels }: AnalyticsViewPro
           </div>
         ) : (
           <div className="space-y-5">
-            {/* 9 metric cards */}
-            <AnalyticsCards
-              summary={summary}
-              deltas={deltas}
-              timeSeries={timeSeries}
-            />
-
-            {/* Main 2-column layout */}
+            <AnalyticsCards summary={summary} deltas={deltas} timeSeries={timeSeries} />
             <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
-              {/* Left: chart + funnel */}
               <div className="space-y-5">
                 <AnalyticsChart data={timeSeries} />
-                <AnalyticsFunnel
-                  steps={funnelSteps}
-                  conversionRate={convRate}
-                  avgCheck={avgCheck}
-                />
+                <AnalyticsFunnel steps={funnelSteps} conversionRate={convRate} avgCheck={avgCheck} />
               </div>
-
-              {/* Right: channel table */}
               <AnalyticsTable channels={channelBreakdown} />
             </div>
-
-            {/* Donuts row */}
             <AnalyticsDonuts channels={channelBreakdown} />
-
-            {/* Bottom 4 columns */}
             <AnalyticsBottom channels={channelBreakdown} summary={summary} />
           </div>
         )
-      ) : (
-        <div className="flex h-[40vh] items-center justify-center">
-          <EmptyState
-            icon={BarChart3}
-            title={`Раздел «${TABS.find((t) => t.id === tab)?.label}»`}
-            description="Этот раздел аналитики в разработке. Пока доступен Обзор."
-          />
-        </div>
+      )}
+
+      {tab === "content" && (
+        <ContentTab contentPlan={contentPlan} />
+      )}
+
+      {tab === "audience" && (
+        <AudienceTab audienceSegments={audienceSegments} buyerPersona={buyerPersona} />
+      )}
+
+      {tab === "channels" && (
+        <ChannelsTab channels={channelBreakdown} channelTimeSeries={channelTimeSeries} />
+      )}
+
+      {tab === "campaigns" && (
+        <CampaignsTab channels={channelBreakdown} summary={summary} />
+      )}
+
+      {tab === "conversions" && (
+        <ConversionsTab summary={summary} channels={channelBreakdown} timeSeries={timeSeries} />
+      )}
+
+      {tab === "attribution" && (
+        <AttributionTab attribution={attribution} channels={channelBreakdown} />
+      )}
+
+      {tab === "ai" && (
+        <AiInsightsTab summary={summary} channels={channelBreakdown} healthScore={healthScore} />
       )}
 
       {/* Floating AI button */}
       {metrics.length > 0 && (
         <div className="fixed bottom-6 right-6 z-50">
-          <button className="flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-neutral-800 transition-colors">
+          <button className="flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-neutral-800">
             <MessageSquare className="size-4" />
             Спросить AI об аналитике
           </button>

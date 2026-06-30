@@ -167,6 +167,57 @@ export function computeFunnel(summary: MetricSummary): FunnelStep[] {
   ]
 }
 
+export interface AttributionData {
+  channel: string
+  revenueShare: number
+  leadsShare: number
+  revenue: number
+  leads: number
+}
+
+export function computeChannelTimeSeries(metrics: Metric[]): Record<string, TimeSeriesPoint[]> {
+  const byChannel = new Map<string, Metric[]>()
+  for (const m of metrics) {
+    const arr = byChannel.get(m.channel) ?? []
+    arr.push(m)
+    byChannel.set(m.channel, arr)
+  }
+  const result: Record<string, TimeSeriesPoint[]> = {}
+  for (const [channel, rows] of byChannel) {
+    result[channel] = computeTimeSeries(rows)
+  }
+  return result
+}
+
+export function computeAttribution(channels: ChannelMetrics[]): AttributionData[] {
+  const totalRevenue = channels.reduce((s, c) => s + c.revenue, 0)
+  const totalLeads = channels.reduce((s, c) => s + c.leads, 0)
+  return channels
+    .map((c) => ({
+      channel: c.channel,
+      revenueShare: totalRevenue > 0 ? (c.revenue / totalRevenue) * 100 : 0,
+      leadsShare: totalLeads > 0 ? (c.leads / totalLeads) * 100 : 0,
+      revenue: c.revenue,
+      leads: c.leads,
+    }))
+    .sort((a, b) => b.revenueShare - a.revenueShare)
+}
+
+export function computeHealthScore(summary: MetricSummary, channels: ChannelMetrics[]): number {
+  let score = 40
+  if (summary.romi > 500) score += 25
+  else if (summary.romi > 200) score += 15
+  else if (summary.romi > 0) score += 5
+  else score -= 10
+  if (summary.cpl > 0 && summary.cpl < 500) score += 15
+  else if (summary.cpl > 0 && summary.cpl < 2000) score += 7
+  if (channels.length >= 4) score += 10
+  else if (channels.length >= 2) score += 5
+  if (summary.totalLeads > 200) score += 10
+  else if (summary.totalLeads > 50) score += 5
+  return Math.min(100, Math.max(0, score))
+}
+
 export function computeDelta(current: number, previous: number): number {
   if (previous === 0) return current === 0 ? 0 : 100
   return ((current - previous) / Math.abs(previous)) * 100
