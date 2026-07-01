@@ -41,6 +41,8 @@ import { createProject } from "@/lib/actions/projects"
 import type { DirectorAnalysis } from "@/lib/ai/schemas/directorAnalysis"
 import type { MetricSummary, ChannelMetrics } from "@/lib/services/analytics.service"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
+import { OnboardingProgress } from "@/components/dashboard/onboarding-progress"
+import type { OnboardingStep } from "@/components/dashboard/onboarding-progress"
 
 interface ProjectRow {
   id: string
@@ -82,6 +84,7 @@ interface DashboardViewProps {
   reports: ReportRow[]
   strategyKpis: KpiRow[]
   todayContent: ContentItem[]
+  onboardingSteps?: OnboardingStep[]
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -221,6 +224,7 @@ export function DashboardView({
   reports,
   strategyKpis,
   todayContent,
+  onboardingSteps,
 }: DashboardViewProps) {
   const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
@@ -296,8 +300,10 @@ export function DashboardView({
           {projectName ?? "Главная"}
         </h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8">
-            <Bell className="size-3.5" />
+          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
+            <Link href="/inbox">
+              <Bell className="size-3.5" />
+            </Link>
           </Button>
           <Button size="sm" onClick={() => setNewProjectOpen(true)}>
             <Plus className="size-3.5" />
@@ -305,6 +311,11 @@ export function DashboardView({
           </Button>
         </div>
       </div>
+
+      {/* Onboarding Progress */}
+      {onboardingSteps && onboardingSteps.some((s) => !s.done) && (
+        <OnboardingProgress steps={onboardingSteps} />
+      )}
 
       {/* Morning Brief */}
       {projectId && (

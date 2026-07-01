@@ -15,6 +15,7 @@ import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
 import { DashboardView } from "@/components/dashboard/dashboard-view"
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard"
 import { ArtifactType } from "@prisma/client"
+import type { OnboardingStep } from "@/components/dashboard/onboarding-progress"
 
 export default async function HomePage() {
   const session = await auth()
@@ -68,7 +69,7 @@ export default async function HomePage() {
   const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
 
-  const [project, metrics, directorArtifact, tasks, reports, strategyArtifact, contentArtifact] =
+  const [project, metrics, directorArtifact, tasks, reports, strategyArtifact, contentArtifact, companyArtifact, audienceArtifact, offerArtifact] =
     await Promise.all([
       prisma.project.findUnique({ where: { id: projectId } }),
       listMetrics(projectId),
@@ -95,6 +96,9 @@ export default async function HomePage() {
       }),
       getLatestArtifact(projectId, "STRATEGY_30"),
       getLatestArtifact(projectId, "CONTENT_PLAN"),
+      getLatestArtifact(projectId, "COMPANY_ANALYSIS"),
+      getLatestArtifact(projectId, "AUDIENCE_SEGMENTS"),
+      getLatestArtifact(projectId, "OFFER"),
     ])
 
   if (!project) {
@@ -145,6 +149,51 @@ export default async function HomePage() {
       ? contentParsed.data.calendar.filter((item) => item.day === todayDay)
       : []
 
+  const onboardingSteps: OnboardingStep[] = [
+    {
+      id: "company",
+      label: "Анализ компании",
+      description: "Опишите продукт, позиционирование и точки роста",
+      href: "/company",
+      done: !!companyArtifact,
+    },
+    {
+      id: "audience",
+      label: "Аудитория",
+      description: "Сегментируйте клиентов и создайте персоны",
+      href: "/audience",
+      done: !!audienceArtifact,
+    },
+    {
+      id: "offer",
+      label: "Оффер",
+      description: "Сформулируйте ценностное предложение",
+      href: "/offers",
+      done: !!offerArtifact,
+    },
+    {
+      id: "strategy",
+      label: "Стратегия",
+      description: "Получите 30-дневный план действий",
+      href: "/strategy",
+      done: !!strategyArtifact,
+    },
+    {
+      id: "content",
+      label: "Контент-план",
+      description: "Создайте календарь публикаций",
+      href: "/content",
+      done: !!contentArtifact,
+    },
+    {
+      id: "metrics",
+      label: "Первые метрики",
+      description: "Добавьте данные по каналам за текущий месяц",
+      href: "/analytics",
+      done: metrics.length > 0,
+    },
+  ]
+
   return (
     <DashboardView
       projectId={projectId}
@@ -167,6 +216,7 @@ export default async function HomePage() {
       }))}
       strategyKpis={strategyKpis}
       todayContent={todayContent}
+      onboardingSteps={onboardingSteps}
     />
   )
 }

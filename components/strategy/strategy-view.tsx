@@ -12,10 +12,12 @@ import { ExportPdfButton } from "@/components/shared/export-pdf-button"
 import { runStrategy } from "@/lib/actions/ai"
 import type { Strategy, Horizon } from "@/lib/ai/schemas/strategy"
 import { cn } from "@/lib/utils"
+import { ArtifactVersionSelect } from "@/components/shared/artifact-version-select"
 
 export interface StrategyEntry {
   artifactId: string
   version: number
+  createdAt?: string
   data: Strategy
   doneKeys: string[]
 }
@@ -23,6 +25,7 @@ export interface StrategyEntry {
 interface StrategyViewProps {
   projectId: string
   entries: Record<number, StrategyEntry | null>
+  allVersionEntries?: Record<number, StrategyEntry[]>
 }
 
 const horizons: { value: Horizon; label: string }[] = [
@@ -32,12 +35,19 @@ const horizons: { value: Horizon; label: string }[] = [
   { value: 365, label: "1 год" },
 ]
 
-export function StrategyView({ projectId, entries }: StrategyViewProps) {
+export function StrategyView({ projectId, entries, allVersionEntries }: StrategyViewProps) {
   const router = useRouter()
   const [horizon, setHorizon] = useState<Horizon>(30)
   const [loading, setLoading] = useState(false)
+  const [selectedVersionId, setSelectedVersionId] = useState<Record<number, string>>({})
 
-  const entry = entries[horizon] ?? null
+  const versions = allVersionEntries?.[horizon] ?? []
+  const activeVersionId = selectedVersionId[horizon] ?? versions[0]?.artifactId ?? ""
+  const entry = versions.find((v) => v.artifactId === activeVersionId) ?? entries[horizon] ?? null
+
+  function handleVersionChange(id: string) {
+    setSelectedVersionId((prev) => ({ ...prev, [horizon]: id }))
+  }
 
   async function generate(force: boolean) {
     setLoading(true)
@@ -73,12 +83,20 @@ export function StrategyView({ projectId, entries }: StrategyViewProps) {
           <h2 className="text-lg font-semibold text-foreground">Стратегия</h2>
           <p className="text-sm text-muted-foreground">
             Маркетинговый план по горизонтам
-            {entry && (
-              <span className="ml-2 text-xs">· версия {entry.version}</span>
-            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {versions.length > 1 && (
+            <ArtifactVersionSelect
+              versions={versions.map((v) => ({
+                id: v.artifactId,
+                version: v.version,
+                createdAt: v.createdAt ?? new Date().toISOString(),
+              }))}
+              selectedId={activeVersionId}
+              onSelect={handleVersionChange}
+            />
+          )}
           {entry && (
             <ExportPdfButton
               printAreaId="strategy-print-area"

@@ -12,6 +12,23 @@ export async function getLatestArtifact(
   })
 }
 
+/** Returns all versions of an artifact type for a project, newest first. */
+export async function listArtifactVersions(
+  projectId: string,
+  type: ArtifactType
+) {
+  return prisma.aiArtifact.findMany({
+    where: { projectId, type },
+    orderBy: { version: "desc" },
+    select: { id: true, version: true, createdAt: true, payload: true, inputHash: true, model: true },
+  })
+}
+
+/** Returns a specific artifact by id */
+export async function getArtifactById(id: string) {
+  return prisma.aiArtifact.findUnique({ where: { id } })
+}
+
 /** Next version number for a given project + artifact type (1-based). */
 export async function getNextVersion(
   projectId: string,

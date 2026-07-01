@@ -13,6 +13,22 @@ enum ProjectStatus {
   ARCHIVED
 }
 
+enum SignalType {
+  ANOMALY
+  MARKET
+  STRATEGY
+  CONTENT
+  COMPETITOR
+  EXPERIMENT
+  SYSTEM
+}
+
+enum SignalPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
 enum ArtifactType {
   COMPANY_ANALYSIS
   SWOT
@@ -93,6 +109,7 @@ model Project {
   strategyTasks StrategyTask[]
   metrics        Metric[]
   customChannels CustomChannel[]
+  inboxSignals   InboxSignal[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -142,6 +159,22 @@ model CustomChannel {
 
   @@unique([projectId, name])
   @@index([projectId])
+}
+
+model InboxSignal {
+  id        String        @id @default(cuid())
+  projectId String
+  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      SignalType
+  priority  SignalPriority @default(MEDIUM)
+  title     String
+  body      String
+  action    String?
+  actionHref String?
+  read      Boolean       @default(false)
+  createdAt DateTime      @default(now())
+
+  @@index([projectId, read])
 }
 
 model StrategyTask {

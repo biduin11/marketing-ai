@@ -9,6 +9,7 @@ import { getActiveProjectId } from "@/lib/actions/active-project"
 import { prisma } from "@/lib/prisma"
 import { strategySchema, horizonValues } from "@/lib/ai/schemas/strategy"
 import { horizonArtifactType } from "@/lib/services/strategy.service"
+import { listArtifactVersions } from "@/lib/services/artifacts"
 
 export default async function StrategyPage() {
   const projectId = await getActiveProjectId()
@@ -38,31 +39,43 @@ export default async function StrategyPage() {
     )
   }
 
-  // Load the latest artifact + done-task keys for each horizon.
+  // Load all versions + done-task keys for each horizon.
   const entries: Record<number, StrategyEntry | null> = {}
+  const allVersionEntries: Record<number, StrategyEntry[]> = {}
+
   for (const horizon of horizonValues) {
     const type = horizonArtifactType(horizon)
-    const artifact = await prisma.aiArtifact.findFirst({
-      where: { projectId: project.id, type },
-      orderBy: { version: "desc" },
-      include: { tasks: { where: { done: true }, select: { taskKey: true } } },
+    const [latestWithTasks, versions] = await Promise.all([
+      prisma.aiArtifact.findFirst({
+        where: { projectId: project.id, type },
+        orderBy: { version: "desc" },
+        include: { tasks: { where: { done: true }, select: { taskKey: true } } },
+      }),
+      listArtifactVersions(project.id, type),
+    ])
+
+    const doneKeys = latestWithTasks?.tasks.map((t) => t.taskKey) ?? []
+
+    allVersionEntries[horizon] = versions.flatMap((v) => {
+      const parsed = strategySchema.safeParse(v.payload)
+      if (!parsed.success) return []
+      return [{
+        artifactId: v.id,
+        version: v.version,
+        createdAt: v.createdAt.toISOString(),
+        data: parsed.data,
+        doneKeys: v.id === latestWithTasks?.id ? doneKeys : [],
+      }]
     })
 
-    if (!artifact) {
-      entries[horizon] = null
-      continue
-    }
-
-    const parsed = strategySchema.safeParse(artifact.payload)
-    entries[horizon] = parsed.success
-      ? {
-          artifactId: artifact.id,
-          version: artifact.version,
-          data: parsed.data,
-          doneKeys: artifact.tasks.map((t) => t.taskKey),
-        }
-      : null
+    entries[horizon] = allVersionEntries[horizon][0] ?? null
   }
 
-  return <StrategyView projectId={project.id} entries={entries} />
+  return (
+    <StrategyView
+      projectId={project.id}
+      entries={entries}
+      allVersionEntries={allVersionEntries}
+    />
+  )
 }

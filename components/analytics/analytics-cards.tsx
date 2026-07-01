@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import type { MetricSummary, TimeSeriesPoint } from "@/lib/services/analytics.service"
+import { MetricTooltip } from "@/components/shared/metric-tooltip"
 
 interface AnalyticsCardsProps {
   summary: MetricSummary
@@ -68,6 +69,8 @@ interface CardDef {
   format: (v: number) => string
   sparkKey: keyof TimeSeriesPoint
   color: string
+  formula?: string
+  formulaDesc?: string
 }
 
 const CARDS: CardDef[] = [
@@ -77,6 +80,8 @@ const CARDS: CardDef[] = [
     format: (v) => `${v.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`,
     sparkKey: "spend",
     color: "#111111",
+    formula: "Σ spend по всем каналам за период",
+    formulaDesc: "Суммарные маркетинговые расходы",
   },
   {
     label: "Показы",
@@ -84,6 +89,8 @@ const CARDS: CardDef[] = [
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "impressions",
     color: "#8b5cf6",
+    formula: "Σ impressions по всем каналам",
+    formulaDesc: "Сколько раз показались объявления",
   },
   {
     label: "Клики",
@@ -91,6 +98,8 @@ const CARDS: CardDef[] = [
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "clicks",
     color: "#3b82f6",
+    formula: "Σ clicks по всем каналам",
+    formulaDesc: "Сколько раз кликнули по объявлениям",
   },
   {
     label: "CTR",
@@ -98,6 +107,8 @@ const CARDS: CardDef[] = [
     format: (v) => `${v.toFixed(2)}%`,
     sparkKey: "clicks",
     color: "#06b6d4",
+    formula: "CTR = Клики / Показы × 100%",
+    formulaDesc: "Кликабельность — доля показов, ставших кликами",
   },
   {
     label: "Лиды",
@@ -105,6 +116,8 @@ const CARDS: CardDef[] = [
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "leads",
     color: "#10b981",
+    formula: "Σ leads по всем каналам",
+    formulaDesc: "Количество полученных заявок/лидов",
   },
   {
     label: "Стоимость лида (CPL)",
@@ -112,6 +125,8 @@ const CARDS: CardDef[] = [
     format: (v) => `${v.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`,
     sparkKey: "spend",
     color: "#f59e0b",
+    formula: "CPL = Расходы / Лиды",
+    formulaDesc: "Сколько стоит один лид в среднем",
   },
   {
     label: "Продажи",
@@ -119,6 +134,8 @@ const CARDS: CardDef[] = [
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "leads",
     color: "#f97316",
+    formula: "Продажи ≈ Лиды × CR (конверсия ~27.8%)",
+    formulaDesc: "Расчётное количество закрытых сделок",
   },
   {
     label: "Выручка",
@@ -126,6 +143,8 @@ const CARDS: CardDef[] = [
     format: (v) => `${v.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`,
     sparkKey: "revenue",
     color: "#16a34a",
+    formula: "Σ revenue по всем каналам за период",
+    formulaDesc: "Суммарная выручка от маркетинговых активностей",
   },
   {
     label: "ROMI",
@@ -133,6 +152,8 @@ const CARDS: CardDef[] = [
     format: (v) => `${v.toFixed(0)}%`,
     sparkKey: "revenue",
     color: "#8b5cf6",
+    formula: "ROMI = Выручка / Расходы × 100%",
+    formulaDesc: "Возврат на маркетинговые инвестиции",
   },
 ]
 
@@ -166,9 +187,14 @@ export function AnalyticsCards({
             key={card.key}
             className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm"
           >
-            <p className="mb-1 text-[11px] leading-snug text-muted-foreground">
-              {card.label}
-            </p>
+            <div className="mb-1 flex items-center gap-1">
+              <p className="text-[11px] leading-snug text-muted-foreground">
+                {card.label}
+              </p>
+              {card.formula && (
+                <MetricTooltip formula={card.formula} description={card.formulaDesc} />
+              )}
+            </div>
             <p className="text-base font-semibold leading-tight text-foreground">
               {card.format(value)}
             </p>
