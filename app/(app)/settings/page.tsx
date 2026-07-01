@@ -16,6 +16,9 @@ export default async function SettingsPage() {
     getActiveProjectId(),
   ])
 
+  const { PLAN_LIMITS } = await import("@/lib/config/plans")
+  const maxProjects = PLAN_LIMITS[usage.planName].maxProjects
+
   const channels = activeProjectId ? await getChannels(activeProjectId) : []
 
   return (
@@ -23,6 +26,8 @@ export default async function SettingsPage() {
       name={session.user.name ?? null}
       email={session.user.email ?? ""}
       usage={usage}
+      projectCount={projects.length}
+      maxProjects={maxProjects === Infinity ? 999 : maxProjects}
       projects={projects}
       activeProjectId={activeProjectId}
       channels={channels}

@@ -13,12 +13,14 @@ interface SettingsViewProps {
   name: string | null
   email: string
   usage: UsageInfo
+  projectCount: number
+  maxProjects: number
   projects: ProjectListItem[]
   activeProjectId: string | null
   channels: ChannelItem[]
 }
 
-export function SettingsView({ name, email, usage, projects, activeProjectId, channels }: SettingsViewProps) {
+export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels }: SettingsViewProps) {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null
 
   return (
@@ -45,7 +47,7 @@ export function SettingsView({ name, email, usage, projects, activeProjectId, ch
       </div>
 
       <PlanCard planName={usage.planName} />
-      <UsageBar usage={usage} />
+      <UsageBar usage={usage} projectCount={projectCount} maxProjects={maxProjects} />
 
       {activeProject && (
         <ChannelsSection projectId={activeProject.id} initialChannels={channels} />

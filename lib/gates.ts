@@ -22,20 +22,26 @@ export async function canCreateProject(userId: string): Promise<GateResult> {
   if (count >= limits.maxProjects) {
     return {
       allowed: false,
-      reason: `Достигнут лимит плана Free (${limits.maxProjects} проект). Перейдите на Pro для неограниченного числа проектов.`,
+      reason: `На плане Free доступен 1 проект с неограниченными AI-генерациями. Перейдите на Pro чтобы вести несколько проектов или клиентов.`,
     }
   }
   return { allowed: true }
 }
 
+// FREE = unlimited AI generations within 1 project.
+// Upsell trigger = creating a 2nd project (canCreateProject).
 export async function canGenerateAi(userId: string): Promise<GateResult> {
   const usage = await getUsageThisMonth(userId)
   if (usage.isUnlimited) return { allowed: true }
 
-  if (usage.generationsUsed >= usage.generationsLimit) {
+  // Only block if a finite limit is explicitly set (future plans)
+  if (
+    usage.generationsLimit !== Infinity &&
+    usage.generationsUsed >= usage.generationsLimit
+  ) {
     return {
       allowed: false,
-      reason: `Достигнут лимит Free (${usage.generationsUsed}/${usage.generationsLimit} генераций в этом месяце). Перейдите на Pro для неограниченных генераций.`,
+      reason: `Достигнут лимит генераций (${usage.generationsUsed}/${usage.generationsLimit}). Перейдите на Pro.`,
     }
   }
   return { allowed: true }
