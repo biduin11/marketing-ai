@@ -1,10 +1,12 @@
 import {
   BarChart3,
+  Bell,
   BotMessageSquare,
   Building2,
   ChartLine,
   Crosshair,
   FileText,
+  FlaskConical,
   Home,
   LayoutList,
   Route,
@@ -18,19 +20,53 @@ export interface NavItem {
   label: string
   href: string
   icon: LucideIcon
+  badge?: string
 }
 
-export const navItems: NavItem[] = [
-  { label: "Главная", href: "/", icon: Home },
-  { label: "AI Директор", href: "/director", icon: BotMessageSquare },
-  { label: "Анализ компании", href: "/company", icon: Building2 },
-  { label: "Аудитория", href: "/audience", icon: Users },
-  { label: "Конкуренты", href: "/competitors", icon: Crosshair },
-  { label: "Офферы", href: "/offers", icon: Tag },
-  { label: "Стратегия", href: "/strategy", icon: ChartLine },
-  { label: "CJM", href: "/journey", icon: Route },
-  { label: "Контент-план", href: "/content", icon: LayoutList },
-  { label: "Аналитика", href: "/analytics", icon: BarChart3 },
-  { label: "Отчёты", href: "/reports", icon: FileText },
-  { label: "Настройки", href: "/settings", icon: Settings },
+export interface NavGroup {
+  label: string
+  items: NavItem[]
+}
+
+export const navGroups: NavGroup[] = [
+  {
+    label: "",
+    items: [
+      { label: "Главная", href: "/", icon: Home },
+      { label: "Входящие", href: "/inbox", icon: Bell },
+    ],
+  },
+  {
+    label: "ПОНЯТЬ",
+    items: [
+      { label: "Бренд и оффер", href: "/company", icon: Building2 },
+      { label: "Аудитория и CJM", href: "/audience", icon: Users },
+      { label: "Конкуренты", href: "/competitors", icon: Crosshair },
+    ],
+  },
+  {
+    label: "РЕШИТЬ",
+    items: [
+      { label: "Командный центр", href: "/director", icon: BotMessageSquare },
+      { label: "Стратегия", href: "/strategy", icon: ChartLine },
+      { label: "Перформанс", href: "/analytics", icon: BarChart3 },
+      { label: "Эксперименты", href: "/experiments", icon: FlaskConical },
+    ],
+  },
+  {
+    label: "ДЕЛАТЬ",
+    items: [
+      { label: "Контент-студия", href: "/content", icon: LayoutList },
+      { label: "Отчёты", href: "/reports", icon: FileText },
+    ],
+  },
+  {
+    label: "",
+    items: [
+      { label: "Настройки", href: "/settings", icon: Settings },
+    ],
+  },
 ]
+
+// Flat list for backward compat
+export const navItems: NavItem[] = navGroups.flatMap((g) => g.items)
