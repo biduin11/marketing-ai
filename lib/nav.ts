@@ -6,7 +6,6 @@ import {
   ChartLine,
   Crosshair,
   FileText,
-  FlaskConical,
   Home,
   LayoutList,
   Route,
@@ -51,7 +50,6 @@ export const navGroups: NavGroup[] = [
       { label: "Командный центр", href: "/director", icon: BotMessageSquare },
       { label: "Стратегия", href: "/strategy", icon: ChartLine },
       { label: "Перформанс", href: "/analytics", icon: BarChart3 },
-      { label: "Эксперименты", href: "/experiments", icon: FlaskConical },
     ],
   },
   {
