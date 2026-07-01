@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { KpiCard } from "@/components/strategy/kpi-card"
 import { TaskList, type TaskItem } from "@/components/strategy/task-list"
+import { ExportPdfButton } from "@/components/shared/export-pdf-button"
 import { runStrategy } from "@/lib/actions/ai"
 import type { Strategy, Horizon } from "@/lib/ai/schemas/strategy"
 import { cn } from "@/lib/utils"
@@ -77,30 +78,38 @@ export function StrategyView({ projectId, entries }: StrategyViewProps) {
             )}
           </p>
         </div>
-        {entry ? (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => generate(true)}
-            disabled={loading}
-          >
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="size-3.5" />
-            )}
-            Регенерировать
-          </Button>
-        ) : (
-          <Button size="sm" onClick={() => generate(false)} disabled={loading}>
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="size-3.5" />
-            )}
-            Сгенерировать
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {entry && (
+            <ExportPdfButton
+              printAreaId="strategy-print-area"
+              filename={`strategy-${horizon}d`}
+            />
+          )}
+          {entry ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => generate(true)}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3.5" />
+              )}
+              Регенерировать
+            </Button>
+          ) : (
+            <Button size="sm" onClick={() => generate(false)} disabled={loading}>
+              {loading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="size-3.5" />
+              )}
+              Сгенерировать
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Horizon switcher */}
@@ -131,7 +140,7 @@ export function StrategyView({ projectId, entries }: StrategyViewProps) {
           />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div id="strategy-print-area" className="space-y-6">
           {/* Summary */}
           <div className="rounded-2xl border border-border bg-card p-6">
             <p className="text-sm text-muted-foreground">

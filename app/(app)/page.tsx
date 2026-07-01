@@ -7,8 +7,11 @@ import {
   computeSummary,
   computeChannelBreakdown,
   filterByRange,
+  computeDelta,
 } from "@/lib/services/analytics.service"
 import { directorAnalysisSchema } from "@/lib/ai/schemas/directorAnalysis"
+import { strategySchema } from "@/lib/ai/schemas/strategy"
+import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
 import { DashboardView } from "@/components/dashboard/dashboard-view"
 import { OnboardingWizard } from "@/components/onboarding/onboarding-wizard"
 import { ArtifactType } from "@prisma/client"
@@ -50,41 +53,49 @@ export default async function HomePage() {
         projects={serializedProjects}
         analysis={null}
         summary={null}
+        prevSummary={null}
         channels={[]}
         tasks={[]}
         reports={[]}
+        strategyKpis={[]}
+        todayContent={[]}
       />
     )
   }
 
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
 
-  const [project, metrics, directorArtifact, tasks, reports] = await Promise.all([
-    prisma.project.findUnique({ where: { id: projectId } }),
-    listMetrics(projectId),
-    getLatestArtifact(projectId, "DIRECTOR_DAILY"),
-    prisma.strategyTask.findMany({
-      where: { projectId, done: false },
-      take: 5,
-      orderBy: { updatedAt: "asc" },
-    }),
-    prisma.aiArtifact.findMany({
-      where: {
-        projectId,
-        type: {
-          in: [
-            ArtifactType.REPORT_WEEKLY,
-            ArtifactType.REPORT_MONTHLY,
-            ArtifactType.REPORT_QUARTERLY,
-          ],
+  const [project, metrics, directorArtifact, tasks, reports, strategyArtifact, contentArtifact] =
+    await Promise.all([
+      prisma.project.findUnique({ where: { id: projectId } }),
+      listMetrics(projectId),
+      getLatestArtifact(projectId, "DIRECTOR_DAILY"),
+      prisma.strategyTask.findMany({
+        where: { projectId, done: false },
+        take: 5,
+        orderBy: { updatedAt: "asc" },
+      }),
+      prisma.aiArtifact.findMany({
+        where: {
+          projectId,
+          type: {
+            in: [
+              ArtifactType.REPORT_WEEKLY,
+              ArtifactType.REPORT_MONTHLY,
+              ArtifactType.REPORT_QUARTERLY,
+            ],
+          },
         },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 3,
-      select: { id: true, type: true, createdAt: true },
-    }),
-  ])
+        orderBy: { createdAt: "desc" },
+        take: 3,
+        select: { id: true, type: true, createdAt: true },
+      }),
+      getLatestArtifact(projectId, "STRATEGY_30"),
+      getLatestArtifact(projectId, "CONTENT_PLAN"),
+    ])
 
   if (!project) {
     return (
@@ -94,15 +105,20 @@ export default async function HomePage() {
         projects={serializedProjects}
         analysis={null}
         summary={null}
+        prevSummary={null}
         channels={[]}
         tasks={[]}
         reports={[]}
+        strategyKpis={[]}
+        todayContent={[]}
       />
     )
   }
 
   const monthlyMetrics = filterByRange(metrics, monthStart, now)
+  const prevMetrics = filterByRange(metrics, prevMonthStart, prevMonthEnd)
   const summary = monthlyMetrics.length > 0 ? computeSummary(monthlyMetrics) : null
+  const prevSummary = prevMetrics.length > 0 ? computeSummary(prevMetrics) : null
   const channels =
     monthlyMetrics.length > 0
       ? computeChannelBreakdown(monthlyMetrics).sort((a, b) => b.roi - a.roi)
@@ -113,6 +129,22 @@ export default async function HomePage() {
     : null
   const analysis = parseResult?.success ? parseResult.data : null
 
+  // Strategy KPIs from STRATEGY_30
+  const strategyParsed = strategyArtifact
+    ? strategySchema.safeParse(strategyArtifact.payload)
+    : null
+  const strategyKpis = strategyParsed?.success ? strategyParsed.data.kpi : []
+
+  // Today's content items: match by day of month
+  const todayDay = now.getDate()
+  const contentParsed = contentArtifact
+    ? contentPlanSchema.safeParse(contentArtifact.payload)
+    : null
+  const todayContent =
+    contentParsed?.success
+      ? contentParsed.data.calendar.filter((item) => item.day === todayDay)
+      : []
+
   return (
     <DashboardView
       projectId={projectId}
@@ -120,6 +152,7 @@ export default async function HomePage() {
       projects={serializedProjects}
       analysis={analysis}
       summary={summary}
+      prevSummary={prevSummary}
       channels={channels}
       tasks={tasks.map((t) => ({
         id: t.id,
@@ -132,6 +165,8 @@ export default async function HomePage() {
         type: r.type as string,
         createdAt: r.createdAt.toISOString(),
       }))}
+      strategyKpis={strategyKpis}
+      todayContent={todayContent}
     />
   )
 }

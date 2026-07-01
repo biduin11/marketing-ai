@@ -10,8 +10,10 @@ import {
   FileText,
   Mail,
   Users,
+  Sparkles,
 } from "lucide-react"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
+import { ContentWriteDialog } from "@/components/content/content-write-dialog"
 
 type CalendarItem = ContentPlan["calendar"][number]
 
@@ -77,12 +79,14 @@ const STATUS_CLS: Record<string, string> = {
 
 interface ContentCalendarProps {
   items: CalendarItem[]
+  projectId: string
 }
 
-export function ContentCalendar({ items }: ContentCalendarProps) {
+export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
   const [view, setView] = useState<"week" | "month">("week")
   const [selectedWeek, setSelectedWeek] = useState<Week>(1)
   const [platformFilter, setPlatformFilter] = useState<PlatformId | "all">("all")
+  const [writeItem, setWriteItem] = useState<CalendarItem | null>(null)
 
   const weekItems = items.filter((i) => i.week === selectedWeek)
   const visiblePlatforms: PlatformEntry[] =
@@ -160,9 +164,19 @@ export function ContentCalendar({ items }: ContentCalendarProps) {
           allItems={items}
           platforms={visiblePlatforms}
           week={selectedWeek}
+          onWrite={setWriteItem}
         />
       ) : (
-        <MonthGrid items={items} />
+        <MonthGrid items={items} onWrite={setWriteItem} />
+      )}
+
+      {writeItem && (
+        <ContentWriteDialog
+          open={true}
+          onClose={() => setWriteItem(null)}
+          projectId={projectId}
+          item={writeItem}
+        />
       )}
 
       {/* Status legend */}
@@ -200,11 +214,13 @@ function WeekGrid({
   allItems,
   platforms,
   week,
+  onWrite,
 }: {
   items: CalendarItem[]
   allItems: CalendarItem[]
   platforms: readonly PlatformEntry[]
   week: Week
+  onWrite: (item: CalendarItem) => void
 }) {
   const startDay = (week - 1) * 7 + 1
   const days = Array.from({ length: 7 }, (_, i) => startDay + i)
@@ -287,7 +303,7 @@ function WeekGrid({
                           return (
                             <div
                               key={idx}
-                              className="rounded-lg border border-[#eaeaea] bg-white p-1.5 shadow-sm"
+                              className="group rounded-lg border border-[#eaeaea] bg-white p-1.5 shadow-sm"
                             >
                               <div className="mb-0.5 flex items-center justify-between gap-1">
                                 <span className="text-[10px] font-medium text-foreground">
@@ -303,9 +319,18 @@ function WeekGrid({
                               <p className="line-clamp-2 text-[11px] font-medium leading-snug text-foreground">
                                 {item.title}
                               </p>
-                              <span className="mt-0.5 inline-block rounded bg-neutral-100 px-1 py-0.5 text-[10px] text-muted-foreground">
-                                {format}
-                              </span>
+                              <div className="mt-1 flex items-center justify-between gap-1">
+                                <span className="inline-block rounded bg-neutral-100 px-1 py-0.5 text-[10px] text-muted-foreground">
+                                  {format}
+                                </span>
+                                <button
+                                  onClick={() => onWrite(item)}
+                                  className="hidden group-hover:flex items-center gap-0.5 rounded bg-[#111] px-1.5 py-0.5 text-[10px] font-medium text-white"
+                                >
+                                  <Sparkles className="size-2.5" />
+                                  Написать
+                                </button>
+                              </div>
                             </div>
                           )
                         })}
@@ -322,7 +347,7 @@ function WeekGrid({
   )
 }
 
-function MonthGrid({ items }: { items: CalendarItem[] }) {
+function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: CalendarItem) => void }) {
   const byDay = new Map<number, CalendarItem[]>()
   for (const item of items) {
     if (item.day >= 1 && item.day <= 28) {
@@ -381,16 +406,17 @@ function MonthGrid({ items }: { items: CalendarItem[] }) {
                       const cls =
                         platformColor[platform] ?? "bg-neutral-100 text-neutral-700"
                       return (
-                        <span
+                        <button
                           key={i}
                           title={item.title}
+                          onClick={() => onWrite(item)}
                           className={cn(
-                            "truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight",
+                            "truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight text-left hover:opacity-80 transition-opacity",
                             cls
                           )}
                         >
                           {getFormat(item)}
-                        </span>
+                        </button>
                       )
                     })}
                     {dayItems.length > 3 && (

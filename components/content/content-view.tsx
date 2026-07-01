@@ -237,7 +237,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
 
           {/* Calendar tab */}
           {activeTab === "calendar" && (
-            <ContentCalendar items={plan.calendar} />
+            <ContentCalendar items={plan.calendar} projectId={projectId} />
           )}
 
           {/* Ideas tab */}
