@@ -149,7 +149,7 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
       )}
 
       {/* Empty state */}
-      {!analysis && !loading ? (
+      {!loading && !analysis && (
         <div className="flex h-[50vh] items-center justify-center">
           <EmptyState
             icon={Sparkles}
@@ -157,7 +157,9 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
             description="Заполните карточку компании и нажмите «Сгенерировать анализ», чтобы AI построил скоркарту, SWOT и рекомендации."
           />
         </div>
-      ) : !loading ? (
+      )}
+
+      {!loading && analysis && (
         <Tabs defaultValue="overview">
           <TabsList>
             <TabsTrigger value="overview">Обзор</TabsTrigger>
@@ -281,7 +283,7 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
             ))}
           </TabsContent>
         </Tabs>
-      ) : null}
+      )}
     </div>
   )
 }
