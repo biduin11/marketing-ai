@@ -218,6 +218,104 @@ export function computeHealthScore(summary: MetricSummary, channels: ChannelMetr
   return Math.min(100, Math.max(0, score))
 }
 
+export interface AnomalyItem {
+  channel: string
+  metric: "CPL" | "Лиды/день" | "Расходы/день"
+  delta: number
+  current: number
+  previous: number
+  direction: "up" | "down"
+  severity: "critical" | "warning" | "positive"
+}
+
+export function computeAnomalies(metrics: Metric[]): AnomalyItem[] {
+  const now = new Date()
+
+  const recentFrom = new Date(now)
+  recentFrom.setDate(now.getDate() - 3)
+  recentFrom.setHours(0, 0, 0, 0)
+
+  const baselineFrom = new Date(now)
+  baselineFrom.setDate(now.getDate() - 10)
+  baselineFrom.setHours(0, 0, 0, 0)
+
+  const recent = metrics.filter((m) => {
+    const d = m.date instanceof Date ? m.date : new Date(m.date)
+    return d >= recentFrom
+  })
+  const baseline = metrics.filter((m) => {
+    const d = m.date instanceof Date ? m.date : new Date(m.date)
+    return d >= baselineFrom && d < recentFrom
+  })
+
+  if (recent.length === 0 || baseline.length === 0) return []
+
+  const channels = [...new Set(metrics.map((m) => m.channel))]
+  const anomalies: AnomalyItem[] = []
+  const THRESHOLD = 25
+
+  for (const channel of channels) {
+    const r = recent.filter((m) => m.channel === channel)
+    const b = baseline.filter((m) => m.channel === channel)
+    if (r.length === 0 || b.length === 0) continue
+
+    const rSpend = r.reduce((s, m) => s + m.spend, 0)
+    const bSpend = b.reduce((s, m) => s + m.spend, 0)
+    const rLeads = r.reduce((s, m) => s + m.leads, 0)
+    const bLeads = b.reduce((s, m) => s + m.leads, 0)
+
+    const rCpl = rLeads > 0 ? rSpend / rLeads : 0
+    const bCpl = bLeads > 0 ? bSpend / bLeads : 0
+    if (bCpl > 0 && rCpl > 0) {
+      const delta = ((rCpl - bCpl) / bCpl) * 100
+      if (Math.abs(delta) >= THRESHOLD) {
+        anomalies.push({
+          channel, metric: "CPL", delta,
+          current: rCpl, previous: bCpl,
+          direction: delta > 0 ? "up" : "down",
+          severity: delta > 0 ? (delta > 50 ? "critical" : "warning") : "positive",
+        })
+      }
+    }
+
+    const rLeadsDay = rLeads / 3
+    const bLeadsDay = bLeads / 7
+    if (bLeadsDay > 0) {
+      const delta = ((rLeadsDay - bLeadsDay) / bLeadsDay) * 100
+      if (Math.abs(delta) >= THRESHOLD) {
+        anomalies.push({
+          channel, metric: "Лиды/день", delta,
+          current: rLeadsDay, previous: bLeadsDay,
+          direction: delta > 0 ? "up" : "down",
+          severity: delta > 0 ? "positive" : (delta < -50 ? "critical" : "warning"),
+        })
+      }
+    }
+
+    const rSpendDay = rSpend / 3
+    const bSpendDay = bSpend / 7
+    if (bSpendDay > 0) {
+      const delta = ((rSpendDay - bSpendDay) / bSpendDay) * 100
+      if (Math.abs(delta) >= 40) {
+        anomalies.push({
+          channel, metric: "Расходы/день", delta,
+          current: rSpendDay, previous: bSpendDay,
+          direction: delta > 0 ? "up" : "down",
+          severity: "warning",
+        })
+      }
+    }
+  }
+
+  const severityOrder: Record<AnomalyItem["severity"], number> = { critical: 0, warning: 1, positive: 2 }
+  return anomalies
+    .sort((a, b) => {
+      const sd = severityOrder[a.severity] - severityOrder[b.severity]
+      return sd !== 0 ? sd : Math.abs(b.delta) - Math.abs(a.delta)
+    })
+    .slice(0, 4)
+}
+
 export function computeDelta(current: number, previous: number): number {
   if (previous === 0) return current === 0 ? 0 : 100
   return ((current - previous) / Math.abs(previous)) * 100

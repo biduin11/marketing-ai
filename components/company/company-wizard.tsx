@@ -44,7 +44,14 @@ interface FormState {
   budget: string
   marketingGoal: string
   website: string
-  socialLinks: string
+  instagram: string
+  vk: string
+  telegram: string
+  youtube: string
+  tiktok: string
+  otherSocials: string
+  yandexMaps: string
+  twogis: string
   proofFacts: string
   // Step 4
   margin: string
@@ -100,6 +107,24 @@ const MARKETING_GOAL_OPTIONS = [
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+type SocialLinksJson = {
+  instagram?: string; vk?: string; telegram?: string
+  youtube?: string; tiktok?: string; otherSocials?: string
+  yandexMaps?: string; twogis?: string
+}
+
+function parseSocialLinks(raw: unknown): SocialLinksJson {
+  if (!raw || typeof raw !== "string") return {}
+  try {
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed === "object") return parsed as SocialLinksJson
+  } catch {
+    // legacy: comma-separated string → put in otherSocials
+    return { otherSocials: raw }
+  }
+  return {}
+}
+
 function initForm(p: Project): FormState {
   const comps = (p.competitorsDetailed as Competitor[] | null) ?? []
   return {
@@ -120,7 +145,19 @@ function initForm(p: Project): FormState {
     budget: p.budget?.toString() ?? "",
     marketingGoal: ((p as unknown as Record<string, unknown>).marketingGoal as string) ?? "",
     website: p.website ?? "",
-    socialLinks: ((p as unknown as Record<string, unknown>).socialLinks as string) ?? "",
+    ...(() => {
+      const s = parseSocialLinks((p as unknown as Record<string, unknown>).socialLinks)
+      return {
+        instagram: s.instagram ?? "",
+        vk: s.vk ?? "",
+        telegram: s.telegram ?? "",
+        youtube: s.youtube ?? "",
+        tiktok: s.tiktok ?? "",
+        otherSocials: s.otherSocials ?? "",
+        yandexMaps: s.yandexMaps ?? "",
+        twogis: s.twogis ?? "",
+      }
+    })(),
     proofFacts: ((p as unknown as Record<string, unknown>).proofFacts as string) ?? "",
     margin: ((p as unknown as Record<string, unknown>).margin as number | undefined)?.toString() ?? "",
     conversionRate: ((p as unknown as Record<string, unknown>).conversionRate as number | undefined)?.toString() ?? "",
@@ -151,7 +188,19 @@ function buildPayload(f: FormState) {
     clientLanguage: f.clientLanguage || undefined,
     currentChannels: f.currentChannels || undefined,
     marketingGoal: f.marketingGoal || undefined,
-    socialLinks: f.socialLinks || undefined,
+    socialLinks: (() => {
+      const obj: SocialLinksJson = {
+        ...(f.instagram && { instagram: f.instagram }),
+        ...(f.vk && { vk: f.vk }),
+        ...(f.telegram && { telegram: f.telegram }),
+        ...(f.youtube && { youtube: f.youtube }),
+        ...(f.tiktok && { tiktok: f.tiktok }),
+        ...(f.otherSocials && { otherSocials: f.otherSocials }),
+        ...(f.yandexMaps && { yandexMaps: f.yandexMaps }),
+        ...(f.twogis && { twogis: f.twogis }),
+      }
+      return Object.keys(obj).length > 0 ? JSON.stringify(obj) : undefined
+    })(),
     proofFacts: f.proofFacts || undefined,
     margin: f.margin ? Number(f.margin) : undefined,
     conversionRate: f.conversionRate ? Number(f.conversionRate) : undefined,
@@ -478,20 +527,87 @@ function Step3({ f, set }: { f: FormState; set: (k: keyof FormState, v: string) 
           options={MARKETING_GOAL_OPTIONS}
           placeholder="— необязательно —"
         />
+        <div className="col-span-2">
+          <FieldText
+            id="w-website"
+            label="Сайт"
+            value={f.website}
+            onChange={(v) => set("website", v)}
+            type="url"
+            placeholder="https://example.com"
+          />
+        </div>
+      </div>
+
+      <SectionLabel>Соцсети и мессенджеры</SectionLabel>
+      <div className="grid grid-cols-2 gap-3">
         <FieldText
-          id="w-website"
-          label="Сайт"
-          value={f.website}
-          onChange={(v) => set("website", v)}
+          id="w-instagram"
+          label="Instagram"
+          value={f.instagram}
+          onChange={(v) => set("instagram", v)}
           type="url"
-          placeholder="https://example.com"
+          placeholder="https://instagram.com/yourpage"
         />
         <FieldText
-          id="w-social"
-          label="Соцсети и мессенджеры"
-          value={f.socialLinks}
-          onChange={(v) => set("socialLinks", v)}
-          placeholder="Ссылки или @-логины через запятую"
+          id="w-vk"
+          label="ВКонтакте"
+          value={f.vk}
+          onChange={(v) => set("vk", v)}
+          type="url"
+          placeholder="https://vk.com/yourpage"
+        />
+        <FieldText
+          id="w-telegram"
+          label="Telegram"
+          value={f.telegram}
+          onChange={(v) => set("telegram", v)}
+          placeholder="https://t.me/channel или @login"
+        />
+        <FieldText
+          id="w-youtube"
+          label="YouTube"
+          value={f.youtube}
+          onChange={(v) => set("youtube", v)}
+          type="url"
+          placeholder="https://youtube.com/@channel"
+        />
+        <FieldText
+          id="w-tiktok"
+          label="TikTok"
+          value={f.tiktok}
+          onChange={(v) => set("tiktok", v)}
+          type="url"
+          placeholder="https://tiktok.com/@yourpage"
+        />
+        <FieldText
+          id="w-other-socials"
+          label="Другие каналы"
+          value={f.otherSocials}
+          onChange={(v) => set("otherSocials", v)}
+          placeholder="WhatsApp, Avito, Одноклассники..."
+        />
+      </div>
+
+      <SectionLabel>Точки на картах — необязательно</SectionLabel>
+      <div className="grid grid-cols-2 gap-3">
+        <FieldText
+          id="w-yandex"
+          label="Яндекс Карты"
+          value={f.yandexMaps}
+          onChange={(v) => set("yandexMaps", v)}
+          type="url"
+          placeholder="https://yandex.ru/maps/-/..."
+          hint="Ссылка на карточку организации"
+        />
+        <FieldText
+          id="w-twogis"
+          label="2ГИС"
+          value={f.twogis}
+          onChange={(v) => set("twogis", v)}
+          type="url"
+          placeholder="https://2gis.ru/..."
+          hint="Ссылка на карточку организации"
         />
       </div>
 

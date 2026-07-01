@@ -12,6 +12,8 @@ import { AnalyticsTable } from "@/components/analytics/analytics-table"
 import { AnalyticsFunnel } from "@/components/analytics/analytics-funnel"
 import { AnalyticsDonuts } from "@/components/analytics/analytics-donuts"
 import { AnalyticsBottom } from "@/components/analytics/analytics-bottom"
+import { AnalyticsAnomalies } from "@/components/analytics/analytics-anomalies"
+import { AnalyticsBudgetPacing } from "@/components/analytics/analytics-budget-pacing"
 import { MetricFormDialog } from "@/components/analytics/metric-form-dialog"
 import { ContentTab } from "@/components/analytics/tabs/content-tab"
 import { AudienceTab } from "@/components/analytics/tabs/audience-tab"
@@ -31,6 +33,7 @@ import {
   computeChannelTimeSeries,
   computeAttribution,
   computeHealthScore,
+  computeAnomalies,
   filterByRange,
   getPreviousRange,
 } from "@/lib/services/analytics.service"
@@ -40,6 +43,7 @@ interface AnalyticsViewProps {
   projectId: string
   metrics: Metric[]
   channels: string[]
+  budget: number | null
   contentPlan: ContentPlan | null
   audienceSegments: AudienceSegments | null
   buyerPersona: BuyerPersona | null
@@ -82,6 +86,7 @@ export function AnalyticsView({
   projectId,
   metrics,
   channels,
+  budget,
   contentPlan,
   audienceSegments,
   buyerPersona,
@@ -112,6 +117,19 @@ export function AnalyticsView({
   const channelTimeSeries = useMemo(() => computeChannelTimeSeries(current), [current])
   const attribution = useMemo(() => computeAttribution(channelBreakdown), [channelBreakdown])
   const healthScore = useMemo(() => computeHealthScore(summary, channelBreakdown), [summary, channelBreakdown])
+  const anomalies = useMemo(() => computeAnomalies(metrics), [metrics])
+  const monthSpend = useMemo(() => {
+    const now = new Date()
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    monthEnd.setHours(23, 59, 59, 999)
+    return metrics
+      .filter((m) => {
+        const d = m.date instanceof Date ? m.date : new Date(m.date)
+        return d >= monthStart && d <= monthEnd
+      })
+      .reduce((s, m) => s + m.spend, 0)
+  }, [metrics])
 
   const deltas = useMemo(() => {
     const keys = [
@@ -234,6 +252,14 @@ export function AnalyticsView({
         ) : (
           <div className="space-y-5">
             <AnalyticsCards summary={summary} deltas={deltas} timeSeries={timeSeries} />
+            {budget && budget > 0 ? (
+              <div className="grid gap-5 lg:grid-cols-2">
+                <AnalyticsAnomalies anomalies={anomalies} />
+                <AnalyticsBudgetPacing monthlyBudget={budget} monthSpend={monthSpend} />
+              </div>
+            ) : (
+              <AnalyticsAnomalies anomalies={anomalies} />
+            )}
             <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
               <div className="space-y-5">
                 <AnalyticsChart data={timeSeries} />

@@ -63,6 +63,7 @@ export default async function AnalyticsPage() {
       projectId={project.id}
       metrics={metrics}
       channels={channels}
+      budget={project.budget ?? null}
       contentPlan={contentPlanResult?.success ? contentPlanResult.data : null}
       audienceSegments={audienceResult?.success ? audienceResult.data : null}
       buyerPersona={personaResult?.success ? personaResult.data : null}
