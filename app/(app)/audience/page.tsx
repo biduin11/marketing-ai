@@ -9,9 +9,15 @@ import {
   buyerPersonaSchema,
   jtbdSchema,
 } from "@/lib/ai/schemas/audience"
+import { cjmSchema } from "@/lib/ai/schemas/cjm"
 
-export default async function AudiencePage() {
+export default async function AudiencePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
   const projectId = await getActiveProjectId()
+  const { tab } = await searchParams
 
   if (!projectId) {
     return (
@@ -38,11 +44,13 @@ export default async function AudiencePage() {
     )
   }
 
-  const [segmentsArtifact, personaArtifact, jtbdArtifact] = await Promise.all([
-    getLatestArtifact(project.id, "AUDIENCE_SEGMENTS"),
-    getLatestArtifact(project.id, "BUYER_PERSONA"),
-    getLatestArtifact(project.id, "JTBD"),
-  ])
+  const [segmentsArtifact, personaArtifact, jtbdArtifact, cjmArtifact] =
+    await Promise.all([
+      getLatestArtifact(project.id, "AUDIENCE_SEGMENTS"),
+      getLatestArtifact(project.id, "BUYER_PERSONA"),
+      getLatestArtifact(project.id, "JTBD"),
+      getLatestArtifact(project.id, "CJM"),
+    ])
 
   const segmentsParsed = segmentsArtifact
     ? audienceSegmentsSchema.safeParse(segmentsArtifact.payload)
@@ -50,13 +58,13 @@ export default async function AudiencePage() {
   const personaParsed = personaArtifact
     ? buyerPersonaSchema.safeParse(personaArtifact.payload)
     : null
-  const jtbdParsed = jtbdArtifact
-    ? jtbdSchema.safeParse(jtbdArtifact.payload)
-    : null
+  const jtbdParsed = jtbdArtifact ? jtbdSchema.safeParse(jtbdArtifact.payload) : null
+  const cjmParsed = cjmArtifact ? cjmSchema.safeParse(cjmArtifact.payload) : null
 
   return (
     <AudienceView
       projectId={project.id}
+      defaultTab={tab ?? "overview"}
       segments={segmentsParsed?.success ? segmentsParsed.data : null}
       segmentsVersion={segmentsArtifact?.version ?? null}
       segmentsCreatedAt={segmentsArtifact?.createdAt.toISOString() ?? null}
@@ -64,6 +72,9 @@ export default async function AudiencePage() {
       personaVersion={personaArtifact?.version ?? null}
       jtbd={jtbdParsed?.success ? jtbdParsed.data : null}
       jtbdVersion={jtbdArtifact?.version ?? null}
+      cjm={cjmParsed?.success ? cjmParsed.data : null}
+      cjmVersion={cjmArtifact?.version ?? null}
+      cjmCreatedAt={cjmArtifact?.createdAt.toISOString() ?? null}
     />
   )
 }
