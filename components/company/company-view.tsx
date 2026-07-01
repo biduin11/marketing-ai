@@ -281,7 +281,7 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
             ))}
           </TabsContent>
         </Tabs>
-      )}
+      ) : null}
     </div>
   )
 }
