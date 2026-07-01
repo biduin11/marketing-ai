@@ -40,7 +40,8 @@ export const navGroups: NavGroup[] = [
     label: "ПОНЯТЬ",
     items: [
       { label: "Бренд и оффер", href: "/company", icon: Building2 },
-      { label: "Аудитория и CJM", href: "/audience", icon: Users },
+      { label: "Аудитория", href: "/audience", icon: Users },
+      { label: "CJM", href: "/journey", icon: Route },
       { label: "Конкуренты", href: "/competitors", icon: Crosshair },
     ],
   },
