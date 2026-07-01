@@ -91,95 +91,17 @@ function DonutSection({
   )
 }
 
-const TRAFFIC_TYPES = [
-  { label: "Платный поиск", value: 38.6 },
-  { label: "Соцсети", value: 25.4 },
-  { label: "Прямые заходы", value: 16.2 },
-  { label: "Органический поиск", value: 9.8 },
-  { label: "Реферальный трафик", value: 6.4 },
-  { label: "Email", value: 3.6 },
-]
-
-const DEVICES = [
-  { label: "Мобильные", value: 56.7 },
-  { label: "Десктоп", value: 38.2 },
-  { label: "Планшеты", value: 5.1 },
-]
-
-const GEO = [
-  { label: "Россия", value: 81.9 },
-  { label: "Казахстан", value: 7.7 },
-  { label: "Беларусь", value: 3.4 },
-  { label: "Украина", value: 1.4 },
-  { label: "Другие", value: 5.6 },
-]
-
 export function AnalyticsDonuts({ channels }: AnalyticsDonutsProps) {
-  // Real data: spend distribution by channel
   const totalSpend = channels.reduce((s, c) => s + c.spend, 0)
+  if (totalSpend === 0) return null
+
   const spendData = channels.slice(0, 8).map((c, i) => ({
     label: c.channel,
     value: c.spend,
     color: DONUT_COLORS[i % DONUT_COLORS.length],
   }))
 
-  const trafficData = TRAFFIC_TYPES.map((t, i) => ({
-    ...t,
-    color: DONUT_COLORS[i % DONUT_COLORS.length],
-  }))
-
-  const deviceData = DEVICES.map((d, i) => ({
-    ...d,
-    color: DONUT_COLORS[i % DONUT_COLORS.length],
-  }))
-
-  // Geography — simple list instead of map SVG
-  const geoData = GEO.map((g, i) => ({
-    ...g,
-    color: DONUT_COLORS[i % DONUT_COLORS.length],
-  }))
-
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {totalSpend > 0 ? (
-        <DonutSection title="Распределение расходов" data={spendData} />
-      ) : (
-        <DonutSection title="Распределение расходов" data={trafficData} />
-      )}
-      <DonutSection title="Типы трафика" data={trafficData} />
-      <DonutSection title="Устройства" data={deviceData} />
-
-      {/* Geography — styled separately */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
-        <p className="mb-3 text-sm font-medium text-foreground">
-          География лидов
-        </p>
-        <div className="space-y-2">
-          {geoData.map((g) => (
-            <div key={g.label} className="flex items-center gap-2">
-              <span
-                className="size-2 shrink-0 rounded-full"
-                style={{ backgroundColor: g.color }}
-              />
-              <span className="flex-1 text-xs text-muted-foreground">
-                {g.label}
-              </span>
-              <div className="w-20 overflow-hidden rounded-full bg-neutral-100">
-                <div
-                  className="h-1.5 rounded-full"
-                  style={{
-                    width: `${g.value}%`,
-                    backgroundColor: g.color,
-                  }}
-                />
-              </div>
-              <span className="w-10 text-right text-xs font-medium text-foreground">
-                {g.value}%
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <DonutSection title="Распределение расходов по каналам" data={spendData} />
   )
 }
