@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { listProjects } from "@/lib/actions/projects"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AppHeader } from "@/components/app-header"
+import { AiChatPanel } from "@/components/ai-chat/ai-chat-panel"
 
 export default async function AppLayout({
   children,
@@ -33,6 +34,7 @@ export default async function AppLayout({
           {children}
         </main>
       </div>
+      <AiChatPanel />
     </div>
   )
 }

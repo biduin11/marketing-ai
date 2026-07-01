@@ -17,6 +17,14 @@ import {
   BarChart3,
   CheckSquare,
   FileText,
+  Sunrise,
+  TrendingDown,
+  Camera,
+  Send,
+  PlayCircle,
+  Mail,
+  Hash,
+  Target,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +40,7 @@ import { toggleStrategyTask } from "@/lib/actions/strategy-tasks"
 import { createProject } from "@/lib/actions/projects"
 import type { DirectorAnalysis } from "@/lib/ai/schemas/directorAnalysis"
 import type { MetricSummary, ChannelMetrics } from "@/lib/services/analytics.service"
+import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
 
 interface ProjectRow {
   id: string
@@ -54,15 +63,25 @@ interface ReportRow {
   createdAt: string
 }
 
+interface KpiRow {
+  name: string
+  target: string
+}
+
+type ContentItem = ContentPlan["calendar"][number]
+
 interface DashboardViewProps {
   projectId: string | null
   projectName: string | null
   projects: ProjectRow[]
   analysis: DirectorAnalysis | null
   summary: MetricSummary | null
+  prevSummary: MetricSummary | null
   channels: ChannelMetrics[]
   tasks: TaskRow[]
   reports: ReportRow[]
+  strategyKpis: KpiRow[]
+  todayContent: ContentItem[]
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -85,6 +104,29 @@ const REPORT_LABELS: Record<string, string> = {
   REPORT_QUARTERLY: "Квартальный",
 }
 
+const CONTENT_TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  reels: PlayCircle,
+  post: Hash,
+  stories: Camera,
+  email: Mail,
+}
+
+const CONTENT_TYPE_LABELS: Record<string, string> = {
+  reels: "Reels",
+  post: "Пост",
+  stories: "Сторис",
+  email: "Email",
+}
+
+const PLATFORM_LABELS: Record<string, string> = {
+  instagram: "Instagram",
+  telegram: "Telegram",
+  vk: "VK",
+  youtube: "YouTube",
+  blog: "Блог",
+  email: "Email",
+}
+
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", {
     day: "numeric",
@@ -94,6 +136,32 @@ function fmtDate(iso: string): string {
 
 function fmtNum(v: number, suffix = ""): string {
   return `${v.toLocaleString("ru-RU", { maximumFractionDigits: 1 })}${suffix}`
+}
+
+function todayRu(): string {
+  return new Date().toLocaleDateString("ru-RU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  })
+}
+
+function DeltaBadge({ current, prev }: { current: number; prev: number }) {
+  if (prev === 0) return null
+  const delta = ((current - prev) / Math.abs(prev)) * 100
+  const up = delta >= 0
+  const big = Math.abs(delta) >= 20
+  return (
+    <span
+      className={cn(
+        "ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium",
+        up ? "bg-green-50 text-[#16a34a]" : big ? "bg-red-50 text-[#dc2626]" : "bg-amber-50 text-[#d97706]"
+      )}
+    >
+      {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+      {Math.abs(delta).toFixed(0)}%
+    </span>
+  )
 }
 
 function RoiBadge({ roi }: { roi: number }) {
@@ -110,15 +178,49 @@ function RoiBadge({ roi }: { roi: number }) {
   )
 }
 
+function detectAnomalies(
+  summary: MetricSummary,
+  prevSummary: MetricSummary
+): Array<{ label: string; delta: number; bad: boolean }> {
+  const anomalies: Array<{ label: string; delta: number; bad: boolean }> = []
+  const threshold = 20
+
+  const revDelta = prevSummary.totalRevenue > 0
+    ? ((summary.totalRevenue - prevSummary.totalRevenue) / prevSummary.totalRevenue) * 100
+    : 0
+  if (Math.abs(revDelta) >= threshold) {
+    anomalies.push({ label: "Выручка", delta: revDelta, bad: revDelta < 0 })
+  }
+
+  const leadsDelta = prevSummary.totalLeads > 0
+    ? ((summary.totalLeads - prevSummary.totalLeads) / prevSummary.totalLeads) * 100
+    : 0
+  if (Math.abs(leadsDelta) >= threshold) {
+    anomalies.push({ label: "Лиды", delta: leadsDelta, bad: leadsDelta < 0 })
+  }
+
+  const roiDelta = prevSummary.roi > 0
+    ? ((summary.roi - prevSummary.roi) / prevSummary.roi) * 100
+    : 0
+  if (Math.abs(roiDelta) >= threshold) {
+    anomalies.push({ label: "ROI", delta: roiDelta, bad: roiDelta < 0 })
+  }
+
+  return anomalies
+}
+
 export function DashboardView({
   projectId,
   projectName,
   projects,
   analysis,
   summary,
+  prevSummary,
   channels,
   tasks,
   reports,
+  strategyKpis,
+  todayContent,
 }: DashboardViewProps) {
   const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
@@ -182,6 +284,9 @@ export function DashboardView({
   }
 
   const topPriority = analysis?.priorities.sort((a, b) => a.order - b.order)[0]
+  const anomalies =
+    summary && prevSummary ? detectAnomalies(summary, prevSummary) : []
+  const badAnomalies = anomalies.filter((a) => a.bad)
 
   return (
     <div className="space-y-6">
@@ -200,6 +305,92 @@ export function DashboardView({
           </Button>
         </div>
       </div>
+
+      {/* Morning Brief */}
+      {projectId && (
+        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Sunrise className="size-4 text-[#d97706]" />
+            <span className="text-sm font-semibold text-foreground">Morning Brief</span>
+            <span className="ml-auto text-xs text-muted-foreground capitalize">{todayRu()}</span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* Today's content */}
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Опубликовать сегодня</p>
+              {todayContent.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">
+                  {!contentPlanExists(todayContent)
+                    ? "Контент-план не создан"
+                    : "Сегодня публикаций нет"}
+                </p>
+              ) : (
+                <div className="space-y-1.5">
+                  {todayContent.map((item, i) => {
+                    const Icon = CONTENT_TYPE_ICONS[item.type] ?? Hash
+                    const platform = (item as { platform?: string }).platform
+                    return (
+                      <div key={i} className="flex items-start gap-2 rounded-lg bg-neutral-50 px-2.5 py-2">
+                        <Icon className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-foreground line-clamp-1">{item.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {CONTENT_TYPE_LABELS[item.type] ?? item.type}
+                            {platform && ` · ${PLATFORM_LABELS[platform] ?? platform}`}
+                            {(item as { time?: string }).time && ` · ${(item as { time?: string }).time}`}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Next priority from Director */}
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Приоритет #1</p>
+              {topPriority ? (
+                <div className="rounded-lg bg-neutral-50 px-2.5 py-2">
+                  <p className="text-xs text-foreground leading-relaxed">{topPriority.action}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">
+                  {analysis ? "Нет приоритетов" : "Запустите AI Директора"}
+                </p>
+              )}
+            </div>
+
+            {/* Anomalies */}
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-2">Изменения vs прошлый месяц</p>
+              {anomalies.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">
+                  {summary ? "Значительных изменений нет" : "Нет данных за этот месяц"}
+                </p>
+              ) : (
+                <div className="space-y-1.5">
+                  {anomalies.map((a) => (
+                    <div key={a.label} className={cn(
+                      "flex items-center justify-between rounded-lg px-2.5 py-1.5",
+                      a.bad ? "bg-red-50" : "bg-green-50"
+                    )}>
+                      <span className="text-xs text-foreground">{a.label}</span>
+                      <span className={cn(
+                        "text-xs font-semibold",
+                        a.bad ? "text-[#dc2626]" : "text-[#16a34a]"
+                      )}>
+                        {a.delta > 0 ? "+" : ""}{a.delta.toFixed(0)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Two-column grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -231,7 +422,7 @@ export function DashboardView({
                 )}
                 <Link href="/director">
                   <Button variant="ghost" size="sm" className="h-7 gap-1 px-2 text-xs">
-                    Рекомендации
+                    Подробнее
                     <ChevronRight className="size-3" />
                   </Button>
                 </Link>
@@ -272,52 +463,57 @@ export function DashboardView({
                     </div>
                   ))}
                 </div>
-                {topPriority && (
-                  <div className="mt-4 rounded-lg bg-neutral-50 px-3 py-2.5">
-                    <p className="text-xs font-medium text-muted-foreground">Приоритет #1</p>
-                    <p className="mt-0.5 text-sm text-foreground">{topPriority.action}</p>
+                {badAnomalies.length > 0 && (
+                  <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2">
+                    <AlertCircle className="size-3.5 shrink-0 mt-0.5 text-[#dc2626]" />
+                    <p className="text-xs text-[#dc2626]">
+                      Внимание: {badAnomalies.map((a) => `${a.label} упал${a.label === "ROI" ? "" : "и"} на ${Math.abs(a.delta).toFixed(0)}%`).join(", ")} по сравнению с прошлым месяцем
+                    </p>
                   </div>
                 )}
               </>
             )}
           </div>
 
-          {/* Block 2: Projects Table */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
-              <p className="text-sm font-medium text-foreground">Проекты</p>
-              <span className="text-xs text-muted-foreground">{projects.length}</span>
-            </div>
-            {projects.length === 0 ? (
-              <p className="px-5 py-4 text-sm text-muted-foreground">Нет проектов</p>
-            ) : (
-              <div className="divide-y divide-[#eaeaea]">
-                {projects.map((p) => (
-                  <div key={p.id} className="flex items-center justify-between px-5 py-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
-                      {p.niche && (
-                        <p className="truncate text-xs text-muted-foreground">{p.niche}</p>
-                      )}
-                    </div>
-                    <div className="ml-3 flex shrink-0 items-center gap-3">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          STATUS_STYLES[p.status] ?? "bg-neutral-100 text-[#6b7280]"
-                        )}
-                      >
-                        {STATUS_LABELS[p.status] ?? p.status}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {fmtDate(p.updatedAt)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+          {/* Block 2: Plan vs Fact */}
+          {strategyKpis.length > 0 && (
+            <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
+                <div className="flex items-center gap-2">
+                  <Target className="size-4 text-foreground" />
+                  <p className="text-sm font-medium text-foreground">План / Факт</p>
+                </div>
+                <Link
+                  href="/strategy"
+                  className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Стратегия <ChevronRight className="size-3" />
+                </Link>
               </div>
-            )}
-          </div>
+              <div className="divide-y divide-[#eaeaea]">
+                {strategyKpis.map((kpi) => {
+                  const factValue = getFactForKpi(kpi.name, summary)
+                  return (
+                    <div key={kpi.name} className="flex items-center justify-between px-5 py-3">
+                      <span className="text-sm text-foreground">{kpi.name}</span>
+                      <div className="flex items-center gap-3">
+                        {factValue !== null && (
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">Факт</p>
+                            <p className="text-sm font-semibold text-foreground">{factValue}</p>
+                          </div>
+                        )}
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">План</p>
+                          <p className="text-sm font-medium text-muted-foreground">{kpi.target}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Block 3: Tasks */}
           <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
@@ -327,7 +523,7 @@ export function DashboardView({
                 <p className="text-sm font-medium text-foreground">Задачи</p>
               </div>
               <Link
-                href="/company"
+                href="/strategy"
                 className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground"
               >
                 Стратегия <ChevronRight className="size-3" />
@@ -376,18 +572,45 @@ export function DashboardView({
                 <BarChart3 className="size-4 text-foreground" />
                 <p className="text-sm font-medium text-foreground">Метрики</p>
               </div>
-              <span className="text-xs text-muted-foreground">этот месяц</span>
+              <Link href="/analytics" className="text-xs text-muted-foreground hover:text-foreground">
+                этот месяц
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "ROI", value: summary ? fmtNum(summary.roi, "%") : "—" },
-                { label: "CAC", value: summary ? fmtNum(summary.cac, " ₽") : "—" },
-                { label: "LTV", value: summary ? fmtNum(summary.ltv, " ₽") : "—" },
-                { label: "ROMI", value: summary ? fmtNum(summary.romi, "%") : "—" },
-              ].map(({ label, value }) => (
+                {
+                  label: "ROI",
+                  value: summary ? fmtNum(summary.roi, "%") : "—",
+                  prev: prevSummary?.roi ?? null,
+                  curr: summary?.roi ?? null,
+                },
+                {
+                  label: "CAC",
+                  value: summary ? fmtNum(summary.cac, " ₽") : "—",
+                  prev: prevSummary?.cac ?? null,
+                  curr: summary?.cac ?? null,
+                },
+                {
+                  label: "Выручка",
+                  value: summary ? fmtNum(summary.totalRevenue, " ₽") : "—",
+                  prev: prevSummary?.totalRevenue ?? null,
+                  curr: summary?.totalRevenue ?? null,
+                },
+                {
+                  label: "Лиды",
+                  value: summary ? fmtNum(summary.totalLeads) : "—",
+                  prev: prevSummary?.totalLeads ?? null,
+                  curr: summary?.totalLeads ?? null,
+                },
+              ].map(({ label, value, prev, curr }) => (
                 <div key={label} className="rounded-xl bg-neutral-50 px-3 py-2.5">
                   <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="mt-0.5 text-lg font-semibold text-foreground">{value}</p>
+                  <div className="mt-0.5 flex items-center">
+                    <p className="text-lg font-semibold text-foreground">{value}</p>
+                    {curr !== null && prev !== null && (
+                      <DeltaBadge current={curr} prev={prev} />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -474,6 +697,40 @@ export function DashboardView({
               </div>
             )}
           </div>
+
+          {/* Block 7: Projects */}
+          <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
+              <p className="text-sm font-medium text-foreground">Проекты</p>
+              <span className="text-xs text-muted-foreground">{projects.length}</span>
+            </div>
+            {projects.length === 0 ? (
+              <p className="px-5 py-4 text-sm text-muted-foreground">Нет проектов</p>
+            ) : (
+              <div className="divide-y divide-[#eaeaea]">
+                {projects.slice(0, 3).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between px-5 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
+                      {p.niche && (
+                        <p className="truncate text-xs text-muted-foreground">{p.niche}</p>
+                      )}
+                    </div>
+                    <div className="ml-3 flex shrink-0 items-center gap-3">
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-xs font-medium",
+                          STATUS_STYLES[p.status] ?? "bg-neutral-100 text-[#6b7280]"
+                        )}
+                      >
+                        {STATUS_LABELS[p.status] ?? p.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -505,4 +762,31 @@ export function DashboardView({
       </Dialog>
     </div>
   )
+}
+
+function contentPlanExists(_items: ContentItem[]): boolean {
+  return false
+}
+
+function getFactForKpi(kpiName: string, summary: MetricSummary | null): string | null {
+  if (!summary) return null
+  const name = kpiName.toLowerCase()
+  if (name.includes("выруч") || name.includes("revenue")) {
+    return summary.totalRevenue.toLocaleString("ru-RU") + " ₽"
+  }
+  if (name.includes("лид") || name.includes("lead")) {
+    return summary.totalLeads.toLocaleString("ru-RU")
+  }
+  if (name.includes("roi")) {
+    return summary.roi.toFixed(1) + "%"
+  }
+  if (name.includes("cac") || name.includes("стоим") || name.includes("клиент")) {
+    return summary.cac.toLocaleString("ru-RU") + " ₽"
+  }
+  if (name.includes("конверс")) {
+    return summary.totalLeads > 0 && summary.totalClicks > 0
+      ? ((summary.totalLeads / summary.totalClicks) * 100).toFixed(1) + "%"
+      : null
+  }
+  return null
 }
