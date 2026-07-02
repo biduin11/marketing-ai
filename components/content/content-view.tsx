@@ -25,6 +25,7 @@ import {
   FolderOpen,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import { EmptyState } from "@/components/empty-state"
 import { ContentCalendar } from "@/components/content/content-calendar"
 import { runContentPlan } from "@/lib/actions/ai"
@@ -500,12 +501,7 @@ function RubricsTab({ plan }: { plan: ContentPlan }) {
               </div>
             </div>
             {/* Progress bar */}
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-              <div
-                className={`h-full rounded-full transition-all ${color}`}
-                style={{ width: `${Math.min(pct, 100)}%` }}
-              />
-            </div>
+            <Progress value={pct} barClassName={color} />
           </div>
         )
       })}

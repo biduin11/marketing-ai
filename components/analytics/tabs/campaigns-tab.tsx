@@ -4,6 +4,7 @@ import {
 import { BarChart3 } from "lucide-react"
 import type { ChannelMetrics, MetricSummary } from "@/lib/services/analytics.service"
 import { EmptyState } from "@/components/empty-state"
+import { Progress } from "@/components/ui/progress"
 
 interface CampaignsTabProps {
   channels: ChannelMetrics[]
@@ -126,9 +127,7 @@ export function CampaignsTab({ channels, summary }: CampaignsTabProps) {
                     <span className="w-10 text-right text-xs font-medium text-foreground">{pct.toFixed(1)}%</span>
                   </div>
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                  <div className="h-full rounded-full bg-neutral-900 transition-all" style={{ width: `${pct}%` }} />
-                </div>
+                <Progress value={pct} barClassName="bg-neutral-900" />
               </div>
             )
           })}

@@ -1,4 +1,5 @@
 import type { UsageInfo } from "@/lib/services/usage.service"
+import { Progress } from "@/components/ui/progress"
 
 interface UsageBarProps {
   usage: UsageInfo
@@ -23,14 +24,7 @@ export function UsageBar({ usage, projectCount, maxProjects }: UsageBarProps) {
             {projectCount} / {isProPlan ? "∞" : maxProjects}
           </span>
         </div>
-        {!isProPlan && (
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-            <div
-              className="h-full rounded-full bg-[#111] transition-all"
-              style={{ width: `${Math.min((projectCount / maxProjects) * 100, 100)}%` }}
-            />
-          </div>
-        )}
+        {!isProPlan && <Progress value={projectCount} max={maxProjects} />}
         <p className="mt-1 text-xs text-muted-foreground">
           {isProPlan ? "Без ограничений" : "На Free — 1 проект с безлимитными генерациями"}
         </p>

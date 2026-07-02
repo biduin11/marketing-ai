@@ -1,6 +1,7 @@
 import { TrendingUp, Sparkles } from "lucide-react"
 import type { ChannelMetrics, MetricSummary } from "@/lib/services/analytics.service"
 import { cn } from "@/lib/utils"
+import { Progress } from "@/components/ui/progress"
 
 interface AnalyticsBottomProps {
   channels: ChannelMetrics[]
@@ -37,12 +38,7 @@ function TopCampaigns({ channels }: { channels: ChannelMetrics[] }) {
                     {fmt(c.romi)}%
                   </span>
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                  <div
-                    className="h-full rounded-full bg-[#111111]"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                <Progress value={pct} />
               </div>
             )
           })}
@@ -81,12 +77,7 @@ function BestCtr({ channels }: { channels: ChannelMetrics[] }) {
                     {c.ctr.toFixed(2)}%
                   </span>
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                  <div
-                    className="h-full rounded-full bg-neutral-400"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
+                <Progress value={pct} barClassName="bg-neutral-400" />
               </div>
             )
           })}

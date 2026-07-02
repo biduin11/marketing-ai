@@ -13,21 +13,15 @@ import {
   BotMessageSquare,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge, SEVERITY_VARIANT } from "@/components/ui/badge"
 import { EmptyState } from "@/components/empty-state"
 import { runDirectorAnalysis } from "@/lib/actions/ai"
 import type { DirectorAnalysis } from "@/lib/ai/schemas/directorAnalysis"
-import { cn } from "@/lib/utils"
 
 const SEVERITY_LABEL: Record<"low" | "medium" | "high", string> = {
   low: "Низкий",
   medium: "Средний",
   high: "Высокий",
-}
-
-const SEVERITY_COLOR: Record<"low" | "medium" | "high", string> = {
-  low: "bg-green-50 text-[#16a34a]",
-  medium: "bg-amber-50 text-[#d97706]",
-  high: "bg-red-50 text-[#dc2626]",
 }
 
 interface DirectorViewProps {
@@ -99,9 +93,9 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
             <div className="mb-4 flex items-center gap-2">
               <AlertCircle className="size-4 text-[#dc2626]" />
               <h3 className="text-sm font-semibold text-foreground">Проблемы</h3>
-              <span className="ml-auto rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-[#dc2626]">
+              <Badge variant="danger" className="ml-auto">
                 {analysis.problems.length}
-              </span>
+              </Badge>
             </div>
             <ul className="space-y-3">
               {analysis.problems.map((p, i) => (
@@ -118,9 +112,9 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
             <div className="mb-4 flex items-center gap-2">
               <TrendingUp className="size-4 text-[#16a34a]" />
               <h3 className="text-sm font-semibold text-foreground">Возможности</h3>
-              <span className="ml-auto rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-[#16a34a]">
+              <Badge variant="success" className="ml-auto">
                 {analysis.opportunities.length}
-              </span>
+              </Badge>
             </div>
             <ul className="space-y-3">
               {analysis.opportunities.map((o, i) => (
@@ -137,16 +131,16 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
             <div className="mb-4 flex items-center gap-2">
               <ShieldAlert className="size-4 text-[#d97706]" />
               <h3 className="text-sm font-semibold text-foreground">Риски</h3>
-              <span className="ml-auto rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-[#d97706]">
+              <Badge variant="warning" className="ml-auto">
                 {analysis.risks.length}
-              </span>
+              </Badge>
             </div>
             <ul className="space-y-3">
               {analysis.risks.map((r, i) => (
                 <li key={i} className="flex items-start gap-2.5 border-b border-[#eaeaea] pb-3 last:border-0 last:pb-0">
-                  <span className={cn("mt-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap", SEVERITY_COLOR[r.severity])}>
+                  <Badge variant={SEVERITY_VARIANT[r.severity]} size="sm" className="mt-0.5">
                     {SEVERITY_LABEL[r.severity]}
-                  </span>
+                  </Badge>
                   <p className="text-sm text-foreground">{r.title}</p>
                 </li>
               ))}
