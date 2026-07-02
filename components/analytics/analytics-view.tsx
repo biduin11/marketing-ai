@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import type { Metric } from "@prisma/client"
-import { BarChart3, Download, MessageSquare, Settings2 } from "lucide-react"
+import { BarChart3, Download, Settings2 } from "lucide-react"
 import { MetricsList } from "@/components/analytics/metrics-list"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
@@ -308,15 +308,6 @@ export function AnalyticsView({
         <AiInsightsTab summary={summary} channels={channelBreakdown} healthScore={healthScore} />
       )}
 
-      {/* Floating AI button */}
-      {metrics.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <button className="flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-neutral-800">
-            <MessageSquare className="size-4" />
-            Спросить AI об аналитике
-          </button>
-        </div>
-      )}
     </div>
   )
 }
