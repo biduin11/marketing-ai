@@ -16,6 +16,7 @@ import { generateCjm } from "@/lib/services/cjm.service"
 import { generateContentPlan } from "@/lib/services/contentPlan.service"
 import { generateExecutiveReport } from "@/lib/services/report.service"
 import { generateDirectorAnalysis } from "@/lib/services/director.service"
+import { generateReputationAnalysis } from "@/lib/services/reputation.service"
 import { listMetrics } from "@/lib/actions/metrics"
 import { filterByRange } from "@/lib/services/analytics.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
@@ -300,6 +301,27 @@ export async function runDirectorAnalysis(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Не удалось запустить AI Директора"
+    return { success: false, error: message }
+  }
+}
+
+export async function runReputationAnalysis(
+  projectId: string,
+  force = false
+): Promise<ActionResult> {
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
+  try {
+    await generateReputationAnalysis(project, { force })
+    revalidatePath("/reputation")
+    return { success: true }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось проанализировать репутацию"
     return { success: false, error: message }
   }
 }

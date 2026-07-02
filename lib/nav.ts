@@ -7,6 +7,7 @@ import {
   Home,
   LayoutList,
   Settings,
+  Star,
   Users,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -54,6 +55,7 @@ export const navGroups: NavGroup[] = [
     label: "RESULTS",
     items: [
       { label: "Аналитика", href: "/analytics", icon: BarChart3 },
+      { label: "Репутация", href: "/reputation", icon: Star },
     ],
   },
   {
