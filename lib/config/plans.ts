@@ -8,7 +8,7 @@ export interface PlanLimits {
 export const PLAN_LIMITS: Record<PlanName, PlanLimits> = {
   FREE: {
     maxProjects: 1,
-    maxGenerationsPerMonth: 15,
+    maxGenerationsPerMonth: Infinity, // Unlimited within 1 project — upsell is 2nd project
   },
   PRO: {
     maxProjects: Infinity,

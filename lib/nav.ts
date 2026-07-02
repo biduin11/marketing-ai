@@ -1,17 +1,13 @@
 import {
   BarChart3,
   Bell,
-  BotMessageSquare,
   Building2,
   ChartLine,
   Crosshair,
-  FileText,
-  FlaskConical,
   Home,
   LayoutList,
-  Route,
   Settings,
-  Tag,
+  Star,
   Users,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -32,32 +28,34 @@ export const navGroups: NavGroup[] = [
   {
     label: "",
     items: [
-      { label: "Главная", href: "/", icon: Home },
-      { label: "Входящие", href: "/inbox", icon: Bell },
+      { label: "Command Center", href: "/", icon: Home },
     ],
   },
   {
-    label: "ПОНЯТЬ",
+    label: "INTELLIGENCE",
     items: [
-      { label: "Бренд и оффер", href: "/company", icon: Building2 },
-      { label: "Аудитория и CJM", href: "/audience", icon: Users },
-      { label: "Конкуренты", href: "/competitors", icon: Crosshair },
+      { label: "Бренд", href: "/company", icon: Building2 },
+      { label: "Рынок", href: "/competitors", icon: Crosshair },
+      { label: "Клиент", href: "/audience", icon: Users },
     ],
   },
   {
-    label: "РЕШИТЬ",
+    label: "STRATEGY",
     items: [
-      { label: "Командный центр", href: "/director", icon: BotMessageSquare },
       { label: "Стратегия", href: "/strategy", icon: ChartLine },
-      { label: "Перформанс", href: "/analytics", icon: BarChart3 },
-      { label: "Эксперименты", href: "/experiments", icon: FlaskConical },
     ],
   },
   {
-    label: "ДЕЛАТЬ",
+    label: "EXECUTION",
     items: [
-      { label: "Контент-студия", href: "/content", icon: LayoutList },
-      { label: "Отчёты", href: "/reports", icon: FileText },
+      { label: "Контент", href: "/content", icon: LayoutList },
+    ],
+  },
+  {
+    label: "RESULTS",
+    items: [
+      { label: "Аналитика", href: "/analytics", icon: BarChart3 },
+      { label: "Репутация", href: "/reputation", icon: Star },
     ],
   },
   {

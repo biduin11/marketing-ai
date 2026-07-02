@@ -4,6 +4,7 @@ import { getUsageThisMonth } from "@/lib/services/usage.service"
 import { listProjects } from "@/lib/actions/projects"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getChannels } from "@/lib/actions/channels"
+import { listIntegrations } from "@/lib/actions/integrations"
 import { SettingsView } from "@/components/settings/settings-view"
 
 export default async function SettingsPage() {
@@ -16,16 +17,27 @@ export default async function SettingsPage() {
     getActiveProjectId(),
   ])
 
-  const channels = activeProjectId ? await getChannels(activeProjectId) : []
+  const { PLAN_LIMITS } = await import("@/lib/config/plans")
+  const maxProjects = PLAN_LIMITS[usage.planName].maxProjects
+
+  const [channels, integrations] = activeProjectId
+    ? await Promise.all([
+        getChannels(activeProjectId),
+        listIntegrations(activeProjectId),
+      ])
+    : [[], []]
 
   return (
     <SettingsView
       name={session.user.name ?? null}
       email={session.user.email ?? ""}
       usage={usage}
+      projectCount={projects.length}
+      maxProjects={maxProjects === Infinity ? 999 : maxProjects}
       projects={projects}
       activeProjectId={activeProjectId}
       channels={channels}
+      integrations={integrations}
     />
   )
 }

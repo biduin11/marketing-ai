@@ -3,12 +3,20 @@ import { Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface UpgradeGateProps {
-  used: number
-  limit: number
+  reason?: string
+  title?: string
   className?: string
+  /** @deprecated kept for backward compat */
+  used?: number
+  /** @deprecated kept for backward compat */
+  limit?: number
 }
 
-export function UpgradeGate({ used, limit, className }: UpgradeGateProps) {
+export function UpgradeGate({
+  reason,
+  title = "Нужен Pro",
+  className,
+}: UpgradeGateProps) {
   return (
     <div className={`rounded-2xl border border-[#eaeaea] bg-amber-50 p-5 ${className ?? ""}`}>
       <div className="flex items-start gap-3">
@@ -16,10 +24,9 @@ export function UpgradeGate({ used, limit, className }: UpgradeGateProps) {
           <Zap className="size-4 text-[#d97706]" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-foreground">Лимит исчерпан</p>
+          <p className="text-sm font-semibold text-foreground">{title}</p>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Использовано {used} из {limit} генераций в этом месяце (план Free).
-            Перейдите на Pro для неограниченных генераций.
+            {reason ?? "На плане Free доступен 1 проект с неограниченными AI-генерациями. Перейдите на Pro чтобы вести несколько проектов."}
           </p>
           <Link href="/settings">
             <Button size="sm" className="mt-3">

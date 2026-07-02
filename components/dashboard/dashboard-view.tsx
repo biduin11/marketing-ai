@@ -26,7 +26,7 @@ import {
   Hash,
   Target,
 } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -300,11 +300,12 @@ export function DashboardView({
           {projectName ?? "Главная"}
         </h1>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
-            <Link href="/inbox">
-              <Bell className="size-3.5" />
-            </Link>
-          </Button>
+          <Link
+            href="/inbox"
+            className={cn(buttonVariants({ variant: "outline", size: "icon" }), "h-8 w-8")}
+          >
+            <Bell className="size-3.5" />
+          </Link>
           <Button size="sm" onClick={() => setNewProjectOpen(true)}>
             <Plus className="size-3.5" />
             Новый проект

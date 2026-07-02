@@ -38,9 +38,12 @@ import type {
   BuyerPersona,
   Jtbd,
 } from "@/lib/ai/schemas/audience"
+import type { Cjm } from "@/lib/ai/schemas/cjm"
+import { JourneyView } from "@/components/journey/journey-view"
 
 interface AudienceViewProps {
   projectId: string
+  defaultTab?: string
   segments: AudienceSegments | null
   segmentsVersion: number | null
   segmentsCreatedAt: string | null
@@ -48,6 +51,9 @@ interface AudienceViewProps {
   personaVersion: number | null
   jtbd: Jtbd | null
   jtbdVersion: number | null
+  cjm: Cjm | null
+  cjmVersion: number | null
+  cjmCreatedAt: string | null
 }
 
 type LoadingKey = "segments" | "persona" | "jtbd" | null
@@ -74,6 +80,7 @@ function parseShareFromSize(size: string): number {
 
 export function AudienceView({
   projectId,
+  defaultTab = "overview",
   segments,
   segmentsVersion,
   segmentsCreatedAt,
@@ -81,10 +88,13 @@ export function AudienceView({
   personaVersion,
   jtbd,
   jtbdVersion,
+  cjm,
+  cjmVersion,
+  cjmCreatedAt,
 }: AudienceViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<LoadingKey>(null)
-  const [activeTab, setActiveTab] = useState("overview")
+  const [activeTab, setActiveTab] = useState(defaultTab)
 
   async function generate(
     key: LoadingKey,
@@ -144,7 +154,7 @@ export function AudienceView({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-[#111]">Аудитория</h1>
+        <h1 className="text-2xl font-semibold text-[#111]">Клиент</h1>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 rounded-lg border border-[#eaeaea] px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]">
             <Download size={15} />
@@ -167,6 +177,7 @@ export function AudienceView({
           <TabsTrigger value="pains">Боли и потребности</TabsTrigger>
           <TabsTrigger value="triggers">Триггеры</TabsTrigger>
           <TabsTrigger value="insights">Инсайты</TabsTrigger>
+          <TabsTrigger value="cjm">CJM</TabsTrigger>
         </TabsList>
 
         {/* ─── ОБЗОР ─── */}
@@ -802,6 +813,16 @@ export function AudienceView({
               description="Раздел в разработке — здесь будут автоматические инсайты на основе всех данных аудитории."
             />
           </div>
+        </TabsContent>
+
+        {/* ─── CJM ─── */}
+        <TabsContent value="cjm" className="mt-6">
+          <JourneyView
+            projectId={projectId}
+            cjm={cjm}
+            version={cjmVersion}
+            cjmCreatedAt={cjmCreatedAt}
+          />
         </TabsContent>
       </Tabs>
     </div>

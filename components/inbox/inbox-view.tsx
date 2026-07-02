@@ -14,7 +14,7 @@ import {
   Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { markSignalRead, markAllSignalsRead } from "@/lib/actions/inbox"
 import type { InboxSignalRow } from "@/lib/actions/inbox"
 import type { SignalType, SignalPriority } from "@prisma/client"
@@ -190,9 +190,12 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
                     </p>
                     <div className="mt-3 flex items-center gap-2">
                       {signal.actionHref && signal.action && (
-                        <Button asChild size="sm" variant="outline" className="h-7 text-xs">
-                          <Link href={signal.actionHref}>{signal.action}</Link>
-                        </Button>
+                        <Link
+                          href={signal.actionHref}
+                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 text-xs")}
+                        >
+                          {signal.action}
+                        </Link>
                       )}
                       {!signal.read && (
                         <button

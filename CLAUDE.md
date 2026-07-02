@@ -183,7 +183,8 @@ STRIPE_SECRET_KEY=        # (нужен с Итерации 6)
 STRIPE_WEBHOOK_SECRET=    # (нужен с Итерации 6)
 STRIPE_PRO_PRICE_ID=      # price_xxx из Stripe Dashboard (нужен с Итерации 6)
 NEXT_PUBLIC_APP_URL=      # https://твой-домен.vercel.app (нужен с Итерации 6)
-CRON_SECRET=              # случайная строка для защиты /api/cron/director
+CRON_SECRET=              # случайная строка для защиты /api/cron/director и /api/cron/sync-integrations
+INTEGRATION_ENCRYPTION_KEY= # 32 байта hex (openssl rand -hex 32) — шифрование accessToken интеграций
 ```
 
 ---

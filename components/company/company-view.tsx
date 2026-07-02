@@ -20,6 +20,15 @@ import { RecommendationCard } from "@/components/company/recommendation-card"
 import { CompanyWizard } from "@/components/company/company-wizard"
 import { runCompanyAnalysis } from "@/lib/actions/ai"
 import type { CompanyAnalysis } from "@/lib/ai/schemas/companyAnalysis"
+import { GenerationProgress } from "@/components/shared/generation-progress"
+
+const COMPANY_STEPS = [
+  { id: "fetch", label: "Собираю данные компании" },
+  { id: "analyze", label: "Анализирую рынок и конкурентов" },
+  { id: "swot", label: "Строю SWOT и позиционирование" },
+  { id: "score", label: "Вычисляю маркетинговый скор" },
+  { id: "save", label: "Сохраняю результат" },
+]
 
 interface CompanyViewProps {
   project: Project
@@ -60,19 +69,27 @@ function Card({
 export function CompanyView({ project, analysis, version }: CompanyViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [genCompleted, setGenCompleted] = useState(false)
+  const [genError, setGenError] = useState<string | null>(null)
 
   async function generate(force: boolean) {
     setLoading(true)
+    setGenCompleted(false)
+    setGenError(null)
     try {
       const result = await runCompanyAnalysis(project.id, force)
       if (!result.success) {
+        setGenError(result.error)
         toast.error(result.error)
         return
       }
+      setGenCompleted(true)
       toast.success(force ? "Анализ обновлён" : "Анализ готов")
-      router.refresh()
+      setTimeout(() => router.refresh(), 600)
     } catch {
-      toast.error("Не удалось сгенерировать анализ")
+      const msg = "Не удалось сгенерировать анализ"
+      setGenError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -122,8 +139,17 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
         </div>
       </div>
 
+      {/* Generation progress */}
+      {loading && (
+        <GenerationProgress
+          steps={COMPANY_STEPS}
+          completed={genCompleted}
+          error={genError}
+        />
+      )}
+
       {/* Empty state */}
-      {!analysis ? (
+      {!loading && !analysis && (
         <div className="flex h-[50vh] items-center justify-center">
           <EmptyState
             icon={Sparkles}
@@ -131,7 +157,9 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
             description="Заполните карточку компании и нажмите «Сгенерировать анализ», чтобы AI построил скоркарту, SWOT и рекомендации."
           />
         </div>
-      ) : (
+      )}
+
+      {!loading && analysis && (
         <Tabs defaultValue="overview">
           <TabsList>
             <TabsTrigger value="overview">Обзор</TabsTrigger>
