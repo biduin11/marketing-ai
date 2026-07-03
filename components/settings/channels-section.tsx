@@ -47,7 +47,7 @@ export function ChannelsSection({ projectId, initialChannels }: ChannelsSectionP
   }
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <h3 className="mb-1 text-sm font-semibold text-foreground">Каналы продвижения</h3>
       <p className="mb-4 text-sm text-[#6b7280]">
         Список каналов используется при вводе метрик. Серые — базовые (всегда доступны), тёмные —
@@ -61,7 +61,7 @@ export function ChannelsSection({ projectId, initialChannels }: ChannelsSectionP
             className={cn(
               "inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium",
               ch.isDefault
-                ? "border-[#eaeaea] bg-neutral-50 text-[#6b7280]"
+                ? "border-border bg-muted text-[#6b7280]"
                 : "border-[#d1d5db] bg-[#111111]/5 text-[#111111]"
             )}
           >

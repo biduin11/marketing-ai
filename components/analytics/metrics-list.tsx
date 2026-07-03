@@ -51,8 +51,8 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
 
   return (
     <>
-      <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-        <div className="border-b border-[#eaeaea] px-5 py-3">
+      <div className="rounded-2xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-5 py-3">
           <p className="text-sm font-semibold text-foreground">Введённые метрики</p>
         </div>
 
@@ -62,7 +62,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#eaeaea] bg-neutral-50">
+                <tr className="border-b border-border bg-muted">
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Дата</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Канал</th>
                   <th className="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">Расходы</th>
@@ -73,7 +73,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
                   <th className="w-20 px-4 py-2.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#eaeaea]">
+              <tbody className="divide-y divide-border">
                 {[...metrics]
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .map((m) => (
@@ -96,7 +96,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
                           </button>
                           <button
                             onClick={() => setConfirmMetric(m)}
-                            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-500"
+                            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-danger/10 hover:text-red-500"
                             title="Удалить"
                           >
                             <Trash2 size={14} />
@@ -114,7 +114,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
       {/* Delete confirm modal */}
       {confirmMetric && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-sm rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-xl">
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 shadow-xl">
             <h3 className="mb-1 text-base font-semibold text-foreground">Удалить запись?</h3>
             <p className="mb-5 text-sm text-muted-foreground">
               Метрика по каналу «{confirmMetric.channel}» за {formatDate(confirmMetric.date)} будет
@@ -131,7 +131,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
               </Button>
               <Button
                 size="sm"
-                className="bg-[#dc2626] text-white hover:bg-red-700"
+                className="bg-danger text-background hover:bg-danger/90"
                 onClick={handleDelete}
                 disabled={loadingDelete}
               >

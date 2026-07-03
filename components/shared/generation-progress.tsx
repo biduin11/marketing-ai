@@ -75,7 +75,7 @@ export function GenerationProgress({
   }, [completed, error, steps.length])
 
   return (
-    <div className="space-y-2.5 rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="space-y-2.5 rounded-2xl border border-border bg-card p-5 shadow-sm">
       {steps.map((step, i) => {
         const { status } = states[i] ?? { status: "pending" }
         return (
@@ -88,7 +88,7 @@ export function GenerationProgress({
                   : status === "done"
                     ? "text-sm text-muted-foreground line-through"
                     : status === "error"
-                      ? "text-sm font-medium text-[#dc2626]"
+                      ? "text-sm font-medium text-danger"
                       : "text-sm text-muted-foreground"
               }
             >
@@ -98,7 +98,7 @@ export function GenerationProgress({
         )
       })}
       {error && (
-        <p className="mt-1 text-xs text-[#dc2626]">{error}</p>
+        <p className="mt-1 text-xs text-danger">{error}</p>
       )}
     </div>
   )
@@ -106,10 +106,10 @@ export function GenerationProgress({
 
 function StepIcon({ status }: { status: StepStatus }) {
   if (status === "done")
-    return <CheckCircle className="size-4 shrink-0 text-[#16a34a]" />
+    return <CheckCircle className="size-4 shrink-0 text-success" />
   if (status === "active")
     return <Loader className="size-4 shrink-0 animate-spin text-[#111]" />
   if (status === "error")
-    return <XCircle className="size-4 shrink-0 text-[#dc2626]" />
+    return <XCircle className="size-4 shrink-0 text-danger" />
   return <Circle className="size-4 shrink-0 text-neutral-300" />
 }

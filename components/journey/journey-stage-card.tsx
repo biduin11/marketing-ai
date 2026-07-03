@@ -8,15 +8,15 @@ interface JourneyStageCardProps {
 }
 
 const emotionConfig = {
-  positive: { label: "Позитивно",  color: "bg-green-50 text-green-700 border-green-200" },
+  positive: { label: "Позитивно",  color: "bg-success/10 text-success border-success/20" },
   neutral:  { label: "Нейтрально", color: "bg-gray-50 text-gray-600 border-gray-200" },
-  negative: { label: "Негативно",  color: "bg-red-50 text-red-700 border-red-200" },
+  negative: { label: "Негативно",  color: "bg-danger/10 text-danger border-danger/20" },
 } as const
 
 const riskConfig = {
-  low:    { label: "Риск: низкий",  color: "bg-green-50 text-green-700 border-green-200" },
-  medium: { label: "Риск: средний", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  high:   { label: "Риск: высокий", color: "bg-red-50 text-red-700 border-red-200" },
+  low:    { label: "Риск: низкий",  color: "bg-success/10 text-success border-success/20" },
+  medium: { label: "Риск: средний", color: "bg-warning/10 text-warning border-warning/20" },
+  high:   { label: "Риск: высокий", color: "bg-danger/10 text-danger border-danger/20" },
 } as const
 
 function SectionList({
@@ -53,10 +53,10 @@ export function JourneyStageCard({ stage, index }: JourneyStageCardProps) {
   const risk    = riskConfig[stage.churnRisk]  ?? riskConfig.low
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+    <div className="rounded-2xl border border-border bg-card p-6">
       {/* Заголовок */}
       <div className="mb-2 flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-sm font-semibold text-[#111]">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-[#111]">
           {index + 1}
         </span>
         <div className="min-w-0 flex-1">
@@ -80,7 +80,7 @@ export function JourneyStageCard({ stage, index }: JourneyStageCardProps) {
       </div>
 
       {/* Разделитель */}
-      <div className="my-4 border-t border-[#eaeaea]" />
+      <div className="my-4 border-t border-border" />
 
       {/* Сетка секций */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

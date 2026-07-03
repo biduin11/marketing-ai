@@ -34,7 +34,7 @@ export function IntegrationsSection({
     : null
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+    <div className="rounded-2xl border border-border bg-card p-6">
       <h3 className="mb-1 text-base font-semibold text-[#111]">Интеграции</h3>
       <p className="mb-6 text-sm text-[#6b7280]">
         Подключите площадки, чтобы автоматически собирать отзывы и статистику
@@ -47,10 +47,10 @@ export function IntegrationsSection({
           return (
             <div
               key={platform.key}
-              className="flex items-center justify-between rounded-xl border border-[#eaeaea] p-4"
+              className="flex items-center justify-between rounded-xl border border-border p-4"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#eaeaea] bg-[#fafafa] text-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-[#fafafa] text-lg">
                   {platform.icon}
                 </div>
                 <div>
@@ -67,13 +67,13 @@ export function IntegrationsSection({
 
               <div className="flex items-center gap-2">
                 {integration?.isActive && (
-                  <span className="rounded-full border border-green-200 bg-green-50 px-2 py-1 text-xs text-green-700">
+                  <span className="rounded-full border border-success/20 bg-success/10 px-2 py-1 text-xs text-success">
                     Активно
                   </span>
                 )}
                 <button
                   onClick={() => setActivePlatform(platform)}
-                  className="rounded-lg border border-[#eaeaea] px-3 py-1.5 text-sm hover:bg-[#fafafa]"
+                  className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-[#fafafa]"
                 >
                   {integration ? "Настроить" : "Подключить"}
                 </button>

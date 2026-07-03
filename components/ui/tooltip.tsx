@@ -81,7 +81,7 @@ function TooltipContent({
   return (
     <div
       className={cn(
-        "absolute z-50 w-max max-w-xs rounded-lg border border-[#eaeaea] bg-white px-3 py-2 text-xs text-foreground shadow-md",
+        "absolute z-50 w-max max-w-xs rounded-lg border border-border bg-card px-3 py-2 text-xs text-foreground shadow-md",
         positionClass,
         className
       )}

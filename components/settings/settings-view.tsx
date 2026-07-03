@@ -36,7 +36,7 @@ export function SettingsView({ name, email, usage, projectCount, maxProjects, pr
       {/* Profile */}
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-neutral-100">
+          <div className="flex size-10 items-center justify-center rounded-full bg-muted">
             <User className="size-4 text-muted-foreground" />
           </div>
           <div>

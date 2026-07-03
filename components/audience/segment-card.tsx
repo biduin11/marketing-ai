@@ -8,7 +8,7 @@ interface SegmentCardProps {
 
 export function SegmentCard({ segment }: SegmentCardProps) {
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-sm">
       {/* Заголовок */}
       <h3 className="mb-1 text-base font-semibold leading-snug text-[#111]">
         {segment.name}
@@ -60,7 +60,7 @@ export function SegmentCard({ segment }: SegmentCardProps) {
               {segment.channels.map((ch, i) => (
                 <span
                   key={i}
-                  className="rounded-md border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-[#111]"
+                  className="rounded-md border border-border bg-muted px-2 py-0.5 text-xs text-[#111]"
                 >
                   {ch}
                 </span>

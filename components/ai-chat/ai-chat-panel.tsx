@@ -84,7 +84,7 @@ export function AiChatPanel() {
       <button
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "fixed bottom-6 right-6 z-50 flex size-12 items-center justify-center rounded-full bg-[#111] text-white shadow-lg transition-transform hover:scale-105 active:scale-95",
+          "fixed bottom-6 right-6 z-50 flex size-12 items-center justify-center rounded-full bg-foreground text-background shadow-lg transition-transform hover:scale-105 active:scale-95",
           open && "rotate-0"
         )}
         aria-label="AI Ассистент"
@@ -94,11 +94,11 @@ export function AiChatPanel() {
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-22 right-6 z-50 flex w-[360px] flex-col rounded-2xl border border-[#eaeaea] bg-white shadow-xl"
+        <div className="fixed bottom-22 right-6 z-50 flex w-[360px] flex-col rounded-2xl border border-border bg-card shadow-xl"
           style={{ height: "480px" }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-[#eaeaea] px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
               <BotMessageSquare className="size-4 text-foreground" />
               <span className="text-sm font-semibold text-foreground">AI Ассистент</span>
@@ -122,10 +122,10 @@ export function AiChatPanel() {
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
             {/* Welcome */}
             <div className="flex gap-2">
-              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#111] text-white">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
                 <BotMessageSquare className="size-3" />
               </span>
-              <div className="rounded-2xl rounded-tl-sm bg-neutral-100 px-3 py-2 text-sm text-foreground max-w-[85%]">
+              <div className="rounded-2xl rounded-tl-sm bg-muted px-3 py-2 text-sm text-foreground max-w-[85%]">
                 {WELCOME}
               </div>
             </div>
@@ -139,7 +139,7 @@ export function AiChatPanel() {
                 )}
               >
                 {m.role === "assistant" && (
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#111] text-white">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
                     <BotMessageSquare className="size-3" />
                   </span>
                 )}
@@ -147,8 +147,8 @@ export function AiChatPanel() {
                   className={cn(
                     "rounded-2xl px-3 py-2 text-sm max-w-[85%] whitespace-pre-wrap",
                     m.role === "user"
-                      ? "bg-[#111] text-white rounded-tr-sm"
-                      : "bg-neutral-100 text-foreground rounded-tl-sm"
+                      ? "bg-foreground text-background rounded-tr-sm"
+                      : "bg-muted text-foreground rounded-tl-sm"
                   )}
                 >
                   {m.content}
@@ -158,10 +158,10 @@ export function AiChatPanel() {
 
             {loading && (
               <div className="flex gap-2">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#111] text-white">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background">
                   <BotMessageSquare className="size-3" />
                 </span>
-                <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-neutral-100 px-3 py-2">
+                <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm bg-muted px-3 py-2">
                   <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">Думаю...</span>
                 </div>
@@ -171,7 +171,7 @@ export function AiChatPanel() {
           </div>
 
           {/* Input */}
-          <div className="border-t border-[#eaeaea] p-3">
+          <div className="border-t border-border p-3">
             <div className="flex items-end gap-2">
               <textarea
                 ref={inputRef}
@@ -180,14 +180,14 @@ export function AiChatPanel() {
                 onKeyDown={handleKeyDown}
                 placeholder="Задайте вопрос о проекте..."
                 rows={1}
-                className="flex-1 resize-none rounded-xl border border-[#eaeaea] bg-neutral-50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[#111] max-h-24"
+                className="flex-1 resize-none rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[#111] max-h-24"
                 style={{ minHeight: "38px" }}
                 disabled={loading}
               />
               <button
                 onClick={() => void send()}
                 disabled={loading || !input.trim()}
-                className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#111] text-white disabled:opacity-40 hover:bg-neutral-800 transition-colors"
+                className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-foreground text-background disabled:opacity-40 hover:bg-foreground transition-colors"
               >
                 <Send className="size-3.5" />
               </button>

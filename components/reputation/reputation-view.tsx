@@ -197,7 +197,7 @@ export function ReputationView({
             key={m.label}
             className={cn(
               "rounded-2xl border p-4",
-              m.alert ? "border-amber-200 bg-amber-50" : "border-[#eaeaea] bg-white"
+              m.alert ? "border-warning/20 bg-warning/10" : "border-border bg-card"
             )}
           >
             <p className="mb-1 text-xs text-[#6b7280]">{m.label}</p>
@@ -228,8 +228,8 @@ export function ReputationView({
                 className={cn(
                   "rounded-lg border px-3 py-1.5 text-sm transition-colors",
                   filter === key
-                    ? "border-[#111] bg-[#111] text-white"
-                    : "border-[#eaeaea] text-[#6b7280] hover:bg-[#fafafa]"
+                    ? "border-[#111] bg-foreground text-background"
+                    : "border-border text-[#6b7280] hover:bg-[#fafafa]"
                 )}
               >
                 {label}
@@ -249,11 +249,11 @@ export function ReputationView({
             {filteredReviews.map((review) => (
               <div
                 key={review.id}
-                className="rounded-2xl border border-[#eaeaea] bg-white p-4"
+                className="rounded-2xl border border-border bg-card p-4"
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-[#eaeaea] bg-[#fafafa] px-2 py-0.5 text-xs">
+                    <span className="rounded-full border border-border bg-[#fafafa] px-2 py-0.5 text-xs">
                       {platformLabel(review.platform)}
                     </span>
                     <div className="flex gap-0.5">
@@ -288,16 +288,16 @@ export function ReputationView({
                     className={cn(
                       "rounded-full border px-2 py-0.5 text-xs",
                       review.sentiment === "positive"
-                        ? "border-green-200 bg-green-50 text-green-700"
+                        ? "border-success/20 bg-success/10 text-success"
                         : review.sentiment === "negative"
-                          ? "border-red-200 bg-red-50 text-red-700"
+                          ? "border-danger/20 bg-danger/10 text-danger"
                           : "border-gray-200 bg-gray-50 text-gray-600"
                     )}
                   >
                     {sentimentLabel(review.sentiment)}
                   </span>
                   {review.reply && (
-                    <span className="rounded-full border border-[#eaeaea] bg-[#fafafa] px-2 py-0.5 text-xs text-[#6b7280]">
+                    <span className="rounded-full border border-border bg-[#fafafa] px-2 py-0.5 text-xs text-[#6b7280]">
                       Есть ответ
                     </span>
                   )}
@@ -318,7 +318,7 @@ export function ReputationView({
               return (
                 <div
                   key={platform}
-                  className="rounded-2xl border border-[#eaeaea] bg-white p-4"
+                  className="rounded-2xl border border-border bg-card p-4"
                 >
                   <div className="mb-3 flex items-center gap-2">
                     <span className="text-lg">{platformIcon(platform)}</span>
@@ -352,7 +352,7 @@ export function ReputationView({
                         <Line
                           type="monotone"
                           dataKey="followers"
-                          stroke="#111"
+                          stroke="var(--foreground)"
                           strokeWidth={1.5}
                           dot={false}
                         />
@@ -367,7 +367,7 @@ export function ReputationView({
       )}
 
       {/* ── БЛОК 4: AI-анализ репутации ── */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+      <div className="rounded-2xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
             <h3 className="text-base font-semibold text-[#111]">AI-анализ репутации</h3>
@@ -378,7 +378,7 @@ export function ReputationView({
           <button
             onClick={generate}
             disabled={loading}
-            className="flex items-center gap-2 rounded-lg border border-[#eaeaea] px-3 py-1.5 text-sm hover:bg-[#fafafa] disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-[#fafafa] disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -438,16 +438,16 @@ export function ReputationView({
               {analysis.actions.map((action, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 rounded-xl border border-[#eaeaea] bg-[#fafafa] p-3"
+                  className="flex gap-3 rounded-xl border border-border bg-[#fafafa] p-3"
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#111] text-xs font-semibold text-white">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
                     {i + 1}
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-[#111]">{action.title}</p>
                     <p className="mt-0.5 text-xs text-[#6b7280]">{action.description}</p>
                     {action.urgency === "high" && (
-                      <span className="mt-1 block text-xs text-red-600">⚡ Срочно</span>
+                      <span className="mt-1 block text-xs text-danger">⚡ Срочно</span>
                     )}
                   </div>
                 </div>
@@ -459,7 +459,7 @@ export function ReputationView({
               <div className="space-y-2">
                 <p className="text-sm font-semibold text-[#111]">Шаблоны ответов</p>
                 {analysis.reviewReplyTemplates.map((t, i) => (
-                  <div key={i} className="rounded-xl border border-[#eaeaea] p-3">
+                  <div key={i} className="rounded-xl border border-border p-3">
                     <p className="mb-1 text-xs font-medium text-[#6b7280]">
                       Для отзыва: {t.forSentiment === "negative" ? "негативного" : "нейтрального"}
                     </p>

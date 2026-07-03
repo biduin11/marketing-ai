@@ -35,7 +35,7 @@ export function ArtifactVersionSelect({
     <div className="flex items-center gap-1.5">
       <History className="size-3.5 text-muted-foreground" />
       <Select value={selectedId} onValueChange={(v) => v && onSelect(v)}>
-        <SelectTrigger className="h-7 w-auto gap-1 border-[#eaeaea] bg-white px-2 text-xs">
+        <SelectTrigger className="h-7 w-auto gap-1 border-border bg-card px-2 text-xs">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

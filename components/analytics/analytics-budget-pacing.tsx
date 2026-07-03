@@ -33,16 +33,16 @@ export function AnalyticsBudgetPacing({ monthlyBudget, monthSpend }: AnalyticsBu
     Math.abs(pacingDelta) <= 15 ? "on_track" : pacingDelta > 0 ? "over" : "under"
 
   const STATUS_CFG: Record<Status, { label: string; labelColor: string; barColor: string; deltaColor: string }> = {
-    on_track: { label: "По плану",   labelColor: "text-emerald-600", barColor: "bg-[#111]",      deltaColor: "text-emerald-600" },
-    over:     { label: "Перерасход", labelColor: "text-amber-600",   barColor: "bg-amber-500",   deltaColor: "text-amber-600"  },
-    under:    { label: "Недорасход", labelColor: "text-blue-600",    barColor: "bg-blue-500",    deltaColor: "text-blue-600"   },
+    on_track: { label: "По плану",   labelColor: "text-success", barColor: "bg-foreground",      deltaColor: "text-success" },
+    over:     { label: "Перерасход", labelColor: "text-warning",   barColor: "bg-warning/100",   deltaColor: "text-warning"  },
+    under:    { label: "Недорасход", labelColor: "text-foreground",    barColor: "bg-muted0",    deltaColor: "text-foreground"   },
   }
   const cfg = STATUS_CFG[status]
 
   const monthName = now.toLocaleDateString("ru-RU", { month: "long" })
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-1 flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground">Пейсинг бюджета</p>
         <span className={cn("text-xs font-medium", cfg.labelColor)}>{cfg.label}</span>
@@ -52,14 +52,14 @@ export function AnalyticsBudgetPacing({ monthlyBudget, monthSpend }: AnalyticsBu
       </p>
 
       {/* Progress bar */}
-      <div className="relative mb-1 h-2.5 w-full overflow-visible rounded-full bg-neutral-100">
+      <div className="relative mb-1 h-2.5 w-full overflow-visible rounded-full bg-muted">
         <div
           className={cn("absolute left-0 top-0 h-full rounded-full", cfg.barColor)}
           style={{ width: `${Math.min(spentPct, 100)}%` }}
         />
         {/* Expected pace marker */}
         <div
-          className="absolute top-1/2 h-4 w-px -translate-y-1/2 bg-neutral-400"
+          className="absolute top-1/2 h-4 w-px -translate-y-1/2 bg-muted-foreground/50"
           style={{ left: `${Math.min(expectedPct, 99)}%` }}
         />
       </div>
@@ -91,7 +91,7 @@ export function AnalyticsBudgetPacing({ monthlyBudget, monthSpend }: AnalyticsBu
       </div>
 
       {/* Footer */}
-      <div className="mt-3 rounded-lg bg-neutral-50 px-3 py-2 text-xs text-muted-foreground">
+      <div className="mt-3 rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
         Остаток:{" "}
         <span className="font-medium text-foreground">
           {fmtMoney(Math.max(0, monthlyBudget - monthSpend))}

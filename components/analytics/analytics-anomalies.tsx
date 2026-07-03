@@ -4,18 +4,18 @@ import { cn } from "@/lib/utils"
 
 const SEVERITY_CFG = {
   critical: {
-    row: "border-red-100 bg-red-50",
-    badge: "text-red-600",
+    row: "border-red-100 bg-danger/10",
+    badge: "text-danger",
     icon: AlertTriangle,
   },
   warning: {
-    row: "border-amber-100 bg-amber-50",
-    badge: "text-amber-600",
+    row: "border-amber-100 bg-warning/10",
+    badge: "text-warning",
     icon: AlertTriangle,
   },
   positive: {
-    row: "border-emerald-100 bg-emerald-50",
-    badge: "text-emerald-600",
+    row: "border-emerald-100 bg-success/10",
+    badge: "text-success",
     icon: CheckCircle2,
   },
 }
@@ -29,7 +29,7 @@ function fmtValue(v: number, metric: AnomalyItem["metric"]): string {
 
 export function AnalyticsAnomalies({ anomalies }: { anomalies: AnomalyItem[] }) {
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground">Отклонения</p>
         <span className="text-xs text-muted-foreground">3 дня vs предыдущие 7</span>
@@ -56,7 +56,7 @@ export function AnalyticsAnomalies({ anomalies }: { anomalies: AnomalyItem[] }) 
                   cfg.row
                 )}
               >
-                <span className="shrink-0 rounded-md bg-white/80 px-2 py-0.5 text-xs font-medium text-foreground">
+                <span className="shrink-0 rounded-md bg-card/80 px-2 py-0.5 text-xs font-medium text-foreground">
                   {a.channel}
                 </span>
                 <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">

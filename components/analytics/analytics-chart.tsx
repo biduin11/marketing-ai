@@ -91,7 +91,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
 
   if (!data.length) {
     return (
-      <div className="flex h-[300px] items-center justify-center rounded-2xl border border-[#eaeaea] bg-white">
+      <div className="flex h-[300px] items-center justify-center rounded-2xl border border-border bg-card">
         <p className="text-sm text-muted-foreground">Нет данных для графика</p>
       </div>
     )
@@ -107,7 +107,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
         }))
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-medium text-foreground">
           Динамика по всем каналам
@@ -115,18 +115,18 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
         <div className="relative">
           <button
             onClick={() => setOpen((o) => !o)}
-            className="flex items-center gap-1 rounded-lg border border-[#eaeaea] bg-white px-2.5 py-1 text-xs text-muted-foreground hover:bg-neutral-50"
+            className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground hover:bg-muted"
           >
             {grouping === "day" ? "По дням" : "По неделям"}
             <ChevronDown className="size-3" />
           </button>
           {open && (
-            <div className="absolute right-0 top-full z-10 mt-1 w-32 rounded-lg border border-[#eaeaea] bg-white shadow-md">
+            <div className="absolute right-0 top-full z-10 mt-1 w-32 rounded-lg border border-border bg-card shadow-md">
               {(["day", "week"] as Grouping[]).map((g) => (
                 <button
                   key={g}
                   onClick={() => { setGrouping(g); setOpen(false) }}
-                  className="block w-full px-3 py-2 text-left text-xs text-foreground hover:bg-neutral-50"
+                  className="block w-full px-3 py-2 text-left text-xs text-foreground hover:bg-muted"
                 >
                   {g === "day" ? "По дням" : "По неделям"}
                 </button>
@@ -138,7 +138,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
 
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData} margin={{ top: 4, right: 48, bottom: 0, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="dateLabel"
             tick={{ fontSize: 10, fill: "#6b7280" }}
@@ -165,7 +165,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
           />
           <Tooltip
             contentStyle={{
-              border: "1px solid #eaeaea",
+              border: "1px solid var(--border)",
               borderRadius: 8,
               fontSize: 11,
               padding: "6px 10px",

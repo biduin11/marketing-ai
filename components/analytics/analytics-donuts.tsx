@@ -35,7 +35,7 @@ function DonutSection({
 }) {
   const total = data.reduce((s, d) => s + d.value, 0)
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <p className="mb-3 text-sm font-medium text-foreground">{title}</p>
       <div className="flex items-center gap-4">
         <div className="shrink-0">
@@ -59,7 +59,7 @@ function DonutSection({
                   `${(((v as number) / total) * 100).toFixed(1)}%`,
                 ]}
                 contentStyle={{
-                  border: "1px solid #eaeaea",
+                  border: "1px solid var(--border)",
                   borderRadius: 6,
                   fontSize: 11,
                 }}

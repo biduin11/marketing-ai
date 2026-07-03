@@ -228,14 +228,14 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl bg-neutral-100 p-1">
+      <div className="flex gap-1 rounded-xl bg-muted p-1">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => handleTabChange(t.id)}
             className={
               activeTab === t.id
-                ? "flex-1 rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-foreground shadow-sm"
+                ? "flex-1 rounded-lg bg-card px-3 py-1.5 text-sm font-medium text-foreground shadow-sm"
                 : "flex-1 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground"
             }
           >
@@ -294,7 +294,7 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
       ) : (
         <div className="space-y-4">
           {/* Headline */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Главный вывод · версия {currentEntry.version}
             </p>
@@ -302,7 +302,7 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
           </div>
 
           {/* Summary */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Исполнительное резюме
             </p>
@@ -311,21 +311,21 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
 
           {/* Wins / Risks */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <ListBlock title="Достижения" items={currentEntry.report.wins} color="bg-[#16a34a]" />
             </div>
-            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
-              <ListBlock title="Риски" items={currentEntry.report.risks} color="bg-[#dc2626]" />
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <ListBlock title="Риски" items={currentEntry.report.risks} color="bg-danger" />
             </div>
           </div>
 
           {/* Recommendations */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <ListBlock title="Рекомендации" items={currentEntry.report.recommendations} color="bg-[#111111]" />
           </div>
 
           {/* Next period */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <ListBlock title="Фокус следующего периода" items={currentEntry.report.nextPeriodFocus} color="bg-[#d97706]" />
           </div>
         </div>

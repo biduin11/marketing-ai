@@ -13,7 +13,7 @@ export default function ExperimentsPage() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-dashed border-[#eaeaea] bg-white py-20 text-center shadow-sm">
+      <div className="rounded-2xl border border-dashed border-border bg-card py-20 text-center shadow-sm">
         <FlaskConical className="mx-auto size-10 text-muted-foreground/30" />
         <p className="mt-3 text-sm font-medium text-foreground">Раздел в разработке</p>
         <p className="mt-1 text-xs text-muted-foreground max-w-xs mx-auto">

@@ -11,7 +11,7 @@ export function UsageBar({ usage, projectCount, maxProjects }: UsageBarProps) {
   const isProPlan = usage.planName === "PRO"
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm space-y-4">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Использование плана
       </p>

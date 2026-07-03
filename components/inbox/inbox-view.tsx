@@ -25,12 +25,12 @@ const SIGNAL_META: Record<
   SignalType,
   { label: string; icon: React.ElementType; color: string }
 > = {
-  ANOMALY: { label: "Аномалия", icon: AlertTriangle, color: "text-amber-600 bg-amber-50" },
-  MARKET: { label: "Рынок", icon: Crosshair, color: "text-blue-600 bg-blue-50" },
-  STRATEGY: { label: "Стратегия", icon: ChartLine, color: "text-violet-600 bg-violet-50" },
-  CONTENT: { label: "Контент", icon: LayoutList, color: "text-green-600 bg-green-50" },
-  COMPETITOR: { label: "Конкурент", icon: Crosshair, color: "text-red-600 bg-red-50" },
-  EXPERIMENT: { label: "Эксперимент", icon: FlaskConical, color: "text-indigo-600 bg-indigo-50" },
+  ANOMALY: { label: "Аномалия", icon: AlertTriangle, color: "text-warning bg-warning/10" },
+  MARKET: { label: "Рынок", icon: Crosshair, color: "text-foreground bg-muted" },
+  STRATEGY: { label: "Стратегия", icon: ChartLine, color: "text-foreground bg-muted" },
+  CONTENT: { label: "Контент", icon: LayoutList, color: "text-success bg-success/10" },
+  COMPETITOR: { label: "Конкурент", icon: Crosshair, color: "text-danger bg-danger/10" },
+  EXPERIMENT: { label: "Эксперимент", icon: FlaskConical, color: "text-foreground bg-muted" },
   SYSTEM: { label: "Система", icon: Zap, color: "text-gray-600 bg-gray-100" },
 }
 
@@ -41,9 +41,9 @@ const PRIORITY_LABEL: Record<SignalPriority, string> = {
 }
 
 const PRIORITY_COLOR: Record<SignalPriority, string> = {
-  HIGH: "bg-red-100 text-red-700",
-  MEDIUM: "bg-amber-100 text-amber-700",
-  LOW: "bg-neutral-100 text-neutral-600",
+  HIGH: "bg-red-100 text-danger",
+  MEDIUM: "bg-amber-100 text-warning",
+  LOW: "bg-muted text-neutral-600",
 }
 
 function formatDate(iso: string): string {
@@ -117,7 +117,7 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 rounded-xl border border-[#eaeaea] bg-neutral-50 p-1">
+      <div className="flex gap-1 rounded-xl border border-border bg-muted p-1">
         {(["unread", "all"] as const).map((tab) => (
           <button
             key={tab}
@@ -125,7 +125,7 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
             className={cn(
               "flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
               filter === tab
-                ? "bg-white text-foreground shadow-sm"
+                ? "bg-card text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -155,7 +155,7 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
               <li
                 key={signal.id}
                 className={cn(
-                  "rounded-2xl border border-[#eaeaea] bg-white p-4 transition-all",
+                  "rounded-2xl border border-border bg-card p-4 transition-all",
                   !signal.read && "border-l-4 border-l-[#111]"
                 )}
               >
@@ -215,7 +215,7 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
       )}
 
       {/* AI note */}
-      <div className="flex items-start gap-2 rounded-xl border border-dashed border-[#eaeaea] p-3">
+      <div className="flex items-start gap-2 rounded-xl border border-dashed border-border p-3">
         <BotMessageSquare className="size-4 shrink-0 text-muted-foreground mt-0.5" />
         <p className="text-xs text-muted-foreground">
           AI анализирует ваши данные каждый день в 06:00 и создаёт новые сигналы. Сигналы появляются автоматически при обнаружении аномалий, изменений рынка и возможностей для роста.
@@ -227,7 +227,7 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
 
 function EmptyState({ text, icon }: { text: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[#eaeaea] py-16 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-border py-16 text-center">
       {icon ?? <Bell className="size-8 text-muted-foreground/40" />}
       <p className="text-sm text-muted-foreground max-w-xs">{text}</p>
     </div>

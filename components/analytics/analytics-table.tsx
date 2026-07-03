@@ -80,7 +80,7 @@ export function AnalyticsTable({ channels }: AnalyticsTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-neutral-50">
+            <tr className="border-b border-border bg-muted">
               {["Канал", "Расходы", "Клики", "CTR", "Лиды", "CPL", "Продажи", "ROMI"].map(
                 (h) => (
                   <th
@@ -96,11 +96,11 @@ export function AnalyticsTable({ channels }: AnalyticsTableProps) {
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#eaeaea]">
+          <tbody className="divide-y divide-border">
             {channels.map((c) => {
               const badge = getChannelBadge(c.channel)
               return (
-                <tr key={c.channel} className="hover:bg-neutral-50/60">
+                <tr key={c.channel} className="hover:bg-muted/60">
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
                       <span

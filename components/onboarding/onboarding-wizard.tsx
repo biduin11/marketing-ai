@@ -81,8 +81,8 @@ export function OnboardingWizard() {
     <div className="mx-auto w-full max-w-md">
       {/* Header */}
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-neutral-900">
-          <Sparkles className="size-5 text-white" />
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-foreground">
+          <Sparkles className="size-5 text-background" />
         </div>
         <h1 className="text-xl font-semibold text-foreground">Добро пожаловать в AI Marketing OS</h1>
         <p className="mt-1 text-sm text-muted-foreground">Создайте первый проект за 3 шага</p>
@@ -96,10 +96,10 @@ export function OnboardingWizard() {
               <div
                 className={`flex size-7 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
                   i < step
-                    ? "bg-neutral-900 text-white"
+                    ? "bg-foreground text-background"
                     : i === step
-                    ? "bg-neutral-900 text-white"
-                    : "bg-neutral-100 text-muted-foreground"
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground"
                 }`}
               >
                 {i < step ? "✓" : i + 1}
@@ -107,19 +107,19 @@ export function OnboardingWizard() {
               <span className="text-[10px] text-muted-foreground">{label}</span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`mb-4 h-px w-8 ${i < step ? "bg-neutral-900" : "bg-neutral-200"}`} />
+              <div className={`mb-4 h-px w-8 ${i < step ? "bg-foreground" : "bg-muted"}`} />
             )}
           </div>
         ))}
       </div>
 
       {/* Card */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         {step === 0 && (
           <div className="space-y-4">
             <div>
               <Label htmlFor="name" className="mb-1.5 block text-sm">
-                Название компании <span className="text-[#dc2626]">*</span>
+                Название компании <span className="text-danger">*</span>
               </Label>
               <Input
                 id="name"

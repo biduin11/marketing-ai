@@ -123,7 +123,7 @@ export function MetricFormDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-xl">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-xl">
         <h2 className="mb-4 text-base font-semibold text-foreground">
           {isEditing ? "Редактировать метрику" : "Добавить метрики"}
         </h2>
