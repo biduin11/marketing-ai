@@ -130,7 +130,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="font-heading text-lg font-semibold text-foreground">
             Контент-план
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -476,7 +476,7 @@ function RubricsTab({ plan }: { plan: ContentPlan }) {
         return (
           <div
             key={key}
-            className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
           >
             <div className="mb-3 flex items-start justify-between gap-2">
               <div>
@@ -575,7 +575,7 @@ function PlatformsTab({ plan }: { plan: ContentPlan }) {
         return (
           <div
             key={platformId}
-            className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+            className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
           >
             <div className="mb-3 flex items-center gap-2">
               <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-100">

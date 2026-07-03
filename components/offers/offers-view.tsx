@@ -3,58 +3,18 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, Tag, Megaphone, Gift, BookOpen } from "lucide-react"
+import { Sparkles, RefreshCw, Loader2, Tag, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { runOffer } from "@/lib/actions/ai"
-import type { Offer, OfferType } from "@/lib/ai/schemas/offer"
+import type { Offer } from "@/lib/ai/schemas/offer"
+import { OFFER_TYPE_META, TONE_CLASSES } from "@/lib/status-variants"
 import { cn } from "@/lib/utils"
 
 interface OffersViewProps {
   projectId: string
   offer: Offer | null
   version: number | null
-}
-
-const offerTypeConfig: Record<
-  OfferType,
-  { label: string; color: string; bg: string; border: string }
-> = {
-  utp: {
-    label: "УТП",
-    color: "text-foreground",
-    bg: "bg-neutral-100",
-    border: "border-[#eaeaea]",
-  },
-  promotion: {
-    label: "Акция",
-    color: "text-[#d97706]",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-  },
-  special: {
-    label: "Спецпредложение",
-    color: "text-[#16a34a]",
-    bg: "bg-green-50",
-    border: "border-green-200",
-  },
-  lead_magnet: {
-    label: "Лид-магнит",
-    color: "text-muted-foreground",
-    bg: "bg-neutral-50",
-    border: "border-[#eaeaea]",
-  },
-}
-
-function OfferTypeIcon({ type }: { type: OfferType }) {
-  const icons = {
-    utp: Tag,
-    promotion: Megaphone,
-    special: Gift,
-    lead_magnet: BookOpen,
-  } as const
-  const Icon = icons[type]
-  return <Icon className="size-4" />
 }
 
 export function OffersView({ projectId, offer, version }: OffersViewProps) {
@@ -83,7 +43,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Офферы</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">Офферы</h2>
           <p className="text-sm text-muted-foreground">
             УТП, акции, спецпредложения и лид-магниты
             {version && <span className="ml-2 text-xs">· версия {version}</span>}
@@ -126,13 +86,13 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
       ) : (
         <div className="space-y-6">
           {/* USP + Tagline */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Главное УТП
             </p>
             <p className="text-xl font-semibold text-foreground">{offer.usp}</p>
             {offer.tagline && (
-              <p className="mt-3 inline-block rounded-full border border-[#eaeaea] bg-neutral-50 px-3 py-1 text-sm text-muted-foreground">
+              <p className="mt-3 inline-block rounded-full border border-border bg-muted px-3 py-1 text-sm text-muted-foreground">
                 {offer.tagline}
               </p>
             )}
@@ -146,22 +106,24 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
               </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {offer.offers.map((o, i) => {
-                  const cfg = offerTypeConfig[o.type]
+                  const meta = OFFER_TYPE_META[o.type]
+                  const tone = TONE_CLASSES[meta.tone]
+                  const Icon = meta.icon
                   return (
                     <div
                       key={i}
                       className={cn(
-                        "rounded-2xl border p-5 shadow-sm",
-                        cfg.bg,
-                        cfg.border
+                        "rounded-2xl border p-6 shadow-sm",
+                        tone.bg,
+                        tone.border
                       )}
                     >
                       <div className="mb-3 flex items-center gap-2">
-                        <span className={cn("flex items-center gap-1 text-xs font-medium", cfg.color)}>
-                          <OfferTypeIcon type={o.type} />
-                          {cfg.label}
+                        <span className={cn("flex items-center gap-1 text-xs font-medium", tone.text)}>
+                          <Icon className="size-4" />
+                          {meta.label}
                         </span>
-                        <span className="rounded border border-[#eaeaea] bg-white px-1.5 py-0.5 text-xs text-muted-foreground">
+                        <span className="rounded border border-border bg-card px-1.5 py-0.5 text-xs text-muted-foreground">
                           {o.target}
                         </span>
                       </div>
@@ -191,11 +153,11 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
                 {offer.leadMagnets.map((lm, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+                    className="rounded-2xl border border-border bg-card p-6 shadow-sm"
                   >
                     <div className="mb-2 flex items-center gap-2">
                       <BookOpen className="size-4 text-muted-foreground" />
-                      <span className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-xs text-muted-foreground">
+                      <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                         {lm.format}
                       </span>
                     </div>

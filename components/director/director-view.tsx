@@ -55,7 +55,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">AI Директор</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">AI Директор</h2>
           <p className="text-sm text-muted-foreground">
             {version ? `Снапшот версии ${version}` : "Стратегический анализ проекта"}
           </p>
@@ -89,9 +89,9 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {/* Problems */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
-              <AlertCircle className="size-4 text-[#dc2626]" />
+              <AlertCircle className="size-4 text-danger" />
               <h3 className="text-sm font-semibold text-foreground">Проблемы</h3>
               <Badge variant="danger" className="ml-auto">
                 {analysis.problems.length}
@@ -99,7 +99,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
             </div>
             <ul className="space-y-3">
               {analysis.problems.map((p, i) => (
-                <li key={i} className="border-b border-[#eaeaea] pb-3 last:border-0 last:pb-0">
+                <li key={i} className="border-b border-border pb-3 last:border-0 last:pb-0">
                   <p className="text-sm font-medium text-foreground">{p.title}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{p.impact}</p>
                 </li>
@@ -108,9 +108,9 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
           </div>
 
           {/* Opportunities */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
-              <TrendingUp className="size-4 text-[#16a34a]" />
+              <TrendingUp className="size-4 text-success" />
               <h3 className="text-sm font-semibold text-foreground">Возможности</h3>
               <Badge variant="success" className="ml-auto">
                 {analysis.opportunities.length}
@@ -118,7 +118,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
             </div>
             <ul className="space-y-3">
               {analysis.opportunities.map((o, i) => (
-                <li key={i} className="border-b border-[#eaeaea] pb-3 last:border-0 last:pb-0">
+                <li key={i} className="border-b border-border pb-3 last:border-0 last:pb-0">
                   <p className="text-sm font-medium text-foreground">{o.title}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{o.potential}</p>
                 </li>
@@ -127,9 +127,9 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
           </div>
 
           {/* Risks */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
-              <ShieldAlert className="size-4 text-[#d97706]" />
+              <ShieldAlert className="size-4 text-warning" />
               <h3 className="text-sm font-semibold text-foreground">Риски</h3>
               <Badge variant="warning" className="ml-auto">
                 {analysis.risks.length}
@@ -137,7 +137,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
             </div>
             <ul className="space-y-3">
               {analysis.risks.map((r, i) => (
-                <li key={i} className="flex items-start gap-2.5 border-b border-[#eaeaea] pb-3 last:border-0 last:pb-0">
+                <li key={i} className="flex items-start gap-2.5 border-b border-border pb-3 last:border-0 last:pb-0">
                   <Badge variant={SEVERITY_VARIANT[r.severity]} size="sm" className="mt-0.5">
                     {SEVERITY_LABEL[r.severity]}
                   </Badge>
@@ -148,7 +148,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
           </div>
 
           {/* Priorities */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="mb-4 flex items-center gap-2">
               <ListOrdered className="size-4 text-foreground" />
               <h3 className="text-sm font-semibold text-foreground">Приоритеты действий</h3>
@@ -157,7 +157,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
               {analysis.priorities
                 .sort((a, b) => a.order - b.order)
                 .map((p, i) => (
-                  <li key={i} className="flex items-start gap-3 border-b border-[#eaeaea] pb-3 last:border-0 last:pb-0">
+                  <li key={i} className="flex items-start gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
                     <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-white">
                       {p.order}
                     </span>

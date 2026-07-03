@@ -133,7 +133,7 @@ export function CompetitorView({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Конкуренты</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">Конкуренты</h2>
           <p className="text-sm text-muted-foreground">
             Анализ на основе живых данных из интернета
             {version && <span className="ml-2 text-xs">· версия {version}</span>}
@@ -187,7 +187,7 @@ export function CompetitorView({
               {analysis.competitors.map((c, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+                  className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
                 >
                   {/* Low-confidence warning */}
                   {c.dataConfidence === "low" && (
@@ -419,7 +419,7 @@ export function CompetitorView({
                 {analysis.opportunities.map((opp, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+                    className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
                   >
                     <div className="mb-2 flex flex-wrap items-center gap-2">
                       <span className="shrink-0 rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-muted-foreground">

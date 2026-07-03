@@ -1,4 +1,6 @@
+import { Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { romiTone, TONE_CSS_VAR, TONE_CLASSES } from "@/lib/status-variants"
 import type { ChannelMetrics } from "@/lib/services/analytics.service"
 
 interface AnalyticsTableProps {
@@ -35,20 +37,16 @@ function fmt(v: number, dec = 0): string {
 
 function RomiBadge({ romi, maxRomi }: { romi: number; maxRomi: number }) {
   const pct = maxRomi > 0 ? Math.min((romi / maxRomi) * 100, 100) : 0
-  const color =
-    romi > 700 ? "#16a34a" : romi > 400 ? "#10b981" : romi > 0 ? "#d97706" : "#dc2626"
+  const tone = romiTone(romi)
   return (
     <div className="flex items-center gap-2">
-      <span
-        className="text-xs font-semibold"
-        style={{ color }}
-      >
+      <span className={cn("text-xs font-semibold", TONE_CLASSES[tone].text)}>
         {fmt(romi)}%
       </span>
-      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-neutral-100">
+      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
         <div
           className="h-full rounded-full"
-          style={{ width: `${pct}%`, backgroundColor: color }}
+          style={{ width: `${pct}%`, backgroundColor: TONE_CSS_VAR[tone] }}
         />
       </div>
     </div>
@@ -58,9 +56,13 @@ function RomiBadge({ romi, maxRomi }: { romi: number; maxRomi: number }) {
 export function AnalyticsTable({ channels }: AnalyticsTableProps) {
   if (!channels.length) {
     return (
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
-        <p className="text-sm text-muted-foreground">
-          Нет данных по каналам. Добавьте метрики.
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
+        <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-muted">
+          <Inbox className="size-5 text-muted-foreground" />
+        </div>
+        <p className="text-sm font-medium text-foreground">Нет данных по каналам</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Добавьте метрики, чтобы увидеть эффективность каждого канала.
         </p>
       </div>
     )
@@ -69,8 +71,8 @@ export function AnalyticsTable({ channels }: AnalyticsTableProps) {
   const maxRomi = Math.max(...channels.map((c) => c.romi), 1)
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-      <div className="border-b border-[#eaeaea] px-5 py-4">
+    <div className="rounded-2xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-5 py-4">
         <h3 className="text-sm font-medium text-foreground">
           Эффективность по каналам
         </h3>
@@ -78,7 +80,7 @@ export function AnalyticsTable({ channels }: AnalyticsTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#eaeaea] bg-neutral-50">
+            <tr className="border-b border-border bg-neutral-50">
               {["Канал", "Расходы", "Клики", "CTR", "Лиды", "CPL", "Продажи", "ROMI"].map(
                 (h) => (
                   <th
