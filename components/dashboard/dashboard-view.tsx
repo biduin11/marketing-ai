@@ -361,7 +361,7 @@ export function DashboardView({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           {projectName ?? "Главная"}
         </h1>
         <div className="flex items-center gap-2">
@@ -540,7 +540,7 @@ export function DashboardView({
                   ].map(({ label, count, Icon, color }) => (
                     <div key={label} className="flex items-center gap-1.5">
                       <Icon className={cn("size-3.5", color)} />
-                      <span className="text-sm font-semibold text-foreground">{count}</span>
+                      <span className="font-heading text-sm font-semibold tabular-nums text-foreground">{count}</span>
                       <span className="text-xs text-muted-foreground">{label}</span>
                     </div>
                   ))}
@@ -688,7 +688,7 @@ export function DashboardView({
                 <div key={label} className="rounded-xl bg-neutral-50 px-3 py-2.5">
                   <p className="text-xs text-muted-foreground">{label}</p>
                   <div className="mt-0.5 flex items-center">
-                    <p className="text-lg font-semibold text-foreground">{value}</p>
+                    <p className="font-heading text-lg font-semibold tabular-nums text-foreground">{value}</p>
                     {curr !== null && prev !== null && (
                       <DeltaBadge current={curr} prev={prev} />
                     )}
