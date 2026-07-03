@@ -60,6 +60,8 @@ export default async function HomePage() {
         reports={[]}
         strategyKpis={[]}
         todayContent={[]}
+        hasContentPlan={false}
+        contentPlanUpdatedAt={null}
       />
     )
   }
@@ -115,6 +117,8 @@ export default async function HomePage() {
         reports={[]}
         strategyKpis={[]}
         todayContent={[]}
+        hasContentPlan={false}
+        contentPlanUpdatedAt={null}
       />
     )
   }
@@ -216,6 +220,8 @@ export default async function HomePage() {
       }))}
       strategyKpis={strategyKpis}
       todayContent={todayContent}
+      hasContentPlan={!!contentArtifact}
+      contentPlanUpdatedAt={contentArtifact?.createdAt.toISOString() ?? null}
       onboardingSteps={onboardingSteps}
     />
   )
