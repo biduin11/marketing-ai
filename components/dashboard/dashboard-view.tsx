@@ -97,10 +97,10 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "text-[#6b7280] bg-neutral-100",
-  ACTIVE: "text-[#16a34a] bg-green-50",
-  PAUSED: "text-[#d97706] bg-amber-50",
-  ARCHIVED: "text-[#6b7280] bg-neutral-100",
+  DRAFT: "text-[#6b7280] bg-muted",
+  ACTIVE: "text-success bg-success/10",
+  PAUSED: "text-warning bg-warning/10",
+  ARCHIVED: "text-[#6b7280] bg-muted",
 }
 
 const REPORT_LABELS: Record<string, string> = {
@@ -154,7 +154,7 @@ function todayRu(): string {
 function DeltaBadge({ current, prev }: { current: number; prev: number }) {
   if (prev === 0) {
     return (
-      <span className="ml-1 inline-flex items-center rounded-full bg-neutral-100 px-1.5 py-0.5 text-xs text-muted-foreground">
+      <span className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
         нет базы
       </span>
     )
@@ -166,7 +166,7 @@ function DeltaBadge({ current, prev }: { current: number; prev: number }) {
     <span
       className={cn(
         "ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium",
-        up ? "bg-green-50 text-[#16a34a]" : big ? "bg-red-50 text-[#dc2626]" : "bg-amber-50 text-[#d97706]"
+        up ? "bg-success/10 text-success" : big ? "bg-danger/10 text-danger" : "bg-warning/10 text-warning"
       )}
     >
       {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
@@ -178,10 +178,10 @@ function DeltaBadge({ current, prev }: { current: number; prev: number }) {
 function RoiBadge({ roi }: { roi: number }) {
   const cls =
     roi > 100
-      ? "bg-green-50 text-[#16a34a]"
+      ? "bg-success/10 text-success"
       : roi > 0
-      ? "bg-amber-50 text-[#d97706]"
-      : "bg-red-50 text-[#dc2626]"
+      ? "bg-warning/10 text-warning"
+      : "bg-danger/10 text-danger"
   return (
     <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", cls)}>
       {roi.toFixed(1)}%
@@ -312,21 +312,21 @@ export function DashboardView({
             Новый проект
           </Button>
         </div>
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-10 shadow-sm text-center">
+        <div className="rounded-2xl border border-border bg-card p-10 shadow-sm text-center">
           <BotMessageSquare className="mx-auto mb-4 size-10 text-muted-foreground opacity-40" />
           <p className="text-base font-semibold text-foreground mb-1">Выберите активный проект</p>
           <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
             Переключитесь на один из ваших проектов через меню слева, чтобы видеть аналитику, задачи и рекомендации AI.
           </p>
           {projects.length > 0 && (
-            <div className="divide-y divide-[#eaeaea] rounded-xl border border-[#eaeaea] text-left max-w-xs mx-auto">
+            <div className="divide-y divide-border rounded-xl border border-border text-left max-w-xs mx-auto">
               {projects.slice(0, 3).map((p) => (
                 <div key={p.id} className="flex items-center justify-between px-4 py-3">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
                     {p.niche && <p className="truncate text-xs text-muted-foreground">{p.niche}</p>}
                   </div>
-                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-neutral-100 text-[#6b7280]")}>
+                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-[#6b7280]")}>
                     {STATUS_LABELS[p.status] ?? p.status}
                   </span>
                 </div>
@@ -385,13 +385,13 @@ export function DashboardView({
 
       {/* Morning Brief */}
       {projectId && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Sunrise className="size-4 text-[#d97706]" />
+            <Sunrise className="size-4 text-warning" />
             <span className="text-sm font-semibold text-foreground">Morning Brief</span>
             <span className="ml-auto text-xs text-muted-foreground capitalize">{todayRu()}</span>
             {contentPlanUpdatedAt && (
-              <span className="text-xs text-muted-foreground border-l border-[#eaeaea] pl-2">
+              <span className="text-xs text-muted-foreground border-l border-border pl-2">
                 план от {fmtDate(contentPlanUpdatedAt)}
               </span>
             )}
@@ -413,7 +413,7 @@ export function DashboardView({
                     const Icon = CONTENT_TYPE_ICONS[item.type] ?? Hash
                     const platform = (item as { platform?: string }).platform
                     return (
-                      <div key={i} className="flex items-start gap-2 rounded-lg bg-neutral-50 px-2.5 py-2">
+                      <div key={i} className="flex items-start gap-2 rounded-lg bg-muted px-2.5 py-2">
                         <Icon className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-foreground line-clamp-1">{item.title}</p>
@@ -434,7 +434,7 @@ export function DashboardView({
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-2">Приоритет #1</p>
               {topPriority ? (
-                <div className="rounded-lg bg-neutral-50 px-2.5 py-2">
+                <div className="rounded-lg bg-muted px-2.5 py-2">
                   <p className="text-xs text-foreground leading-relaxed">{topPriority.action}</p>
                 </div>
               ) : (
@@ -456,12 +456,12 @@ export function DashboardView({
                   {anomalies.map((a) => (
                     <div key={a.label} className={cn(
                       "flex items-center justify-between rounded-lg px-2.5 py-1.5",
-                      a.bad ? "bg-red-50" : "bg-green-50"
+                      a.bad ? "bg-danger/10" : "bg-success/10"
                     )}>
                       <span className="text-xs text-foreground">{a.label}</span>
                       <span className={cn(
                         "text-xs font-semibold",
-                        a.bad ? "text-[#dc2626]" : "text-[#16a34a]"
+                        a.bad ? "text-danger" : "text-success"
                       )}>
                         {a.delta > 0 ? "+" : ""}{a.delta.toFixed(0)}%
                       </span>
@@ -479,7 +479,7 @@ export function DashboardView({
         {/* LEFT col-span-3 */}
         <div className="space-y-5 lg:col-span-3">
           {/* Block 1: AI Director */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BotMessageSquare className="size-4 text-foreground" />
@@ -523,19 +523,19 @@ export function DashboardView({
                       label: "проблем",
                       count: analysis.problems.length,
                       Icon: AlertCircle,
-                      color: "text-[#dc2626]",
+                      color: "text-danger",
                     },
                     {
                       label: "возможностей",
                       count: analysis.opportunities.length,
                       Icon: TrendingUp,
-                      color: "text-[#16a34a]",
+                      color: "text-success",
                     },
                     {
                       label: "рисков",
                       count: analysis.risks.length,
                       Icon: ShieldAlert,
-                      color: "text-[#d97706]",
+                      color: "text-warning",
                     },
                   ].map(({ label, count, Icon, color }) => (
                     <div key={label} className="flex items-center gap-1.5">
@@ -546,9 +546,9 @@ export function DashboardView({
                   ))}
                 </div>
                 {badAnomalies.length > 0 && (
-                  <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2">
-                    <AlertCircle className="size-3.5 shrink-0 mt-0.5 text-[#dc2626]" />
-                    <p className="text-xs text-[#dc2626]">
+                  <div className="mt-3 flex items-start gap-2 rounded-lg bg-danger/10 px-3 py-2">
+                    <AlertCircle className="size-3.5 shrink-0 mt-0.5 text-danger" />
+                    <p className="text-xs text-danger">
                       Внимание: {badAnomalies.map((a) => `${a.label} упал${a.label === "ROI" ? "" : "и"} на ${Math.abs(a.delta).toFixed(0)}%`).join(", ")} по сравнению с прошлым месяцем
                     </p>
                   </div>
@@ -559,8 +559,8 @@ export function DashboardView({
 
           {/* Block 2: Plan vs Fact */}
           {strategyKpis.length > 0 && (
-            <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
+            <div className="rounded-2xl border border-border bg-card shadow-sm">
+              <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <Target className="size-4 text-foreground" />
                   <p className="text-sm font-medium text-foreground">План / Факт</p>
@@ -572,7 +572,7 @@ export function DashboardView({
                   Стратегия <ChevronRight className="size-3" />
                 </Link>
               </div>
-              <div className="divide-y divide-[#eaeaea]">
+              <div className="divide-y divide-border">
                 {strategyKpis.map((kpi) => {
                   const factValue = getFactForKpi(kpi.name, summary)
                   return (
@@ -598,8 +598,8 @@ export function DashboardView({
           )}
 
           {/* Block 3: Tasks */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
+          <div className="rounded-2xl border border-border bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <CheckSquare className="size-4 text-foreground" />
                 <p className="text-sm font-medium text-foreground">Задачи</p>
@@ -616,17 +616,17 @@ export function DashboardView({
                 {projectId ? "Все задачи выполнены" : "Выберите активный проект"}
               </p>
             ) : (
-              <div className="divide-y divide-[#eaeaea]">
+              <div className="divide-y divide-border">
                 {tasks.map((task) => (
                   <label
                     key={task.id}
-                    className="flex cursor-pointer items-start gap-3 px-5 py-3 hover:bg-neutral-50"
+                    className="flex cursor-pointer items-start gap-3 px-5 py-3 hover:bg-muted"
                   >
                     <input
                       type="checkbox"
                       checked={tasksDone[task.id] ?? task.done}
                       onChange={() => handleToggle(task)}
-                      className="mt-0.5 h-4 w-4 cursor-pointer rounded border-[#eaeaea] accent-[#111]"
+                      className="mt-0.5 h-4 w-4 cursor-pointer rounded border-border accent-[#111]"
                     />
                     <span
                       className={cn(
@@ -648,7 +648,7 @@ export function DashboardView({
         {/* RIGHT col-span-2 */}
         <div className="space-y-5 lg:col-span-2">
           {/* Block 4: Key Metrics */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <BarChart3 className="size-4 text-foreground" />
@@ -685,7 +685,7 @@ export function DashboardView({
                   curr: summary?.totalLeads ?? null,
                 },
               ].map(({ label, value, prev, curr }) => (
-                <div key={label} className="rounded-xl bg-neutral-50 px-3 py-2.5">
+                <div key={label} className="rounded-xl bg-muted px-3 py-2.5">
                   <p className="text-xs text-muted-foreground">{label}</p>
                   <div className="mt-0.5 flex items-center">
                     <p className="font-heading text-lg font-semibold tabular-nums text-foreground">{value}</p>
@@ -699,8 +699,8 @@ export function DashboardView({
           </div>
 
           {/* Block 5: Top Channels */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
+          <div className="rounded-2xl border border-border bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <p className="text-sm font-medium text-foreground">Топ каналы</p>
               <Link
                 href="/analytics"
@@ -717,15 +717,15 @@ export function DashboardView({
                 </Link>
               </p>
             ) : (
-              <div className="divide-y divide-[#eaeaea]">
+              <div className="divide-y divide-border">
                 {channels.slice(0, 5).map((c, i) => (
                   <Link
                     key={c.channel}
                     href={`/analytics?channel=${encodeURIComponent(c.channel)}`}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-neutral-50 transition-colors"
+                    className="flex items-center justify-between px-5 py-3 hover:bg-muted transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className="flex size-5 items-center justify-center rounded-full bg-neutral-100 text-xs font-medium text-muted-foreground">
+                      <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
                         {i + 1}
                       </span>
                       <span className="text-sm font-medium text-foreground">{c.channel}</span>
@@ -743,8 +743,8 @@ export function DashboardView({
           </div>
 
           {/* Block 6: Recent Reports */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
+          <div className="rounded-2xl border border-border bg-card shadow-sm">
+            <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <FileText className="size-4 text-foreground" />
                 <p className="text-sm font-medium text-foreground">Отчёты</p>
@@ -764,12 +764,12 @@ export function DashboardView({
                 </Link>
               </p>
             ) : (
-              <div className="divide-y divide-[#eaeaea]">
+              <div className="divide-y divide-border">
                 {reports.map((r) => (
                   <Link
                     key={r.id}
                     href="/reports"
-                    className="flex items-center justify-between px-5 py-3 hover:bg-neutral-50"
+                    className="flex items-center justify-between px-5 py-3 hover:bg-muted"
                   >
                     <p className="text-sm font-medium text-foreground">
                       {REPORT_LABELS[r.type] ?? r.type}
@@ -782,11 +782,11 @@ export function DashboardView({
           </div>
 
           {/* Block 7: Quick Actions */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-            <div className="border-b border-[#eaeaea] px-5 py-3.5">
+          <div className="rounded-2xl border border-border bg-card shadow-sm">
+            <div className="border-b border-border px-5 py-3.5">
               <p className="text-sm font-medium text-foreground">Быстрые действия</p>
             </div>
-            <div className="divide-y divide-[#eaeaea]">
+            <div className="divide-y divide-border">
               {[
                 { label: "Добавить метрики", href: "/analytics", icon: BarChart3, desc: "Данные по каналам" },
                 { label: "Создать отчёт", href: "/reports", icon: FileText, desc: "Weekly / Monthly" },
@@ -796,9 +796,9 @@ export function DashboardView({
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-neutral-50 transition-colors"
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-muted transition-colors"
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                     <Icon className="size-3.5 text-foreground" />
                   </div>
                   <div className="min-w-0">

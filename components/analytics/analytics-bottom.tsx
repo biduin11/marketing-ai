@@ -18,7 +18,7 @@ function TopCampaigns({ channels }: { channels: ChannelMetrics[] }) {
   const sorted = [...channels].sort((a, b) => b.romi - a.romi).slice(0, 5)
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <p className="mb-4 text-sm font-medium text-foreground">
         Топ каналов по ROMI
       </p>
@@ -34,7 +34,7 @@ function TopCampaigns({ channels }: { channels: ChannelMetrics[] }) {
                   <span className="max-w-[160px] truncate text-xs text-foreground">
                     {c.channel}
                   </span>
-                  <span className="text-xs font-semibold text-[#16a34a]">
+                  <span className="text-xs font-semibold text-success">
                     {fmt(c.romi)}%
                   </span>
                 </div>
@@ -55,7 +55,7 @@ function BestCtr({ channels }: { channels: ChannelMetrics[] }) {
   const sorted = [...withCtr].sort((a, b) => b.ctr - a.ctr).slice(0, 5)
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <p className="mb-4 text-sm font-medium text-foreground">
         Лучшие каналы по CTR
       </p>
@@ -77,7 +77,7 @@ function BestCtr({ channels }: { channels: ChannelMetrics[] }) {
                     {c.ctr.toFixed(2)}%
                   </span>
                 </div>
-                <Progress value={pct} barClassName="bg-neutral-400" />
+                <Progress value={pct} barClassName="bg-muted-foreground/50" />
               </div>
             )
           })}
@@ -100,7 +100,7 @@ function RecentConversions({ channels }: { channels: ChannelMetrics[] }) {
     }))
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <p className="mb-4 text-sm font-medium text-foreground">
         Лучшие каналы по лидам
       </p>
@@ -176,13 +176,13 @@ function AiRecommendations({ channels, summary }: { channels: ChannelMetrics[]; 
     info: "•",
   }
   const typeCls: Record<"up" | "down" | "info", string> = {
-    up: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    down: "bg-red-50 text-[#dc2626] border-red-200",
-    info: "bg-blue-50 text-blue-700 border-blue-200",
+    up: "bg-success/10 text-success border-success/20",
+    down: "bg-danger/10 text-danger border-danger/20",
+    info: "bg-muted text-foreground border-border",
   }
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
         <Sparkles className="size-4 text-foreground" />
         <p className="text-sm font-medium text-foreground">AI рекомендации</p>

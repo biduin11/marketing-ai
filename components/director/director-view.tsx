@@ -158,7 +158,7 @@ export function DirectorView({ projectId, analysis, version }: DirectorViewProps
                 .sort((a, b) => a.order - b.order)
                 .map((p, i) => (
                   <li key={i} className="flex items-start gap-3 border-b border-border pb-3 last:border-0 last:pb-0">
-                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-white">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">
                       {p.order}
                     </span>
                     <div>

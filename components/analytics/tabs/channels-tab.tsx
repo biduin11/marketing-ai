@@ -74,7 +74,7 @@ export function ChannelsTab({ channels, channelTimeSeries }: ChannelsTabProps) {
               onClick={() => setSelected(isSelected ? null : c.channel)}
               className={cn(
                 "rounded-2xl border p-4 text-left shadow-sm transition-all",
-                isSelected ? "border-foreground bg-neutral-50" : "border-[#eaeaea] bg-white hover:border-neutral-300"
+                isSelected ? "border-foreground bg-muted" : "border-border bg-card hover:border-neutral-300"
               )}
             >
               <div className="mb-3 flex items-center justify-between">
@@ -112,7 +112,7 @@ export function ChannelsTab({ channels, channelTimeSeries }: ChannelsTabProps) {
 
       {/* Selected channel detail */}
       {selectedChannel && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-4 text-sm font-medium text-foreground">
             {selectedChannel.channel} · детальная аналитика
           </p>
@@ -138,10 +138,10 @@ export function ChannelsTab({ channels, channelTimeSeries }: ChannelsTabProps) {
           {selectedSeries.length > 1 ? (
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={selectedSeries.map((p) => ({ ...p, dateLabel: formatDate(p.date) }))} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} width={44} tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}К` : String(v)} />
-                <Tooltip contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
                 <Line type="monotone" dataKey="spend" name="Расходы" stroke="#111111" strokeWidth={1.5} dot={false} />
                 <Line type="monotone" dataKey="revenue" name="Выручка" stroke="#16a34a" strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
                 <Line type="monotone" dataKey="leads" name="Лиды" stroke="#3b82f6" strokeWidth={1.5} dot={false} />
@@ -154,7 +154,7 @@ export function ChannelsTab({ channels, channelTimeSeries }: ChannelsTabProps) {
       )}
 
       {/* ROMI comparison bar */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <p className="mb-4 text-sm font-medium text-foreground">Сравнение ROMI по каналам</p>
         {(() => {
           const maxRomi = Math.max(...channels.map((c) => c.romi), 1)
@@ -169,7 +169,7 @@ export function ChannelsTab({ channels, channelTimeSeries }: ChannelsTabProps) {
                       <span className="text-xs text-foreground">{c.channel}</span>
                       <span className="text-xs font-semibold" style={{ color: c.romi > 200 ? "#16a34a" : "#6b7280" }}>{fmt(c.romi)}%</span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                       <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: color }} />
                     </div>
                   </div>

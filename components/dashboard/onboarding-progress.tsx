@@ -30,7 +30,7 @@ export function OnboardingProgress({ steps }: OnboardingProgressProps) {
   if (allDone) return null
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm overflow-hidden">
+    <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       {/* Header */}
       <button
         className="flex w-full items-center gap-3 px-5 py-4 text-left"
@@ -41,14 +41,14 @@ export function OnboardingProgress({ steps }: OnboardingProgressProps) {
             <span className="text-sm font-semibold text-foreground">
               Настройка проекта
             </span>
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-muted-foreground">
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
               {doneCount}/{total}
             </span>
           </div>
           {/* Progress bar */}
-          <div className="mt-2 h-1.5 w-full rounded-full bg-neutral-100">
+          <div className="mt-2 h-1.5 w-full rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-[#111] transition-all duration-500"
+              className="h-full rounded-full bg-foreground transition-all duration-500"
               style={{ width: `${percent}%` }}
             />
           </div>
@@ -62,19 +62,19 @@ export function OnboardingProgress({ steps }: OnboardingProgressProps) {
 
       {/* Steps */}
       {expanded && (
-        <div className="border-t border-[#eaeaea] px-5 py-3 space-y-1">
+        <div className="border-t border-border px-5 py-3 space-y-1">
           {steps.map((step) => (
             <div
               key={step.id}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors",
                 !step.done && step.id === nextStep?.id
-                  ? "bg-neutral-50"
-                  : "hover:bg-neutral-50/50"
+                  ? "bg-muted"
+                  : "hover:bg-muted/50"
               )}
             >
               {step.done ? (
-                <CheckCircle2 className="size-4 shrink-0 text-green-600" />
+                <CheckCircle2 className="size-4 shrink-0 text-success" />
               ) : (
                 <Circle className="size-4 shrink-0 text-muted-foreground/40" />
               )}
@@ -94,7 +94,7 @@ export function OnboardingProgress({ steps }: OnboardingProgressProps) {
               {!step.done && (
                 <Link
                   href={step.href}
-                  className="flex items-center gap-1 rounded-lg border border-[#eaeaea] bg-white px-2.5 py-1 text-xs font-medium text-foreground hover:bg-neutral-50 transition-colors shrink-0"
+                  className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted transition-colors shrink-0"
                 >
                   {step.id === nextStep?.id ? "Начать" : "Открыть"}
                   <ArrowRight className="size-3" />

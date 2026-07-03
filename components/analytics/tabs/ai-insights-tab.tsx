@@ -95,16 +95,16 @@ function generateRecommendations(summary: MetricSummary, channels: ChannelMetric
 }
 
 const INSIGHT_CFG = {
-  success: { icon: CheckCircle2, cls: "border-emerald-200 bg-emerald-50", iconCls: "text-emerald-600", titleCls: "text-emerald-800" },
-  info: { icon: Zap, cls: "border-blue-200 bg-blue-50", iconCls: "text-blue-600", titleCls: "text-blue-800" },
-  warning: { icon: AlertCircle, cls: "border-orange-200 bg-orange-50", iconCls: "text-orange-600", titleCls: "text-orange-800" },
-  danger: { icon: TrendingDown, cls: "border-red-200 bg-red-50", iconCls: "text-[#dc2626]", titleCls: "text-[#dc2626]" },
+  success: { icon: CheckCircle2, cls: "border-success/20 bg-success/10", iconCls: "text-success", titleCls: "text-emerald-800" },
+  info: { icon: Zap, cls: "border-border bg-muted", iconCls: "text-foreground", titleCls: "text-blue-800" },
+  warning: { icon: AlertCircle, cls: "border-warning/20 bg-warning/10", iconCls: "text-warning", titleCls: "text-orange-800" },
+  danger: { icon: TrendingDown, cls: "border-danger/20 bg-danger/10", iconCls: "text-danger", titleCls: "text-danger" },
 } as const
 
 const PRIORITY_CFG = {
-  high: { label: "Высокий", cls: "bg-red-50 text-[#dc2626] border-red-200" },
-  medium: { label: "Средний", cls: "bg-orange-50 text-[#d97706] border-orange-200" },
-  low: { label: "Низкий", cls: "bg-neutral-100 text-muted-foreground border-neutral-200" },
+  high: { label: "Высокий", cls: "bg-danger/10 text-danger border-danger/20" },
+  medium: { label: "Средний", cls: "bg-warning/10 text-warning border-warning/20" },
+  low: { label: "Низкий", cls: "bg-muted text-muted-foreground border-border" },
 } as const
 
 export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabProps) {
@@ -130,7 +130,7 @@ export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabP
       {/* Health score + insights grid */}
       <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
         {/* Health gauge */}
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <div className="mb-1 flex items-center gap-2">
             <Sparkles className="size-4 text-foreground" />
             <p className="text-sm font-medium text-foreground">Здоровье маркетинга</p>
@@ -158,9 +158,9 @@ export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabP
               { label: "Стоимость лида", ok: summary.cpl > 0 && summary.cpl < 1000 },
             ].map(({ label, ok }) => (
               <div key={label} className="flex items-center gap-2">
-                <span className={cn("size-2 shrink-0 rounded-full", ok ? "bg-[#16a34a]" : "bg-[#dc2626]")} />
+                <span className={cn("size-2 shrink-0 rounded-full", ok ? "bg-[#16a34a]" : "bg-danger")} />
                 <span className="text-xs text-muted-foreground">{label}</span>
-                <span className={cn("ml-auto text-xs font-medium", ok ? "text-[#16a34a]" : "text-[#dc2626]")}>{ok ? "OK" : "Внимание"}</span>
+                <span className={cn("ml-auto text-xs font-medium", ok ? "text-success" : "text-danger")}>{ok ? "OK" : "Внимание"}</span>
               </div>
             ))}
           </div>
@@ -179,7 +179,7 @@ export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabP
                   <div className="mb-0.5 flex flex-wrap items-center gap-2">
                     <p className={cn("text-sm font-medium", cfg.titleCls)}>{ins.title}</p>
                     {ins.metric && (
-                      <span className="rounded bg-white/60 px-1.5 py-0.5 text-[10px] font-medium text-foreground">{ins.metric}</span>
+                      <span className="rounded bg-card/60 px-1.5 py-0.5 text-[10px] font-medium text-foreground">{ins.metric}</span>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">{ins.body}</p>
@@ -191,7 +191,7 @@ export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabP
       </div>
 
       {/* Priority recommendations */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp className="size-4 text-foreground" />
           <p className="text-sm font-medium text-foreground">Приоритетные рекомендации</p>
@@ -200,14 +200,14 @@ export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabP
           {recommendations.map((rec, i) => {
             const cfg = PRIORITY_CFG[rec.priority]
             return (
-              <div key={i} className="flex items-start gap-3 rounded-xl border border-[#eaeaea] p-4">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-xs font-semibold text-foreground">{i + 1}</span>
+              <div key={i} className="flex items-start gap-3 rounded-xl border border-border p-4">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">{i + 1}</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">{rec.action}</p>
                   <div className="mt-1.5 flex flex-wrap gap-2">
                     <span className={cn("rounded border px-1.5 py-0.5 text-[10px] font-medium", cfg.cls)}>{cfg.label} приоритет</span>
-                    <span className="rounded border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[10px] text-emerald-700">Ожидаемый эффект: {rec.expected}</span>
-                    <span className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-[10px] text-muted-foreground">Усилия: {rec.effort}</span>
+                    <span className="rounded border border-success/20 bg-success/10 px-1.5 py-0.5 text-[10px] text-success">Ожидаемый эффект: {rec.expected}</span>
+                    <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">Усилия: {rec.effort}</span>
                   </div>
                 </div>
               </div>

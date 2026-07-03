@@ -98,7 +98,7 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
           { icon: UserCheck, label: "Lead Rate", value: `${leadRate.toFixed(2)}%`, sub: "визит → лид" },
           { icon: DollarSign, label: "Средний CPL", value: summary.cpl > 0 ? `${fmt(summary.cpl)} ₽` : "—", sub: "стоимость лида" },
         ].map(({ icon: Icon, label, value, sub }) => (
-          <div key={label} className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm">
+          <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-2 flex items-center gap-2">
               <Icon className="size-3.5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">{label}</p>
@@ -111,16 +111,16 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
 
       {/* Audience reach over time */}
       {reachTimeSeries.length > 1 && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-4 text-sm font-medium text-foreground">Динамика охвата аудитории</p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={reachTimeSeries} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
               <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} width={44}
                 tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}К` : String(v)} />
               <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} width={32} />
-              <Tooltip contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }} />
+              <Tooltip contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
               <Line yAxisId="left" type="monotone" dataKey="impressions" name="Охват" stroke="#111111" strokeWidth={1.5} dot={false} />
               <Line yAxisId="right" type="monotone" dataKey="leads" name="Лиды" stroke="#3b82f6" strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
             </LineChart>
@@ -132,15 +132,15 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Reach by channel */}
         {reachByChannel.length > 0 && (
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="mb-4 text-sm font-medium text-foreground">Охват по каналам</p>
             <ResponsiveContainer width="100%" height={Math.max(160, reachByChannel.length * 38)}>
               <BarChart data={reachByChannel} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false}
                   tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}К` : String(v)} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#374151" }} axisLine={false} tickLine={false} width={100} />
-                <Tooltip formatter={(v: unknown) => [fmt(v as number), "Показы"]} contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip formatter={(v: unknown) => [fmt(v as number), "Показы"]} contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
                 <Bar dataKey="reach" radius={[0, 4, 4, 0]} maxBarSize={20} fill="#111111" />
               </BarChart>
             </ResponsiveContainer>
@@ -149,7 +149,7 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
 
         {/* CPL by channel */}
         {cplData.length > 0 && (
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="mb-1 text-sm font-medium text-foreground">Стоимость привлечения (CPL)</p>
             <p className="mb-4 text-xs text-muted-foreground">Ниже — лучше</p>
             <div className="space-y-3">
@@ -162,7 +162,7 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
                       <span className="text-xs text-foreground">{d.name}</span>
                       <span className="text-xs font-semibold text-foreground">{fmt(d.cpl)} ₽</span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                       <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: d.color }} />
                     </div>
                   </div>
@@ -175,7 +175,7 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
 
       {/* Audience quality by channel */}
       {qualityData.length > 0 && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-sm font-medium text-foreground">Качество аудитории по каналам</p>
           <p className="mb-4 text-xs text-muted-foreground">Лидов на 1 000 показов — чем выше, тем качественнее аудитория канала</p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -183,16 +183,16 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
               const maxQ = Math.max(...qualityData.map((x) => x.quality), 0.001)
               const pct = (d.quality / maxQ) * 100
               const tier = d.quality > maxQ * 0.66 ? "Высокое" : d.quality > maxQ * 0.33 ? "Среднее" : "Низкое"
-              const tierCls = tier === "Высокое" ? "text-[#16a34a] bg-emerald-50 border-emerald-200" : tier === "Среднее" ? "text-[#d97706] bg-orange-50 border-orange-200" : "text-[#dc2626] bg-red-50 border-red-200"
+              const tierCls = tier === "Высокое" ? "text-success bg-success/10 border-success/20" : tier === "Среднее" ? "text-warning bg-warning/10 border-warning/20" : "text-danger bg-danger/10 border-danger/20"
               return (
-                <div key={d.channel} className="rounded-xl border border-[#eaeaea] p-3">
+                <div key={d.channel} className="rounded-xl border border-border p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-foreground">{d.channel}</span>
                     <span className={`rounded border px-1.5 py-0.5 text-[10px] font-medium ${tierCls}`}>{tier}</span>
                   </div>
                   <p className="text-lg font-semibold text-foreground">{d.quality}</p>
                   <p className="mb-2 text-[10px] text-muted-foreground">лидов/1К показов</p>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: d.color }} />
                   </div>
                   <p className="mt-1 text-[10px] text-muted-foreground">{fmt(d.leads)} лид · {fmt(d.reach)} показов</p>
@@ -205,17 +205,17 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
 
       {/* Audience context from artifacts */}
       {(segmentNames.length > 0 || personaName) && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-sm font-medium text-foreground">Контекст аудитории</p>
           <p className="mb-3 text-xs text-muted-foreground">Из последнего анализа аудитории — для сопоставления с метриками</p>
           <div className="flex flex-wrap gap-2">
             {personaName && (
-              <span className="rounded-lg border border-[#eaeaea] bg-neutral-50 px-3 py-1.5 text-xs font-medium text-foreground">
+              <span className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs font-medium text-foreground">
                 Персона: {personaName}
               </span>
             )}
             {segmentNames.map((name) => (
-              <span key={name} className="rounded-lg border border-[#eaeaea] bg-neutral-50 px-3 py-1.5 text-xs text-foreground">
+              <span key={name} className="rounded-lg border border-border bg-muted px-3 py-1.5 text-xs text-foreground">
                 {name}
               </span>
             ))}

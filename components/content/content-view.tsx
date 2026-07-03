@@ -220,7 +220,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-5 border-b border-[#eaeaea]">
+          <div className="flex gap-5 border-b border-border">
             {tabs.map((t) => (
               <button
                 key={t.id}
@@ -253,13 +253,13 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                 {plan.ideas.reels.map((item, i) => (
                   <div
                     key={i}
-                    className="rounded-xl border border-[#eaeaea] bg-white p-4 shadow-sm"
+                    className="rounded-xl border border-border bg-card p-4 shadow-sm"
                   >
                     <p className="text-sm font-medium text-foreground">
                       {item.title}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      <span className="font-medium text-violet-600">Hook:</span>{" "}
+                      <span className="font-medium text-foreground">Hook:</span>{" "}
                       {item.hook}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
@@ -278,13 +278,13 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                 {plan.ideas.posts.map((item, i) => (
                   <div
                     key={i}
-                    className="rounded-xl border border-[#eaeaea] bg-white p-4 shadow-sm"
+                    className="rounded-xl border border-border bg-card p-4 shadow-sm"
                   >
                     <p className="text-sm font-medium text-foreground">
                       {item.title}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      <span className="font-medium text-blue-600">Формат:</span>{" "}
+                      <span className="font-medium text-foreground">Формат:</span>{" "}
                       {item.format}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
@@ -303,13 +303,13 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                 {plan.ideas.stories.map((item, i) => (
                   <div
                     key={i}
-                    className="rounded-xl border border-[#eaeaea] bg-white p-4 shadow-sm"
+                    className="rounded-xl border border-border bg-card p-4 shadow-sm"
                   >
                     <p className="text-sm font-medium text-foreground">
                       {item.title}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      <span className="font-medium text-orange-600">
+                      <span className="font-medium text-warning">
                         Формат:
                       </span>{" "}
                       {item.format}
@@ -329,10 +329,10 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
               {plan.reelsScripts.map((script, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
+                  className="rounded-2xl border border-border bg-card p-6 shadow-sm"
                 >
                   <div className="mb-4 flex items-center gap-2">
-                    <span className="flex size-6 items-center justify-center rounded-full bg-violet-100 text-xs font-semibold text-violet-700">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
                       {i + 1}
                     </span>
                     <h3 className="text-sm font-semibold text-foreground">
@@ -357,7 +357,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                       {script.hashtags.map((tag, j) => (
                         <span
                           key={j}
-                          className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-muted-foreground"
+                          className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground"
                         >
                           #{tag}
                         </span>
@@ -400,15 +400,15 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                 <div className="absolute left-2 top-0 h-full w-px bg-[#eaeaea]" />
                 {plan.emailSequence.map((email, i) => (
                   <div key={i} className="relative pb-4 last:pb-0">
-                    <span className="absolute -left-4 flex size-4 items-center justify-center rounded-full border-2 border-white bg-neutral-800 text-[9px] font-bold text-white">
+                    <span className="absolute -left-4 flex size-4 items-center justify-center rounded-full border-2 border-card bg-foreground text-[9px] font-bold text-background">
                       {email.number}
                     </span>
-                    <div className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm">
+                    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
                       <div className="mb-1.5 flex flex-wrap items-center gap-2">
                         <p className="text-sm font-semibold text-foreground">
                           {email.subject}
                         </p>
-                        <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                        <span className="rounded-full border border-success/20 bg-success/10 px-2 py-0.5 text-xs text-success">
                           {email.sendDay}
                         </span>
                       </div>
@@ -418,7 +418,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                         </span>{" "}
                         {email.goal}
                       </p>
-                      <div className="rounded-lg bg-neutral-50 px-3 py-2">
+                      <div className="rounded-lg bg-muted px-3 py-2">
                         <p className="text-xs italic text-muted-foreground">
                           {email.preview}
                         </p>
@@ -446,24 +446,24 @@ function RubricsTab({ plan }: { plan: ContentPlan }) {
       key: "educational",
       label: "Образовательный",
       description: "Полезный контент, обучающий аудиторию",
-      color: "bg-blue-500",
-      lightColor: "bg-blue-50 text-blue-700 border-blue-200",
+      color: "bg-muted0",
+      lightColor: "bg-muted text-foreground border-border",
       target: 70,
     },
     {
       key: "engagement",
       label: "Вовлечение",
       description: "Истории, кейсы, опросы, за кулисами",
-      color: "bg-orange-500",
-      lightColor: "bg-orange-50 text-orange-700 border-orange-200",
+      color: "bg-warning/100",
+      lightColor: "bg-warning/10 text-warning border-warning/20",
       target: 20,
     },
     {
       key: "sales",
       label: "Продающий",
       description: "Офферы, акции, призывы к действию",
-      color: "bg-green-500",
-      lightColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+      color: "bg-success/100",
+      lightColor: "bg-success/10 text-success border-success/20",
       target: 10,
     },
   ] as const
@@ -476,7 +476,7 @@ function RubricsTab({ plan }: { plan: ContentPlan }) {
         return (
           <div
             key={key}
-            className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
+            className="rounded-2xl border border-border bg-card p-6 shadow-sm"
           >
             <div className="mb-3 flex items-start justify-between gap-2">
               <div>
@@ -575,10 +575,10 @@ function PlatformsTab({ plan }: { plan: ContentPlan }) {
         return (
           <div
             key={platformId}
-            className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
+            className="rounded-2xl border border-border bg-card p-6 shadow-sm"
           >
             <div className="mb-3 flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-100">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
                 <Icon className="size-4 text-foreground" />
               </span>
               <div>
@@ -596,7 +596,7 @@ function PlatformsTab({ plan }: { plan: ContentPlan }) {
               {formats.map((f) => (
                 <span
                   key={f}
-                  className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-xs text-foreground"
+                  className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-foreground"
                 >
                   {f}
                 </span>
@@ -641,7 +641,7 @@ function MetricCard({
   icon: React.ComponentType<{ className?: string }>
 }) {
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs text-muted-foreground">{label}</p>
         <Icon className="size-4 text-muted-foreground/50" />
@@ -666,9 +666,9 @@ function IdeaSection({
   children: React.ReactNode
 }) {
   const colorMap = {
-    violet: "text-violet-600 bg-violet-50",
-    blue: "text-blue-600 bg-blue-50",
-    orange: "text-orange-600 bg-orange-50",
+    violet: "text-foreground bg-muted",
+    blue: "text-foreground bg-muted",
+    orange: "text-warning bg-warning/10",
   }
   return (
     <div>

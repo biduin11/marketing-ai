@@ -11,7 +11,7 @@ function ListItems({ items }: { items: string[] }) {
     <ul className="space-y-1">
       {items.map((item, i) => (
         <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-neutral-400" />
+          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-muted-foreground/50" />
           {item}
         </li>
       ))}
@@ -21,9 +21,9 @@ function ListItems({ items }: { items: string[] }) {
 
 export function PersonaCard({ persona }: PersonaCardProps) {
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       {/* Header */}
-      <div className="mb-4 border-b border-[#eaeaea] pb-4">
+      <div className="mb-4 border-b border-border pb-4">
         <div className="flex items-baseline gap-3">
           <h3 className="text-base font-semibold text-foreground">{persona.name}</h3>
           <span className="text-sm text-muted-foreground">

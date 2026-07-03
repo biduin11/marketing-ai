@@ -62,10 +62,10 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
           { label: "First Touch", desc: "Весь кредит первому касанию", active: false },
           { label: "Linear", desc: "Кредит равномерно всем касаниям", active: false },
         ].map(({ label, desc, active }) => (
-          <div key={label} className={`rounded-2xl border p-4 shadow-sm ${active ? "border-foreground bg-neutral-50" : "border-[#eaeaea] bg-white opacity-60"}`}>
+          <div key={label} className={`rounded-2xl border p-4 shadow-sm ${active ? "border-foreground bg-muted" : "border-border bg-card opacity-60"}`}>
             <p className="text-sm font-medium text-foreground">{label}</p>
             <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>
-            {active && <span className="mt-2 inline-block rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-white">Текущая модель</span>}
+            {active && <span className="mt-2 inline-block rounded-full bg-foreground px-2 py-0.5 text-[10px] font-medium text-background">Текущая модель</span>}
           </div>
         ))}
       </div>
@@ -73,7 +73,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
       {/* Revenue attribution donut + table */}
       <div className="grid gap-5 lg:grid-cols-[320px_1fr]">
         {/* Donut */}
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-4 text-sm font-medium text-foreground">Атрибуция выручки (Last Touch)</p>
           <div className="flex flex-col items-center">
             <ResponsiveContainer width={180} height={180}>
@@ -83,7 +83,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
                 </Pie>
                 <Tooltip
                   formatter={(v: unknown) => [`${v}%`, "Доля выручки"]}
-                  contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }}
+                  contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -100,14 +100,14 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
         </div>
 
         {/* Attribution table */}
-        <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-          <div className="border-b border-[#eaeaea] px-5 py-3">
+        <div className="rounded-2xl border border-border bg-card shadow-sm">
+          <div className="border-b border-border px-5 py-3">
             <p className="text-sm font-medium text-foreground">Сравнение моделей атрибуции</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-[#eaeaea] bg-neutral-50">
+                <tr className="border-b border-border bg-muted">
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Канал</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Last Touch</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Linear</th>
@@ -115,13 +115,13 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Лиды</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#eaeaea]">
+              <tbody className="divide-y divide-border">
                 {attribution.map((a, i) => {
                   const lin = linear.find((l) => l.channel === a.channel)
                   const color = COLORS[i % COLORS.length]
                   const diff = lin ? a.revenueShare - lin.revenueShare : 0
                   return (
-                    <tr key={a.channel} className="hover:bg-neutral-50/60">
+                    <tr key={a.channel} className="hover:bg-muted/60">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
@@ -130,7 +130,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-neutral-100">
+                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
                             <div className="h-full rounded-full" style={{ width: `${a.revenueShare}%`, backgroundColor: color }} />
                           </div>
                           <span className="text-xs font-medium text-foreground">{a.revenueShare.toFixed(1)}%</span>
@@ -140,7 +140,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-muted-foreground">{lin?.revenueShare.toFixed(1) ?? "—"}%</span>
                           {diff !== 0 && (
-                            <span className={`text-[10px] font-medium ${diff > 0 ? "text-[#16a34a]" : "text-[#dc2626]"}`}>
+                            <span className={`text-[10px] font-medium ${diff > 0 ? "text-success" : "text-danger"}`}>
                               {diff > 0 ? "+" : ""}{diff.toFixed(1)}%
                             </span>
                           )}
@@ -152,7 +152,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
                   )
                 })}
               </tbody>
-              <tfoot className="border-t border-[#eaeaea] bg-neutral-50">
+              <tfoot className="border-t border-border bg-muted">
                 <tr>
                   <td className="px-4 py-2.5 text-xs font-medium text-foreground">Итого</td>
                   <td className="px-4 py-2.5 text-xs font-medium text-foreground">100%</td>
@@ -169,7 +169,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
       </div>
 
       {/* Leads attribution */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <p className="mb-4 text-sm font-medium text-foreground">Атрибуция лидов</p>
         <div className="space-y-3">
           {attribution.map((a, i) => (
@@ -184,7 +184,7 @@ export function AttributionTab({ attribution, channels }: AttributionTabProps) {
                   <span className="w-10 text-right text-xs font-medium text-foreground">{a.leadsShare.toFixed(1)}%</span>
                 </div>
               </div>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div className="h-full rounded-full" style={{ width: `${a.leadsShare}%`, backgroundColor: COLORS[i % COLORS.length] }} />
               </div>
             </div>

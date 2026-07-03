@@ -113,7 +113,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
           { icon: TrendingUp, label: "Средний CTR", value: `${avgCtr.toFixed(2)}%` },
           { icon: UserCheck, label: "Лиды с контента", value: fmt(totalLeads) },
         ].map(({ icon: Icon, label, value }) => (
-          <div key={label} className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm">
+          <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-2 flex items-center gap-2">
               <Icon className="size-3.5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">{label}</p>
@@ -128,15 +128,15 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
 
       {/* Reach over time */}
       {reachTimeSeries.length > 1 && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-4 text-sm font-medium text-foreground">Динамика охвата</p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={reachTimeSeries} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
               <YAxis tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} width={44}
                 tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}К` : String(v)} />
-              <Tooltip contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }} />
+              <Tooltip contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
               <Line type="monotone" dataKey="impressions" name="Показы" stroke="#111111" strokeWidth={1.5} dot={false} />
               <Line type="monotone" dataKey="clicks" name="Клики" stroke="#3b82f6" strokeWidth={1.5} dot={false} strokeDasharray="5 3" />
             </LineChart>
@@ -148,15 +148,15 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Reach by channel */}
         {reachData.length > 0 && (
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="mb-4 text-sm font-medium text-foreground">Охват по каналам</p>
             <ResponsiveContainer width="100%" height={Math.max(160, reachData.length * 38)}>
               <BarChart data={reachData} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false}
                   tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}К` : String(v)} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: "#374151" }} axisLine={false} tickLine={false} width={100} />
-                <Tooltip formatter={(v: unknown) => [fmt(v as number), "Показы"]} contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip formatter={(v: unknown) => [fmt(v as number), "Показы"]} contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
                 <Bar dataKey="impressions" radius={[0, 4, 4, 0]} maxBarSize={20} fill="#111111" />
               </BarChart>
             </ResponsiveContainer>
@@ -165,7 +165,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
 
         {/* CTR by channel */}
         {ctrData.length > 0 && (
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="mb-4 text-sm font-medium text-foreground">CTR по каналам</p>
             <div className="space-y-3">
               {ctrData.map((d) => (
@@ -174,7 +174,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
                     <span className="text-xs text-foreground">{d.name}</span>
                     <span className="text-xs font-semibold text-foreground">{d.ctr}%</span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{ width: `${Math.min((d.ctr / Math.max(...ctrData.map((x) => x.ctr), 1)) * 100, 100)}%`, backgroundColor: d.color }}
@@ -191,7 +191,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Leads by channel */}
         {leadsData.length > 0 && (
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="mb-4 text-sm font-medium text-foreground">Лиды по каналам</p>
             <div className="space-y-3">
               {leadsData.map((d) => (
@@ -200,7 +200,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
                     <span className="text-xs text-foreground">{d.name}</span>
                     <span className="text-xs font-semibold text-foreground">{fmt(d.leads)}</span>
                   </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{ width: `${(d.leads / Math.max(...leadsData.map((x) => x.leads), 1)) * 100}%`, backgroundColor: d.color }}
@@ -214,7 +214,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
 
         {/* Content efficiency */}
         {efficiency.length > 0 && (
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
             <p className="mb-1 text-sm font-medium text-foreground">Эффективность контента</p>
             <p className="mb-4 text-xs text-muted-foreground">Лидов на 1 000 показов</p>
             <div className="space-y-3">
@@ -226,7 +226,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
                       <span className="text-xs text-foreground">{d.channel}</span>
                       <span className="text-xs font-semibold text-foreground">{d.lpi.toFixed(2)}</span>
                     </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                       <div
                         className="h-full rounded-full transition-all"
                         style={{ width: `${(d.lpi / maxLpi) * 100}%`, backgroundColor: d.color }}
@@ -242,14 +242,14 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
 
       {/* Content plan volume cross-reference */}
       {planStats && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-1 text-sm font-medium text-foreground">Контент-план vs каналы</p>
           <p className="mb-4 text-xs text-muted-foreground">Запланировано публикаций по платформам из последнего контент-плана</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(planStats).sort((a, b) => b[1] - a[1]).map(([platform, count]) => (
-              <div key={platform} className="flex items-center gap-1.5 rounded-lg border border-[#eaeaea] bg-neutral-50 px-3 py-1.5">
+              <div key={platform} className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-3 py-1.5">
                 <span className="text-xs font-medium capitalize text-foreground">{platform}</span>
-                <span className="rounded-full bg-neutral-200 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">{count}</span>
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-foreground">{count}</span>
               </div>
             ))}
           </div>
@@ -257,24 +257,24 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
       )}
 
       {/* Channel performance table */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-        <div className="border-b border-[#eaeaea] px-5 py-3">
+      <div className="rounded-2xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-5 py-3">
           <p className="text-sm font-medium text-foreground">Детализация каналов</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#eaeaea] bg-neutral-50">
+              <tr className="border-b border-border bg-muted">
                 {["Канал", "Показы", "Клики", "CTR", "Лиды", "Эфф. (лид/1К)", "ROMI"].map((h) => (
                   <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#eaeaea]">
+            <tbody className="divide-y divide-border">
               {[...channels].sort((a, b) => b.impressions - a.impressions).map((c) => {
                 const lpi = c.impressions > 0 ? (c.leads / c.impressions) * 1000 : 0
                 return (
-                  <tr key={c.channel} className="hover:bg-neutral-50/60">
+                  <tr key={c.channel} className="hover:bg-muted/60">
                     <td className="px-4 py-3 text-xs font-medium text-foreground">{c.channel}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{c.impressions > 0 ? fmt(c.impressions) : "—"}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{c.clicks > 0 ? fmt(c.clicks) : "—"}</td>

@@ -61,7 +61,7 @@ export function ConversionsTab({ summary, channels, timeSeries }: ConversionsTab
           { label: "Лиды → Продажи", value: summary.totalLeads > 0 ? `${((totalSales / summary.totalLeads) * 100).toFixed(1)}%` : "—" },
           { label: "Общая конверсия", value: summary.totalImpressions > 0 ? `${((totalSales / summary.totalImpressions) * 100).toFixed(3)}%` : "—" },
         ].map(({ label, value }) => (
-          <div key={label} className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm">
+          <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <p className="text-[11px] leading-snug text-muted-foreground">{label}</p>
             <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
           </div>
@@ -69,7 +69,7 @@ export function ConversionsTab({ summary, channels, timeSeries }: ConversionsTab
       </div>
 
       {/* Visual funnel */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <p className="mb-5 text-sm font-medium text-foreground">Воронка конверсий</p>
         <div className="space-y-2">
           {steps.map((step, i) => {
@@ -89,7 +89,7 @@ export function ConversionsTab({ summary, channels, timeSeries }: ConversionsTab
                     <span className="text-xs font-semibold text-foreground">{fmt(step.value)}</span>
                   </div>
                 </div>
-                <div className="h-7 w-full overflow-hidden rounded-lg bg-neutral-100">
+                <div className="h-7 w-full overflow-hidden rounded-lg bg-muted">
                   <div
                     className="flex h-full items-center rounded-lg px-2 transition-all"
                     style={{ width: `${Math.max(width, 3)}%`, backgroundColor: colors[i] }}
@@ -107,14 +107,14 @@ export function ConversionsTab({ summary, channels, timeSeries }: ConversionsTab
 
       {/* Leads timeline */}
       {leadsChartData.length > 1 && (
-        <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="mb-4 text-sm font-medium text-foreground">Динамика лидов и продаж</p>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={leadsChartData} margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
               <YAxis tick={{ fontSize: 10, fill: "#6b7280" }} axisLine={false} tickLine={false} width={36} />
-              <Tooltip contentStyle={{ border: "1px solid #eaeaea", borderRadius: 8, fontSize: 11 }} />
+              <Tooltip contentStyle={{ border: "1px solid var(--border)", borderRadius: 8, fontSize: 11 }} />
               <Line type="monotone" dataKey="leads" name="Лиды" stroke="#3b82f6" strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="sales" name="Продажи" stroke="#16a34a" strokeWidth={2} dot={false} strokeDasharray="5 3" />
             </LineChart>
@@ -123,25 +123,25 @@ export function ConversionsTab({ summary, channels, timeSeries }: ConversionsTab
       )}
 
       {/* Conversion by channel */}
-      <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-        <div className="border-b border-[#eaeaea] px-5 py-3">
+      <div className="rounded-2xl border border-border bg-card shadow-sm">
+        <div className="border-b border-border px-5 py-3">
           <p className="text-sm font-medium text-foreground">Конверсии по каналам</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#eaeaea] bg-neutral-50">
+              <tr className="border-b border-border bg-muted">
                 {["Канал", "Клики", "Лиды", "CVR", "CPL", "Продажи", "Выручка"].map((h) => (
                   <th key={h} className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#eaeaea]">
+            <tbody className="divide-y divide-border">
               {[...channels].sort((a, b) => b.leads - a.leads).map((c) => {
                 const visitors = Math.round(c.clicks * 0.667)
                 const cvr = visitors > 0 ? ((c.leads / visitors) * 100).toFixed(2) : "—"
                 return (
-                  <tr key={c.channel} className="hover:bg-neutral-50/60">
+                  <tr key={c.channel} className="hover:bg-muted/60">
                     <td className="px-4 py-3 text-xs font-medium text-foreground">{c.channel}</td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">{c.clicks > 0 ? fmt(c.clicks) : "—"}</td>
                     <td className="px-4 py-3 text-xs font-medium text-foreground">{fmt(c.leads)}</td>

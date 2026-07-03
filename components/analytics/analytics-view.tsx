@@ -186,7 +186,7 @@ export function AnalyticsView({
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex overflow-hidden rounded-lg border border-[#eaeaea] bg-white">
+          <div className="flex overflow-hidden rounded-lg border border-border bg-card">
             {RANGES.map((r) => (
               <button
                 key={r.value}
@@ -194,8 +194,8 @@ export function AnalyticsView({
                 className={cn(
                   "px-3 py-1.5 text-sm transition-colors",
                   range === r.value
-                    ? "bg-neutral-900 font-medium text-white"
-                    : "text-muted-foreground hover:bg-neutral-50"
+                    ? "bg-foreground font-medium text-background"
+                    : "text-muted-foreground hover:bg-muted"
                 )}
               >
                 {r.label}
@@ -222,7 +222,7 @@ export function AnalyticsView({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-5 overflow-x-auto border-b border-[#eaeaea]">
+      <div className="flex gap-5 overflow-x-auto border-b border-border">
         {TABS.map((t) => (
           <button
             key={t.id}

@@ -29,8 +29,8 @@ function RatingBadge({
 }) {
   if (rating == null) return null
   return (
-    <span className="flex items-center gap-1 rounded-md border border-[#eaeaea] bg-neutral-50 px-2 py-1 text-xs">
-      <Star className="size-3 fill-[#d97706] text-[#d97706]" />
+    <span className="flex items-center gap-1 rounded-md border border-border bg-muted px-2 py-1 text-xs">
+      <Star className="size-3 fill-warning text-warning" />
       <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
       {count != null && (
         <span className="text-muted-foreground">({count})</span>
@@ -52,14 +52,14 @@ function PresenceBadge({
   if (active == null) return null
   const colors = {
     neutral: active
-      ? "bg-neutral-100 text-foreground border-neutral-200"
-      : "bg-white text-muted-foreground border-[#eaeaea] line-through",
+      ? "bg-muted text-foreground border-border"
+      : "bg-card text-muted-foreground border-border line-through",
     success: active
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : "bg-white text-muted-foreground border-[#eaeaea] line-through",
+      ? "bg-success/10 text-success border-success/20"
+      : "bg-card text-muted-foreground border-border line-through",
     warning: active
-      ? "bg-orange-50 text-orange-700 border-orange-200"
-      : "bg-white text-muted-foreground border-[#eaeaea] line-through",
+      ? "bg-warning/10 text-warning border-warning/20"
+      : "bg-card text-muted-foreground border-border line-through",
   }
   return (
     <span
@@ -73,10 +73,10 @@ function PresenceBadge({
 function SocialActivityBadge({ activity }: { activity?: string | null }) {
   if (!activity) return null
   const map: Record<string, { label: string; cls: string }> = {
-    active: { label: "Активны", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    moderate: { label: "Умеренно", cls: "bg-blue-50 text-blue-700 border-blue-200" },
-    low: { label: "Редко", cls: "bg-orange-50 text-orange-700 border-orange-200" },
-    none: { label: "Нет активности", cls: "bg-neutral-100 text-muted-foreground border-neutral-200" },
+    active: { label: "Активны", cls: "bg-success/10 text-success border-success/20" },
+    moderate: { label: "Умеренно", cls: "bg-muted text-foreground border-border" },
+    low: { label: "Редко", cls: "bg-warning/10 text-warning border-warning/20" },
+    none: { label: "Нет активности", cls: "bg-muted text-muted-foreground border-border" },
   }
   const item = map[activity]
   if (!item) return null
@@ -90,9 +90,9 @@ function SocialActivityBadge({ activity }: { activity?: string | null }) {
 function PriorityBadge({ priority }: { priority?: string }) {
   if (!priority) return null
   const map: Record<string, { label: string; cls: string }> = {
-    high: { label: "Высокий", cls: "bg-red-50 text-[#dc2626] border-red-200" },
-    medium: { label: "Средний", cls: "bg-orange-50 text-[#d97706] border-orange-200" },
-    low: { label: "Низкий", cls: "bg-neutral-100 text-muted-foreground border-neutral-200" },
+    high: { label: "Высокий", cls: "bg-danger/10 text-danger border-danger/20" },
+    medium: { label: "Средний", cls: "bg-warning/10 text-warning border-warning/20" },
+    low: { label: "Низкий", cls: "bg-muted text-muted-foreground border-border" },
   }
   const item = map[priority]
   if (!item) return null
@@ -176,7 +176,7 @@ export function CompetitorView({
       ) : (
         <div className="space-y-6">
           {/* Summary */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p className="text-sm text-muted-foreground">{analysis.summary}</p>
           </div>
 
@@ -187,13 +187,13 @@ export function CompetitorView({
               {analysis.competitors.map((c, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
+                  className="rounded-2xl border border-border bg-card p-6 shadow-sm"
                 >
                   {/* Low-confidence warning */}
                   {c.dataConfidence === "low" && (
-                    <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
-                      <AlertTriangle size={14} className="shrink-0 text-amber-600" />
-                      <p className="text-xs text-amber-700">
+                    <div className="mb-4 flex items-center gap-2 rounded-xl border border-warning/20 bg-warning/10 p-3">
+                      <AlertTriangle size={14} className="shrink-0 text-warning" />
+                      <p className="text-xs text-warning">
                         Мало данных о конкуренте. Результаты могут быть неточными.
                         Рекомендуем добавить данные вручную в анкете.
                       </p>
@@ -232,13 +232,13 @@ export function CompetitorView({
                   {(c.yandexPosition != null || c.hasContextAds != null) && (
                     <div className="mb-2 flex flex-wrap items-center gap-1.5">
                       {c.yandexPosition != null && (
-                        <span className="flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                        <span className="flex items-center gap-1 rounded border border-border bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                           <TrendingUp className="size-3" />
                           Яндекс #{c.yandexPosition}
                         </span>
                       )}
                       {c.hasContextAds === true && (
-                        <span className="rounded border border-orange-200 bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700">
+                        <span className="rounded border border-warning/20 bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
                           Директ
                         </span>
                       )}
@@ -286,17 +286,17 @@ export function CompetitorView({
                       return (
                         <div className="mb-3 flex flex-wrap items-center gap-1.5">
                           {c.instagram && (
-                            <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                            <span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
                               Instagram
                             </span>
                           )}
                           {c.vk && (
-                            <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                            <span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
                               ВКонтакте
                             </span>
                           )}
                           {c.telegram && (
-                            <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                            <span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
                               Telegram
                             </span>
                           )}
@@ -318,7 +318,7 @@ export function CompetitorView({
                   <div className="mb-3 grid gap-3 sm:grid-cols-2">
                     {c.strengths.length > 0 && (
                       <div>
-                        <p className="mb-1.5 text-xs font-medium text-[#16a34a]">
+                        <p className="mb-1.5 text-xs font-medium text-success">
                           Сильные стороны
                         </p>
                         <ul className="space-y-1">
@@ -336,7 +336,7 @@ export function CompetitorView({
                     )}
                     {c.weaknesses.length > 0 && (
                       <div>
-                        <p className="mb-1.5 text-xs font-medium text-[#dc2626]">
+                        <p className="mb-1.5 text-xs font-medium text-danger">
                           Слабые стороны
                         </p>
                         <ul className="space-y-1">
@@ -345,7 +345,7 @@ export function CompetitorView({
                               key={j}
                               className="flex items-start gap-1.5 text-sm text-foreground"
                             >
-                              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#dc2626]" />
+                              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-danger" />
                               {w}
                             </li>
                           ))}
@@ -357,10 +357,10 @@ export function CompetitorView({
                   {/* Complaints & praise from reviews */}
                   {((c.commonComplaints && c.commonComplaints.length > 0) ||
                     (c.commonPraise && c.commonPraise.length > 0)) && (
-                    <div className="grid gap-3 rounded-xl border border-[#eaeaea] bg-neutral-50 p-3 sm:grid-cols-2">
+                    <div className="grid gap-3 rounded-xl border border-border bg-muted p-3 sm:grid-cols-2">
                       {c.commonComplaints && c.commonComplaints.length > 0 && (
                         <div>
-                          <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-[#d97706]">
+                          <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-warning">
                             <AlertCircle className="size-3" />
                             Жалобы клиентов
                           </p>
@@ -375,7 +375,7 @@ export function CompetitorView({
                       )}
                       {c.commonPraise && c.commonPraise.length > 0 && (
                         <div>
-                          <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-[#16a34a]">
+                          <p className="mb-1.5 flex items-center gap-1 text-xs font-medium text-success">
                             <MessageSquare className="size-3" />
                             Хвалят
                           </p>
@@ -397,7 +397,7 @@ export function CompetitorView({
                       {c.channels.map((ch, j) => (
                         <span
                           key={j}
-                          className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-xs text-foreground"
+                          className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-foreground"
                         >
                           {ch}
                         </span>
@@ -419,10 +419,10 @@ export function CompetitorView({
                 {analysis.opportunities.map((opp, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm"
+                    className="rounded-2xl border border-border bg-card p-6 shadow-sm"
                   >
                     <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <span className="shrink-0 rounded-md bg-neutral-100 px-2 py-0.5 text-xs text-muted-foreground">
+                      <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                         {opp.competitor}
                       </span>
                       <PriorityBadge priority={opp.priority} />
@@ -437,7 +437,7 @@ export function CompetitorView({
 
           {/* Our advantages */}
           {analysis.ourAdvantages.length > 0 && (
-            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <h3 className="mb-3 text-sm font-medium text-foreground">
                 Наши конкурентные преимущества
               </h3>
@@ -445,7 +445,7 @@ export function CompetitorView({
                 {analysis.ourAdvantages.map((adv, i) => (
                   <span
                     key={i}
-                    className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700"
+                    className="rounded-lg border border-success/20 bg-success/10 px-3 py-1.5 text-sm text-success"
                   >
                     {adv}
                   </span>
@@ -456,7 +456,7 @@ export function CompetitorView({
 
           {/* Our weaknesses */}
           {analysis.ourWeaknesses && analysis.ourWeaknesses.length > 0 && (
-            <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <h3 className="mb-3 text-sm font-medium text-foreground">
                 Наши зоны роста
               </h3>
@@ -464,7 +464,7 @@ export function CompetitorView({
                 {analysis.ourWeaknesses.map((w, i) => (
                   <span
                     key={i}
-                    className="rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-sm text-orange-700"
+                    className="rounded-lg border border-warning/20 bg-warning/10 px-3 py-1.5 text-sm text-warning"
                   >
                     {w}
                   </span>

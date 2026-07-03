@@ -282,7 +282,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function InfoBlock({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-5 rounded-lg border border-[#eaeaea] bg-neutral-50 px-4 py-3 text-xs text-[#6b7280] leading-relaxed">
+    <div className="mb-5 rounded-lg border border-border bg-muted px-4 py-3 text-xs text-[#6b7280] leading-relaxed">
       {children}
     </div>
   )
@@ -305,9 +305,9 @@ function StepperProgress({ step }: { step: number }) {
               <div className="flex flex-col items-center gap-1">
                 <div className={cn(
                   "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors",
-                  done   ? "bg-[#111] text-white" :
-                  active ? "bg-[#111] text-white" :
-                           "bg-neutral-100 text-[#6b7280]"
+                  done   ? "bg-foreground text-background" :
+                  active ? "bg-foreground text-background" :
+                           "bg-muted text-[#6b7280]"
                 )}>
                   {done ? <Check className="size-3.5" /> : n}
                 </div>
@@ -319,16 +319,16 @@ function StepperProgress({ step }: { step: number }) {
               {n < 5 && (
                 <div className={cn(
                   "mb-4 h-px flex-1 transition-colors",
-                  done ? "bg-[#111]" : "bg-neutral-200"
+                  done ? "bg-foreground" : "bg-muted"
                 )} />
               )}
             </Fragment>
           )
         })}
       </div>
-      <div className="h-1 w-full overflow-hidden rounded-full bg-neutral-100">
+      <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-[#111] transition-all duration-300"
+          className="h-full rounded-full bg-foreground transition-all duration-300"
           style={{ width: `${(step / 5) * 100}%` }}
         />
       </div>
@@ -352,7 +352,7 @@ function Step1({
             Основная информация о компании и предлагаемом продукте или услуге
           </p>
         </div>
-        <div className="shrink-0 rounded-lg border border-[#eaeaea] bg-amber-50 px-3 py-2 text-xs text-amber-700 max-w-[220px]">
+        <div className="shrink-0 rounded-lg border border-border bg-warning/10 px-3 py-2 text-xs text-warning max-w-[220px]">
           💡 Совет: Будьте конкретны — это поможет AI предложить более точные решения
         </div>
       </div>
@@ -715,7 +715,7 @@ function Step5({
 
       <div className="space-y-3">
         {f.competitorsDetailed.map((c, i) => (
-          <div key={i} className="relative rounded-xl border border-[#eaeaea] bg-neutral-50 p-4">
+          <div key={i} className="relative rounded-xl border border-border bg-muted p-4">
             <button
               type="button"
               onClick={() => onRemoveCompetitor(i)}

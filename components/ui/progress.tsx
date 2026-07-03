@@ -9,7 +9,7 @@ interface ProgressProps extends React.ComponentProps<"div"> {
   max?: number
   /** Track height, defaults to 1.5 (h-1.5) */
   size?: "sm" | "default"
-  /** Override the filled-bar classes (default: bg-[#111]) */
+  /** Override the filled-bar classes (default: bg-foreground) */
   barClassName?: string
 }
 
@@ -31,14 +31,14 @@ function Progress({
       aria-valuemin={0}
       aria-valuemax={max}
       className={cn(
-        "w-full overflow-hidden rounded-full bg-neutral-100",
+        "w-full overflow-hidden rounded-full bg-muted",
         size === "sm" ? "h-1" : "h-1.5",
         className
       )}
       {...props}
     >
       <div
-        className={cn("h-full rounded-full bg-[#111] transition-all", barClassName)}
+        className={cn("h-full rounded-full bg-foreground transition-all", barClassName)}
         style={{ width: `${pct}%` }}
       />
     </div>

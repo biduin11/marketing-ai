@@ -156,11 +156,11 @@ export function AudienceView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-[#111]">Клиент</h1>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-lg border border-[#eaeaea] px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]">
+          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]">
             <Download size={15} />
             Экспорт
           </button>
-          <button className="flex items-center gap-2 rounded-lg border border-[#eaeaea] px-3 py-2 text-sm text-[#6b7280]">
+          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-[#6b7280]">
             <Calendar size={15} />
             {fmtDate(segmentsCreatedAt)}
             <ChevronDown size={14} />
@@ -193,7 +193,7 @@ export function AudienceView({
           ) : (
             <>
               {/* СЕКЦИЯ 1 — Сводка по аудитории */}
-              <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+              <div className="rounded-2xl border border-border bg-card p-6">
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   {/* Метрики */}
                   <div>
@@ -247,7 +247,7 @@ export function AudienceView({
                       ).map((m) => (
                         <div
                           key={m.label}
-                          className="rounded-xl border border-[#eaeaea] p-4"
+                          className="rounded-xl border border-border p-4"
                         >
                           <p className="mb-2 text-xs leading-snug text-[#6b7280]">
                             {m.label}
@@ -331,7 +331,7 @@ export function AudienceView({
 
               {/* СЕКЦИЯ 2 — Ключевые портреты */}
               {persona && persona.personas.length > 0 && (
-                <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+                <div className="rounded-2xl border border-border bg-card p-6">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-base font-semibold text-[#111]">
                       Ключевые портреты аудитории
@@ -347,7 +347,7 @@ export function AudienceView({
                     {persona.personas.slice(0, 4).map((p, i) => (
                       <div
                         key={i}
-                        className="flex flex-col rounded-2xl border border-[#eaeaea] p-4"
+                        className="flex flex-col rounded-2xl border border-border p-4"
                       >
                         {/* Аватар + имя */}
                         <div className="mb-4 flex items-center gap-3">
@@ -419,7 +419,7 @@ export function AudienceView({
                         {/* Кнопка подробнее */}
                         <div className="mt-auto">
                           <button
-                            className="flex w-full items-center justify-between rounded-lg border border-[#eaeaea] px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]"
+                            className="flex w-full items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]"
                             onClick={() => setActiveTab("personas")}
                           >
                             Подробнее <ArrowRight size={14} />
@@ -435,7 +435,7 @@ export function AudienceView({
               {segments && (
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                   {/* Основные потребности */}
-                  <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+                  <div className="rounded-2xl border border-border bg-card p-6">
                     <h3 className="mb-4 text-sm font-semibold text-[#111]">
                       Основные потребности
                     </h3>
@@ -449,7 +449,7 @@ export function AudienceView({
                             <div className="flex shrink-0 items-center gap-2">
                               <div className="h-1.5 w-20 rounded-full bg-[#eaeaea]">
                                 <div
-                                  className="h-1.5 rounded-full bg-[#111]"
+                                  className="h-1.5 rounded-full bg-foreground"
                                   style={{ width: `${need.percent}%` }}
                                 />
                               </div>
@@ -468,7 +468,7 @@ export function AudienceView({
                   </div>
 
                   {/* Главные боли */}
-                  <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+                  <div className="rounded-2xl border border-border bg-card p-6">
                     <h3 className="mb-4 text-sm font-semibold text-[#111]">
                       Главные боли
                     </h3>
@@ -482,7 +482,7 @@ export function AudienceView({
                             <div className="flex shrink-0 items-center gap-2">
                               <div className="h-1.5 w-20 rounded-full bg-[#eaeaea]">
                                 <div
-                                  className="h-1.5 rounded-full bg-[#111]"
+                                  className="h-1.5 rounded-full bg-foreground"
                                   style={{ width: `${pain.percent}%` }}
                                 />
                               </div>
@@ -501,7 +501,7 @@ export function AudienceView({
                   </div>
 
                   {/* Триггеры */}
-                  <div className="rounded-2xl border border-[#eaeaea] bg-white p-6">
+                  <div className="rounded-2xl border border-border bg-card p-6">
                     <h3 className="mb-4 text-sm font-semibold text-[#111]">
                       Триггеры принятия решения
                     </h3>
@@ -515,7 +515,7 @@ export function AudienceView({
                             <div className="flex shrink-0 items-center gap-2">
                               <div className="h-1.5 w-20 rounded-full bg-[#eaeaea]">
                                 <div
-                                  className="h-1.5 rounded-full bg-[#111]"
+                                  className="h-1.5 rounded-full bg-foreground"
                                   style={{ width: `${t.percent}%` }}
                                 />
                               </div>
@@ -601,7 +601,7 @@ export function AudienceView({
           ) : (
             <div className="space-y-3">
               {segments.summary && (
-                <div className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm">
+                <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                   <p className="text-sm text-muted-foreground">
                     {segments.summary}
                   </p>
@@ -759,9 +759,9 @@ export function AudienceView({
               {allPains.map(({ pain, persona: pName }, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 rounded-xl border border-[#eaeaea] bg-white p-4 shadow-sm"
+                  className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
                 >
-                  <span className="mt-0.5 size-2 shrink-0 rounded-full bg-[#dc2626]" />
+                  <span className="mt-0.5 size-2 shrink-0 rounded-full bg-danger" />
                   <div className="min-w-0">
                     <p className="text-sm text-foreground">{pain}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
@@ -789,7 +789,7 @@ export function AudienceView({
               {allTriggers.map(({ trigger, persona: pName }, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-3 rounded-xl border border-[#eaeaea] bg-white p-4 shadow-sm"
+                  className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
                 >
                   <span className="mt-0.5 size-2 shrink-0 rounded-full bg-[#16a34a]" />
                   <div className="min-w-0">

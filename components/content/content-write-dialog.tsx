@@ -91,7 +91,7 @@ export function ContentWriteDialog({
         </DialogHeader>
 
         {/* Content metadata */}
-        <div className="rounded-xl bg-neutral-50 px-4 py-3 space-y-1">
+        <div className="rounded-xl bg-muted px-4 py-3 space-y-1">
           <p className="text-sm font-medium text-foreground">{item.title}</p>
           <p className="text-xs text-muted-foreground">
             {TYPE_LABELS[item.type] ?? item.type}
@@ -105,15 +105,15 @@ export function ContentWriteDialog({
 
         {/* Generated text */}
         {text && (
-          <div className="relative rounded-xl border border-[#eaeaea] bg-white">
+          <div className="relative rounded-xl border border-border bg-card">
             <div className="max-h-72 overflow-y-auto p-4">
               <pre className="whitespace-pre-wrap text-sm text-foreground leading-relaxed font-sans">
                 {text}
               </pre>
             </div>
-            <div className="flex justify-end border-t border-[#eaeaea] px-3 py-2">
+            <div className="flex justify-end border-t border-border px-3 py-2">
               <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-xs" onClick={() => void copyText()}>
-                {copied ? <Check className="size-3 text-[#16a34a]" /> : <Copy className="size-3" />}
+                {copied ? <Check className="size-3 text-success" /> : <Copy className="size-3" />}
                 {copied ? "Скопировано" : "Скопировать"}
               </Button>
             </div>

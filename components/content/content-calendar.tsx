@@ -105,7 +105,7 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
             onChange={(e) =>
               setPlatformFilter(e.target.value as PlatformId | "all")
             }
-            className="appearance-none rounded-lg border border-[#eaeaea] bg-white py-1.5 pl-3 pr-7 text-sm text-foreground focus:outline-none"
+            className="appearance-none rounded-lg border border-border bg-card py-1.5 pl-3 pr-7 text-sm text-foreground focus:outline-none"
           >
             <option value="all">Все площадки</option>
             {PLATFORMS.map((p) => (
@@ -128,8 +128,8 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
                   className={cn(
                     "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                     selectedWeek === w
-                      ? "bg-neutral-900 text-white"
-                      : "bg-neutral-100 text-muted-foreground hover:bg-neutral-200"
+                      ? "bg-foreground text-background"
+                      : "bg-muted text-muted-foreground hover:bg-muted"
                   )}
                 >
                   {w} нед.
@@ -139,7 +139,7 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
           )}
 
           {/* View toggle */}
-          <div className="flex overflow-hidden rounded-lg border border-[#eaeaea]">
+          <div className="flex overflow-hidden rounded-lg border border-border">
             {(["week", "month"] as const).map((v) => (
               <button
                 key={v}
@@ -147,8 +147,8 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
                 className={cn(
                   "px-3 py-1.5 text-sm transition-colors",
                   view === v
-                    ? "bg-neutral-900 font-medium text-white"
-                    : "bg-white text-muted-foreground hover:bg-neutral-50"
+                    ? "bg-foreground font-medium text-background"
+                    : "bg-card text-muted-foreground hover:bg-muted"
                 )}
               >
                 {v === "week" ? "Неделя" : "Месяц"}
@@ -235,18 +235,18 @@ function WeekGrid({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[#eaeaea]">
+    <div className="overflow-x-auto rounded-xl border border-border">
       <div className="min-w-[720px]">
         {/* Day headers */}
         <div
-          className="grid border-b border-[#eaeaea] bg-neutral-50"
+          className="grid border-b border-border bg-muted"
           style={{ gridTemplateColumns: "168px repeat(7, 1fr)" }}
         >
-          <div className="border-r border-[#eaeaea] p-3" />
+          <div className="border-r border-border p-3" />
           {days.map((day, i) => (
             <div
               key={day}
-              className="border-r border-[#eaeaea] px-2 py-2 text-center last:border-r-0"
+              className="border-r border-border px-2 py-2 text-center last:border-r-0"
             >
               <p className="text-xs text-muted-foreground">{DAY_NAMES[i]}</p>
               <p className="text-xs font-semibold text-foreground">{day}</p>
@@ -262,11 +262,11 @@ function WeekGrid({
           return (
             <div
               key={id}
-              className="grid border-b border-[#eaeaea] last:border-b-0"
+              className="grid border-b border-border last:border-b-0"
               style={{ gridTemplateColumns: "168px repeat(7, 1fr)" }}
             >
               {/* Platform label */}
-              <div className="flex flex-col justify-center border-r border-[#eaeaea] px-3 py-3">
+              <div className="flex flex-col justify-center border-r border-border px-3 py-3">
                 <div className="flex items-center gap-2">
                   <Icon className="size-4 shrink-0 text-muted-foreground" />
                   <span className="text-sm font-medium text-foreground">
@@ -286,7 +286,7 @@ function WeekGrid({
                 return (
                   <div
                     key={day}
-                    className="min-h-[80px] border-r border-[#eaeaea] p-1.5 last:border-r-0"
+                    className="min-h-[80px] border-r border-border p-1.5 last:border-r-0"
                   >
                     {cellItems.length === 0 ? (
                       <div className="flex h-full min-h-[64px] items-center justify-center">
@@ -303,7 +303,7 @@ function WeekGrid({
                           return (
                             <div
                               key={idx}
-                              className="group rounded-lg border border-[#eaeaea] bg-white p-1.5 shadow-sm"
+                              className="group rounded-lg border border-border bg-card p-1.5 shadow-sm"
                             >
                               <div className="mb-0.5 flex items-center justify-between gap-1">
                                 <span className="text-[10px] font-medium text-foreground">
@@ -320,12 +320,12 @@ function WeekGrid({
                                 {item.title}
                               </p>
                               <div className="mt-1 flex items-center justify-between gap-1">
-                                <span className="inline-block rounded bg-neutral-100 px-1 py-0.5 text-[10px] text-muted-foreground">
+                                <span className="inline-block rounded bg-muted px-1 py-0.5 text-[10px] text-muted-foreground">
                                   {format}
                                 </span>
                                 <button
                                   onClick={() => onWrite(item)}
-                                  className="hidden group-hover:flex items-center gap-0.5 rounded bg-[#111] px-1.5 py-0.5 text-[10px] font-medium text-white"
+                                  className="hidden group-hover:flex items-center gap-0.5 rounded bg-foreground px-1.5 py-0.5 text-[10px] font-medium text-background"
                                 >
                                   <Sparkles className="size-2.5" />
                                   Написать
@@ -359,22 +359,22 @@ function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: 
   const weeks = [1, 2, 3, 4] as const
 
   const platformColor: Record<PlatformId, string> = {
-    instagram: "bg-violet-100 text-violet-700",
-    telegram: "bg-blue-100 text-blue-700",
-    vk: "bg-sky-100 text-sky-700",
-    youtube: "bg-red-100 text-red-700",
-    blog: "bg-emerald-100 text-emerald-700",
-    email: "bg-orange-100 text-orange-700",
+    instagram: "bg-muted text-foreground",
+    telegram: "bg-muted text-foreground",
+    vk: "bg-muted text-foreground",
+    youtube: "bg-red-100 text-danger",
+    blog: "bg-emerald-100 text-success",
+    email: "bg-orange-100 text-warning",
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#eaeaea]">
+    <div className="overflow-hidden rounded-xl border border-border">
       {/* Headers */}
-      <div className="grid grid-cols-7 border-b border-[#eaeaea] bg-neutral-50">
+      <div className="grid grid-cols-7 border-b border-border bg-muted">
         {DAY_NAMES.map((d) => (
           <div
             key={d}
-            className="border-r border-[#eaeaea] py-2 text-center text-xs font-medium text-muted-foreground last:border-r-0"
+            className="border-r border-border py-2 text-center text-xs font-medium text-muted-foreground last:border-r-0"
           >
             {d}
           </div>
@@ -388,14 +388,14 @@ function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: 
         return (
           <div
             key={week}
-            className="grid grid-cols-7 border-b border-[#eaeaea] last:border-b-0"
+            className="grid grid-cols-7 border-b border-border last:border-b-0"
           >
             {days.map((day) => {
               const dayItems = byDay.get(day) ?? []
               return (
                 <div
                   key={day}
-                  className="min-h-[72px] border-r border-[#eaeaea] p-1.5 last:border-r-0"
+                  className="min-h-[72px] border-r border-border p-1.5 last:border-r-0"
                 >
                   <span className="mb-1 block text-xs text-muted-foreground">
                     {day}
@@ -404,7 +404,7 @@ function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: 
                     {dayItems.slice(0, 3).map((item, i) => {
                       const platform = inferPlatform(item)
                       const cls =
-                        platformColor[platform] ?? "bg-neutral-100 text-neutral-700"
+                        platformColor[platform] ?? "bg-muted text-neutral-700"
                       return (
                         <button
                           key={i}
@@ -433,7 +433,7 @@ function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: 
       })}
 
       {/* Platform legend */}
-      <div className="flex flex-wrap gap-2 border-t border-[#eaeaea] bg-neutral-50 px-3 py-2">
+      <div className="flex flex-wrap gap-2 border-t border-border bg-muted px-3 py-2">
         {PLATFORMS.map(({ id, label }) => (
           <span
             key={id}

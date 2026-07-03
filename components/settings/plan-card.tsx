@@ -58,7 +58,7 @@ export function PlanCard({ planName }: PlanCardProps) {
   const isPro = planName === "PRO"
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Ваш план
@@ -66,8 +66,8 @@ export function PlanCard({ planName }: PlanCardProps) {
         <span
           className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
             isPro
-              ? "bg-neutral-900 text-white"
-              : "bg-neutral-100 text-foreground"
+              ? "bg-foreground text-background"
+              : "bg-muted text-foreground"
           }`}
         >
           {isPro ? "Pro" : "Free"}
@@ -98,7 +98,7 @@ export function PlanCard({ planName }: PlanCardProps) {
           <ul className="space-y-2">
             {PRO_FEATURES.map((f) => (
               <li key={f} className="flex items-center gap-2 text-sm text-foreground">
-                <Check className="size-3.5 shrink-0 text-[#16a34a]" />
+                <Check className="size-3.5 shrink-0 text-success" />
                 {f}
               </li>
             ))}
