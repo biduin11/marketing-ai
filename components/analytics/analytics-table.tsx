@@ -1,3 +1,4 @@
+import { Inbox } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { ChannelMetrics } from "@/lib/services/analytics.service"
 
@@ -58,9 +59,13 @@ function RomiBadge({ romi, maxRomi }: { romi: number; maxRomi: number }) {
 export function AnalyticsTable({ channels }: AnalyticsTableProps) {
   if (!channels.length) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-        <p className="text-sm text-muted-foreground">
-          Нет данных по каналам. Добавьте метрики.
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
+        <div className="mb-3 flex size-10 items-center justify-center rounded-xl bg-muted">
+          <Inbox className="size-5 text-muted-foreground" />
+        </div>
+        <p className="text-sm font-medium text-foreground">Нет данных по каналам</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Добавьте метрики, чтобы увидеть эффективность каждого канала.
         </p>
       </div>
     )
