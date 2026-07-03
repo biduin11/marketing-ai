@@ -176,7 +176,7 @@ export function AnalyticsView({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Аналитика</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">Аналитика</h2>
           <p className="text-sm text-muted-foreground">
             {formatDateRu(from)} — {formatDateRu(to)}
             <span className="ml-3 text-muted-foreground/60">

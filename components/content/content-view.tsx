@@ -130,7 +130,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="font-heading text-lg font-semibold text-foreground">
             Контент-план
           </h2>
           <p className="text-sm text-muted-foreground">

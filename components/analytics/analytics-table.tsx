@@ -36,7 +36,7 @@ function fmt(v: number, dec = 0): string {
 function RomiBadge({ romi, maxRomi }: { romi: number; maxRomi: number }) {
   const pct = maxRomi > 0 ? Math.min((romi / maxRomi) * 100, 100) : 0
   const color =
-    romi > 700 ? "#16a34a" : romi > 400 ? "#10b981" : romi > 0 ? "#d97706" : "#dc2626"
+    romi > 700 ? "var(--color-success)" : romi > 400 ? "var(--color-success)" : romi > 0 ? "var(--color-warning)" : "var(--color-danger)"
   return (
     <div className="flex items-center gap-2">
       <span
@@ -58,7 +58,7 @@ function RomiBadge({ romi, maxRomi }: { romi: number; maxRomi: number }) {
 export function AnalyticsTable({ channels }: AnalyticsTableProps) {
   if (!channels.length) {
     return (
-      <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <p className="text-sm text-muted-foreground">
           Нет данных по каналам. Добавьте метрики.
         </p>
@@ -69,8 +69,8 @@ export function AnalyticsTable({ channels }: AnalyticsTableProps) {
   const maxRomi = Math.max(...channels.map((c) => c.romi), 1)
 
   return (
-    <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-      <div className="border-b border-[#eaeaea] px-5 py-4">
+    <div className="rounded-2xl border border-border bg-card shadow-sm">
+      <div className="border-b border-border px-5 py-4">
         <h3 className="text-sm font-medium text-foreground">
           Эффективность по каналам
         </h3>
@@ -78,7 +78,7 @@ export function AnalyticsTable({ channels }: AnalyticsTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#eaeaea] bg-neutral-50">
+            <tr className="border-b border-border bg-neutral-50">
               {["Канал", "Расходы", "Клики", "CTR", "Лиды", "CPL", "Продажи", "ROMI"].map(
                 (h) => (
                   <th

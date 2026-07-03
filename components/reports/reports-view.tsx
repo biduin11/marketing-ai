@@ -205,7 +205,7 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Отчёты</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">Отчёты</h2>
           <p className="text-sm text-muted-foreground">
             AI-резюме для руководителя с экспортом в PDF
           </p>

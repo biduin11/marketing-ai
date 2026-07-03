@@ -44,7 +44,7 @@ function DeltaBadge({ delta }: { delta?: number }) {
     <span
       className={cn(
         "text-xs font-medium",
-        positive ? "text-[#16a34a]" : "text-[#dc2626]"
+        positive ? "text-success" : "text-danger"
       )}
     >
       {positive ? "↑" : "↓"} {Math.abs(delta).toFixed(1)}%
@@ -79,7 +79,7 @@ const CARDS: CardDef[] = [
     key: "totalSpend",
     format: (v) => `${v.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`,
     sparkKey: "spend",
-    color: "#111111",
+    color: "var(--color-foreground)",
     formula: "Σ spend по всем каналам за период",
     formulaDesc: "Суммарные маркетинговые расходы",
   },
@@ -88,7 +88,7 @@ const CARDS: CardDef[] = [
     key: "totalImpressions",
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "impressions",
-    color: "#8b5cf6",
+    color: "var(--color-muted-foreground)",
     formula: "Σ impressions по всем каналам",
     formulaDesc: "Сколько раз показались объявления",
   },
@@ -97,7 +97,7 @@ const CARDS: CardDef[] = [
     key: "totalClicks",
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "clicks",
-    color: "#3b82f6",
+    color: "var(--color-muted-foreground)",
     formula: "Σ clicks по всем каналам",
     formulaDesc: "Сколько раз кликнули по объявлениям",
   },
@@ -106,7 +106,7 @@ const CARDS: CardDef[] = [
     key: "ctr",
     format: (v) => `${v.toFixed(2)}%`,
     sparkKey: "clicks",
-    color: "#06b6d4",
+    color: "var(--color-muted-foreground)",
     formula: "CTR = Клики / Показы × 100%",
     formulaDesc: "Кликабельность — доля показов, ставших кликами",
   },
@@ -115,7 +115,7 @@ const CARDS: CardDef[] = [
     key: "totalLeads",
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "leads",
-    color: "#10b981",
+    color: "var(--color-muted-foreground)",
     formula: "Σ leads по всем каналам",
     formulaDesc: "Количество полученных заявок/лидов",
   },
@@ -124,7 +124,7 @@ const CARDS: CardDef[] = [
     key: "cpl",
     format: (v) => `${v.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`,
     sparkKey: "spend",
-    color: "#f59e0b",
+    color: "var(--color-muted-foreground)",
     formula: "CPL = Расходы / Лиды",
     formulaDesc: "Сколько стоит один лид в среднем",
   },
@@ -133,7 +133,7 @@ const CARDS: CardDef[] = [
     key: "sales",
     format: (v) => v.toLocaleString("ru-RU"),
     sparkKey: "leads",
-    color: "#f97316",
+    color: "var(--color-muted-foreground)",
     formula: "Продажи ≈ Лиды × CR (конверсия ~27.8%)",
     formulaDesc: "Расчётное количество закрытых сделок",
   },
@@ -142,7 +142,7 @@ const CARDS: CardDef[] = [
     key: "totalRevenue",
     format: (v) => `${v.toLocaleString("ru-RU", { maximumFractionDigits: 0 })} ₽`,
     sparkKey: "revenue",
-    color: "#16a34a",
+    color: "var(--color-muted-foreground)",
     formula: "Σ revenue по всем каналам за период",
     formulaDesc: "Суммарная выручка от маркетинговых активностей",
   },
@@ -151,7 +151,7 @@ const CARDS: CardDef[] = [
     key: "romi",
     format: (v) => `${v.toFixed(0)}%`,
     sparkKey: "revenue",
-    color: "#8b5cf6",
+    color: "var(--color-muted-foreground)",
     formula: "ROMI = Выручка / Расходы × 100%",
     formulaDesc: "Возврат на маркетинговые инвестиции",
   },
@@ -176,7 +176,7 @@ export function AnalyticsCards({
   timeSeries,
 }: AnalyticsCardsProps) {
   return (
-    <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-9">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {CARDS.map((card) => {
         const value = getValue(summary, card.key)
         const sparkValues = timeSeries.map((p) => p[card.sparkKey] as number)
@@ -185,7 +185,7 @@ export function AnalyticsCards({
         return (
           <div
             key={card.key}
-            className="rounded-2xl border border-[#eaeaea] bg-white p-4 shadow-sm"
+            className="rounded-2xl border border-border bg-card p-4 shadow-sm"
           >
             <div className="mb-1 flex items-center gap-1">
               <p className="text-[11px] leading-snug text-muted-foreground">

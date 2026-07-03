@@ -133,7 +133,7 @@ export function CompetitorView({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Конкуренты</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">Конкуренты</h2>
           <p className="text-sm text-muted-foreground">
             Анализ на основе живых данных из интернета
             {version && <span className="ml-2 text-xs">· версия {version}</span>}

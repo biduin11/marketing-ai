@@ -23,26 +23,26 @@ const offerTypeConfig: Record<
   utp: {
     label: "УТП",
     color: "text-foreground",
-    bg: "bg-neutral-100",
-    border: "border-[#eaeaea]",
+    bg: "bg-muted",
+    border: "border-border",
   },
   promotion: {
     label: "Акция",
-    color: "text-[#d97706]",
-    bg: "bg-amber-50",
-    border: "border-amber-200",
+    color: "text-warning",
+    bg: "bg-warning/10",
+    border: "border-warning/20",
   },
   special: {
     label: "Спецпредложение",
-    color: "text-[#16a34a]",
-    bg: "bg-green-50",
-    border: "border-green-200",
+    color: "text-success",
+    bg: "bg-success/10",
+    border: "border-success/20",
   },
   lead_magnet: {
     label: "Лид-магнит",
     color: "text-muted-foreground",
-    bg: "bg-neutral-50",
-    border: "border-[#eaeaea]",
+    bg: "bg-muted/50",
+    border: "border-border",
   },
 }
 
@@ -83,7 +83,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Офферы</h2>
+          <h2 className="font-heading text-lg font-semibold text-foreground">Офферы</h2>
           <p className="text-sm text-muted-foreground">
             УТП, акции, спецпредложения и лид-магниты
             {version && <span className="ml-2 text-xs">· версия {version}</span>}
@@ -126,13 +126,13 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
       ) : (
         <div className="space-y-6">
           {/* USP + Tagline */}
-          <div className="rounded-2xl border border-[#eaeaea] bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Главное УТП
             </p>
             <p className="text-xl font-semibold text-foreground">{offer.usp}</p>
             {offer.tagline && (
-              <p className="mt-3 inline-block rounded-full border border-[#eaeaea] bg-neutral-50 px-3 py-1 text-sm text-muted-foreground">
+              <p className="mt-3 inline-block rounded-full border border-border bg-muted px-3 py-1 text-sm text-muted-foreground">
                 {offer.tagline}
               </p>
             )}
@@ -161,7 +161,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
                           <OfferTypeIcon type={o.type} />
                           {cfg.label}
                         </span>
-                        <span className="rounded border border-[#eaeaea] bg-white px-1.5 py-0.5 text-xs text-muted-foreground">
+                        <span className="rounded border border-border bg-card px-1.5 py-0.5 text-xs text-muted-foreground">
                           {o.target}
                         </span>
                       </div>
@@ -191,11 +191,11 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
                 {offer.leadMagnets.map((lm, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
+                    className="rounded-2xl border border-border bg-card p-5 shadow-sm"
                   >
                     <div className="mb-2 flex items-center gap-2">
                       <BookOpen className="size-4 text-muted-foreground" />
-                      <span className="rounded border border-[#eaeaea] bg-neutral-50 px-1.5 py-0.5 text-xs text-muted-foreground">
+                      <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
                         {lm.format}
                       </span>
                     </div>
