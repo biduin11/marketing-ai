@@ -151,7 +151,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
                     <div
                       key={i}
                       className={cn(
-                        "rounded-2xl border p-5 shadow-sm",
+                        "rounded-2xl border p-6 shadow-sm",
                         cfg.bg,
                         cfg.border
                       )}
@@ -191,7 +191,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
                 {offer.leadMagnets.map((lm, i) => (
                   <div
                     key={i}
-                    className="rounded-2xl border border-border bg-card p-5 shadow-sm"
+                    className="rounded-2xl border border-border bg-card p-6 shadow-sm"
                   >
                     <div className="mb-2 flex items-center gap-2">
                       <BookOpen className="size-4 text-muted-foreground" />
