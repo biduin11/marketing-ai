@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
   Sparkles, RefreshCw, Loader2, Crosshair, Star, Globe,
-  MessageSquare, TrendingUp, AlertCircle,
+  MessageSquare, TrendingUp, AlertCircle, AlertTriangle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
@@ -24,15 +24,15 @@ function RatingBadge({
   count,
 }: {
   label: string
-  rating?: number
-  count?: number
+  rating?: number | null
+  count?: number | null
 }) {
-  if (rating === undefined) return null
+  if (rating == null) return null
   return (
     <span className="flex items-center gap-1 rounded-md border border-[#eaeaea] bg-neutral-50 px-2 py-1 text-xs">
       <Star className="size-3 fill-[#d97706] text-[#d97706]" />
       <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
-      {count !== undefined && (
+      {count != null && (
         <span className="text-muted-foreground">({count})</span>
       )}
       <span className="text-muted-foreground">{label}</span>
@@ -46,10 +46,10 @@ function PresenceBadge({
   variant = "neutral",
 }: {
   label: string
-  active?: boolean
+  active?: boolean | null
   variant?: "neutral" | "success" | "warning"
 }) {
-  if (active === undefined) return null
+  if (active == null) return null
   const colors = {
     neutral: active
       ? "bg-neutral-100 text-foreground border-neutral-200"
@@ -70,7 +70,7 @@ function PresenceBadge({
   )
 }
 
-function SocialActivityBadge({ activity }: { activity?: string }) {
+function SocialActivityBadge({ activity }: { activity?: string | null }) {
   if (!activity) return null
   const map: Record<string, { label: string; cls: string }> = {
     active: { label: "Активны", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -189,17 +189,34 @@ export function CompetitorView({
                   key={i}
                   className="rounded-2xl border border-[#eaeaea] bg-white p-5 shadow-sm"
                 >
+                  {/* Low-confidence warning */}
+                  {c.dataConfidence === "low" && (
+                    <div className="mb-4 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                      <AlertTriangle size={14} className="shrink-0 text-amber-600" />
+                      <p className="text-xs text-amber-700">
+                        Мало данных о конкуренте. Результаты могут быть неточными.
+                        Рекомендуем добавить данные вручную в анкете.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Card header: name + ratings */}
                   <div className="mb-3 flex flex-wrap items-start gap-2">
                     <span className="text-base font-semibold text-foreground">
                       {c.name}
                     </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      <RatingBadge
-                        label="Яндекс"
-                        rating={c.yandexRating}
-                        count={c.yandexReviewsCount}
-                      />
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {c.yandexRating != null ? (
+                        <RatingBadge
+                          label="Яндекс"
+                          rating={c.yandexRating}
+                          count={c.yandexReviewsCount}
+                        />
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          Яндекс: нет данных
+                        </span>
+                      )}
                       <RatingBadge
                         label="2ГИС"
                         rating={c.gisRating}
@@ -212,9 +229,9 @@ export function CompetitorView({
                   <p className="mb-3 text-sm text-muted-foreground">{c.positioning}</p>
 
                   {/* Search & ads presence */}
-                  {(c.yandexPosition !== undefined || c.hasContextAds !== undefined) && (
+                  {(c.yandexPosition != null || c.hasContextAds != null) && (
                     <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                      {c.yandexPosition !== undefined && (
+                      {c.yandexPosition != null && (
                         <span className="flex items-center gap-1 rounded border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
                           <TrendingUp className="size-3" />
                           Яндекс #{c.yandexPosition}
@@ -229,12 +246,12 @@ export function CompetitorView({
                   )}
 
                   {/* Online presence */}
-                  {(c.hasSite !== undefined ||
-                    c.hasPrices !== undefined ||
-                    c.hasCalculator !== undefined ||
-                    c.hasOnlineForm !== undefined) && (
+                  {(c.hasSite != null ||
+                    c.hasPrices != null ||
+                    c.hasCalculator != null ||
+                    c.hasOnlineForm != null) && (
                     <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                      {c.hasSite !== undefined && (
+                      {c.hasSite != null && (
                         <PresenceBadge label="Сайт" active={c.hasSite} variant="neutral" />
                       )}
                       {c.siteUrl && c.hasSite && (
@@ -243,43 +260,59 @@ export function CompetitorView({
                           {c.siteUrl.replace(/^https?:\/\//, "").split("/")[0]}
                         </span>
                       )}
-                      {c.hasPrices !== undefined && (
+                      {c.hasPrices != null && (
                         <PresenceBadge label="Цены" active={c.hasPrices} variant="success" />
                       )}
-                      {c.hasCalculator !== undefined && (
+                      {c.hasCalculator != null && (
                         <PresenceBadge
                           label="Калькулятор"
                           active={c.hasCalculator}
                           variant="success"
                         />
                       )}
-                      {c.hasOnlineForm !== undefined && (
+                      {c.hasOnlineForm != null && (
                         <PresenceBadge label="Форма заявки" active={c.hasOnlineForm} variant="success" />
                       )}
                     </div>
                   )}
+                  {c.siteNote && (
+                    <p className="mb-2 text-xs text-muted-foreground">{c.siteNote}</p>
+                  )}
 
                   {/* Social presence */}
-                  {(c.instagram || c.vk || c.telegram || c.socialActivity) && (
-                    <div className="mb-3 flex flex-wrap items-center gap-1.5">
-                      {c.instagram && (
-                        <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
-                          Instagram
-                        </span>
-                      )}
-                      {c.vk && (
-                        <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
-                          ВКонтакте
-                        </span>
-                      )}
-                      {c.telegram && (
-                        <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
-                          Telegram
-                        </span>
-                      )}
-                      <SocialActivityBadge activity={c.socialActivity} />
-                    </div>
-                  )}
+                  {(() => {
+                    const hasSocial = !!(c.instagram || c.vk || c.telegram)
+                    if (hasSocial || c.socialActivity != null) {
+                      return (
+                        <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                          {c.instagram && (
+                            <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                              Instagram
+                            </span>
+                          )}
+                          {c.vk && (
+                            <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                              ВКонтакте
+                            </span>
+                          )}
+                          {c.telegram && (
+                            <span className="rounded border border-[#eaeaea] bg-neutral-50 px-2 py-0.5 text-xs text-foreground">
+                              Telegram
+                            </span>
+                          )}
+                          <SocialActivityBadge activity={c.socialActivity} />
+                          {c.socialNote && (
+                            <span className="text-xs text-muted-foreground">{c.socialNote}</span>
+                          )}
+                        </div>
+                      )
+                    }
+                    return (
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        {c.socialNote ?? "Соцсети не найдены"}
+                      </p>
+                    )
+                  })()}
 
                   {/* Strengths & weaknesses */}
                   <div className="mb-3 grid gap-3 sm:grid-cols-2">
