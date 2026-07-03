@@ -3,58 +3,18 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, Tag, Megaphone, Gift, BookOpen } from "lucide-react"
+import { Sparkles, RefreshCw, Loader2, Tag, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { runOffer } from "@/lib/actions/ai"
-import type { Offer, OfferType } from "@/lib/ai/schemas/offer"
+import type { Offer } from "@/lib/ai/schemas/offer"
+import { OFFER_TYPE_META, TONE_CLASSES } from "@/lib/status-variants"
 import { cn } from "@/lib/utils"
 
 interface OffersViewProps {
   projectId: string
   offer: Offer | null
   version: number | null
-}
-
-const offerTypeConfig: Record<
-  OfferType,
-  { label: string; color: string; bg: string; border: string }
-> = {
-  utp: {
-    label: "УТП",
-    color: "text-foreground",
-    bg: "bg-muted",
-    border: "border-border",
-  },
-  promotion: {
-    label: "Акция",
-    color: "text-warning",
-    bg: "bg-warning/10",
-    border: "border-warning/20",
-  },
-  special: {
-    label: "Спецпредложение",
-    color: "text-success",
-    bg: "bg-success/10",
-    border: "border-success/20",
-  },
-  lead_magnet: {
-    label: "Лид-магнит",
-    color: "text-muted-foreground",
-    bg: "bg-muted/50",
-    border: "border-border",
-  },
-}
-
-function OfferTypeIcon({ type }: { type: OfferType }) {
-  const icons = {
-    utp: Tag,
-    promotion: Megaphone,
-    special: Gift,
-    lead_magnet: BookOpen,
-  } as const
-  const Icon = icons[type]
-  return <Icon className="size-4" />
 }
 
 export function OffersView({ projectId, offer, version }: OffersViewProps) {
@@ -146,20 +106,22 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
               </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {offer.offers.map((o, i) => {
-                  const cfg = offerTypeConfig[o.type]
+                  const meta = OFFER_TYPE_META[o.type]
+                  const tone = TONE_CLASSES[meta.tone]
+                  const Icon = meta.icon
                   return (
                     <div
                       key={i}
                       className={cn(
                         "rounded-2xl border p-6 shadow-sm",
-                        cfg.bg,
-                        cfg.border
+                        tone.bg,
+                        tone.border
                       )}
                     >
                       <div className="mb-3 flex items-center gap-2">
-                        <span className={cn("flex items-center gap-1 text-xs font-medium", cfg.color)}>
-                          <OfferTypeIcon type={o.type} />
-                          {cfg.label}
+                        <span className={cn("flex items-center gap-1 text-xs font-medium", tone.text)}>
+                          <Icon className="size-4" />
+                          {meta.label}
                         </span>
                         <span className="rounded border border-border bg-card px-1.5 py-0.5 text-xs text-muted-foreground">
                           {o.target}
