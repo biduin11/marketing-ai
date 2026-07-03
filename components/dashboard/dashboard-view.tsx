@@ -84,6 +84,8 @@ interface DashboardViewProps {
   reports: ReportRow[]
   strategyKpis: KpiRow[]
   todayContent: ContentItem[]
+  hasContentPlan: boolean
+  contentPlanUpdatedAt: string | null
   onboardingSteps?: OnboardingStep[]
 }
 
@@ -150,7 +152,13 @@ function todayRu(): string {
 }
 
 function DeltaBadge({ current, prev }: { current: number; prev: number }) {
-  if (prev === 0) return null
+  if (prev === 0) {
+    return (
+      <span className="ml-1 inline-flex items-center rounded-full bg-neutral-100 px-1.5 py-0.5 text-xs text-muted-foreground">
+        нет базы
+      </span>
+    )
+  }
   const delta = ((current - prev) / Math.abs(prev)) * 100
   const up = delta >= 0
   const big = Math.abs(delta) >= 20
@@ -186,7 +194,7 @@ function detectAnomalies(
   prevSummary: MetricSummary
 ): Array<{ label: string; delta: number; bad: boolean }> {
   const anomalies: Array<{ label: string; delta: number; bad: boolean }> = []
-  const threshold = 20
+  const threshold = 10
 
   const revDelta = prevSummary.totalRevenue > 0
     ? ((summary.totalRevenue - prevSummary.totalRevenue) / prevSummary.totalRevenue) * 100
@@ -224,6 +232,8 @@ export function DashboardView({
   reports,
   strategyKpis,
   todayContent,
+  hasContentPlan,
+  contentPlanUpdatedAt,
   onboardingSteps,
 }: DashboardViewProps) {
   const router = useRouter()
@@ -292,6 +302,61 @@ export function DashboardView({
     summary && prevSummary ? detectAnomalies(summary, prevSummary) : []
   const badAnomalies = anomalies.filter((a) => a.bad)
 
+  if (!projectId) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-foreground">Главная</h1>
+          <Button size="sm" onClick={() => setNewProjectOpen(true)}>
+            <Plus className="size-3.5" />
+            Новый проект
+          </Button>
+        </div>
+        <div className="rounded-2xl border border-[#eaeaea] bg-white p-10 shadow-sm text-center">
+          <BotMessageSquare className="mx-auto mb-4 size-10 text-muted-foreground opacity-40" />
+          <p className="text-base font-semibold text-foreground mb-1">Выберите активный проект</p>
+          <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+            Переключитесь на один из ваших проектов через меню слева, чтобы видеть аналитику, задачи и рекомендации AI.
+          </p>
+          {projects.length > 0 && (
+            <div className="divide-y divide-[#eaeaea] rounded-xl border border-[#eaeaea] text-left max-w-xs mx-auto">
+              {projects.slice(0, 3).map((p) => (
+                <div key={p.id} className="flex items-center justify-between px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
+                    {p.niche && <p className="truncate text-xs text-muted-foreground">{p.niche}</p>}
+                  </div>
+                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-neutral-100 text-[#6b7280]")}>
+                    {STATUS_LABELS[p.status] ?? p.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <Dialog open={newProjectOpen} onOpenChange={setNewProjectOpen}>
+          <DialogContent className="sm:max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Новый проект</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <Input
+                placeholder="Название проекта"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") void handleCreateProject() }}
+                autoFocus
+              />
+              <Button className="w-full" onClick={() => void handleCreateProject()} disabled={creating || !newProjectName.trim()}>
+                {creating ? <Loader2 className="size-4 animate-spin" /> : "Создать"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -325,6 +390,11 @@ export function DashboardView({
             <Sunrise className="size-4 text-[#d97706]" />
             <span className="text-sm font-semibold text-foreground">Morning Brief</span>
             <span className="ml-auto text-xs text-muted-foreground capitalize">{todayRu()}</span>
+            {contentPlanUpdatedAt && (
+              <span className="text-xs text-muted-foreground border-l border-[#eaeaea] pl-2">
+                план от {fmtDate(contentPlanUpdatedAt)}
+              </span>
+            )}
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -333,7 +403,7 @@ export function DashboardView({
               <p className="text-xs font-medium text-muted-foreground mb-2">Опубликовать сегодня</p>
               {todayContent.length === 0 ? (
                 <p className="text-xs text-muted-foreground italic">
-                  {!contentPlanExists(todayContent)
+                  {!hasContentPlan
                     ? "Контент-план не создан"
                     : "Сегодня публикаций нет"}
                 </p>
@@ -649,9 +719,10 @@ export function DashboardView({
             ) : (
               <div className="divide-y divide-[#eaeaea]">
                 {channels.slice(0, 5).map((c, i) => (
-                  <div
+                  <Link
                     key={c.channel}
-                    className="flex items-center justify-between px-5 py-3"
+                    href={`/analytics?channel=${encodeURIComponent(c.channel)}`}
+                    className="flex items-center justify-between px-5 py-3 hover:bg-neutral-50 transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
                       <span className="flex size-5 items-center justify-center rounded-full bg-neutral-100 text-xs font-medium text-muted-foreground">
@@ -665,7 +736,7 @@ export function DashboardView({
                       </span>
                       <RoiBadge roi={c.roi} />
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -710,38 +781,34 @@ export function DashboardView({
             )}
           </div>
 
-          {/* Block 7: Projects */}
+          {/* Block 7: Quick Actions */}
           <div className="rounded-2xl border border-[#eaeaea] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[#eaeaea] px-5 py-3.5">
-              <p className="text-sm font-medium text-foreground">Проекты</p>
-              <span className="text-xs text-muted-foreground">{projects.length}</span>
+            <div className="border-b border-[#eaeaea] px-5 py-3.5">
+              <p className="text-sm font-medium text-foreground">Быстрые действия</p>
             </div>
-            {projects.length === 0 ? (
-              <p className="px-5 py-4 text-sm text-muted-foreground">Нет проектов</p>
-            ) : (
-              <div className="divide-y divide-[#eaeaea]">
-                {projects.slice(0, 3).map((p) => (
-                  <div key={p.id} className="flex items-center justify-between px-5 py-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
-                      {p.niche && (
-                        <p className="truncate text-xs text-muted-foreground">{p.niche}</p>
-                      )}
-                    </div>
-                    <div className="ml-3 flex shrink-0 items-center gap-3">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          STATUS_STYLES[p.status] ?? "bg-neutral-100 text-[#6b7280]"
-                        )}
-                      >
-                        {STATUS_LABELS[p.status] ?? p.status}
-                      </span>
-                    </div>
+            <div className="divide-y divide-[#eaeaea]">
+              {[
+                { label: "Добавить метрики", href: "/analytics", icon: BarChart3, desc: "Данные по каналам" },
+                { label: "Создать отчёт", href: "/reports", icon: FileText, desc: "Weekly / Monthly" },
+                { label: "Запустить AI Директора", href: "/director", icon: BotMessageSquare, desc: "Анализ + приоритеты" },
+                { label: "Контент на сегодня", href: "/content", icon: Send, desc: "Готовые тексты" },
+              ].map(({ label, href, icon: Icon, desc }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center gap-3 px-5 py-3 hover:bg-neutral-50 transition-colors"
+                >
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-neutral-100">
+                    <Icon className="size-3.5 text-foreground" />
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">{label}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
+                  </div>
+                  <ChevronRight className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -776,9 +843,6 @@ export function DashboardView({
   )
 }
 
-function contentPlanExists(_items: ContentItem[]): boolean {
-  return false
-}
 
 function getFactForKpi(kpiName: string, summary: MetricSummary | null): string | null {
   if (!summary) return null
