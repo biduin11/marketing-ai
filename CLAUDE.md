@@ -85,6 +85,10 @@ prisma/
   (состояние чекбоксов задач стратегии; unique [artifactId, taskKey])
 - `Metric` — id, projectId, channel, date (Date), spend, revenue (Float), leads, clicks, impressions (Int),
   createdAt, updatedAt (unique [projectId, channel, date]; index [projectId])
+- `ContentPlatform` — id, projectId, name, share (Int?, доля публикаций 0-100), order (Int),
+  createdAt, updatedAt (unique [projectId, name]; index [projectId])
+  Управляемые площадки контент-плана (вкладка «Площадки»). Входят в `inputHash` генерации
+  CONTENT_PLAN и передаются в промт — AI распределяет контент по ним с учётом долей.
 
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.

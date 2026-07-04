@@ -29,7 +29,15 @@ export async function generateContentPlan(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "CONTENT_PLAN", card })
+
+  const platformRows = await prisma.contentPlatform.findMany({
+    where: { projectId: project.id },
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    select: { name: true, share: true },
+  })
+  const platforms = platformRows.map((p) => ({ name: p.name, share: p.share }))
+
+  const inputHash = computeInputHash({ type: "CONTENT_PLAN", card, platforms })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CONTENT_PLAN")
@@ -38,7 +46,7 @@ export async function generateContentPlan(
 
   const { data, model } = await generateStructured({
     system: contentPlanSystem,
-    user: buildContentPlanInput(card),
+    user: buildContentPlanInput(card, platforms),
     schema: contentPlanSchema,
     toolName: "save_content_plan",
     toolDescription:

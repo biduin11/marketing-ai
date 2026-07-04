@@ -6,9 +6,11 @@ import { toast } from "sonner"
 import {
   Sparkles, RefreshCw, Loader2, Crosshair, Star, Globe,
   MessageSquare, TrendingUp, AlertCircle, AlertTriangle,
+  Users, Target, Award,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
+import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { runCompetitorAnalysis } from "@/lib/actions/ai"
 import type { CompetitorAnalysis } from "@/lib/ai/schemas/competitorAnalysis"
 
@@ -128,6 +130,14 @@ export function CompetitorView({
     }
   }
 
+  const ratings =
+    analysis?.competitors.flatMap((c) =>
+      [c.yandexRating, c.gisRating].filter((r): r is number => r != null)
+    ) ?? []
+  const avgRating = ratings.length
+    ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)
+    : "—"
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -175,15 +185,55 @@ export function CompetitorView({
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Summary */}
+          {/* Метрик-строка — фирменный приём эталона (#1) */}
+          <StatRow cols={4}>
+            <StatCard
+              label="Конкурентов"
+              value={analysis.competitors.length}
+              sub="проанализировано"
+              icon={Users}
+            />
+            <StatCard
+              label="Средний рейтинг"
+              value={avgRating}
+              sub="по отзывам"
+              icon={Star}
+              tone="warning"
+            />
+            <StatCard
+              label="Возможностей"
+              value={analysis.opportunities.length}
+              sub="захвата рынка"
+              icon={Target}
+              tone="success"
+            />
+            <StatCard
+              label="Наших преимуществ"
+              value={analysis.ourAdvantages.length}
+              sub="перед рынком"
+              icon={Award}
+            />
+          </StatRow>
+
+          {/* Summary — с иконкой-в-чипе (#3) */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <p className="text-sm text-muted-foreground">{analysis.summary}</p>
+            <div className="flex items-start gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
+                <Crosshair className="size-4 text-muted-foreground" />
+              </span>
+              <p className="text-sm leading-relaxed text-muted-foreground">{analysis.summary}</p>
+            </div>
           </div>
 
           {/* Competitor cards */}
           {analysis.competitors.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-foreground">Конкуренты</h3>
+              <div className="flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                  <Users className="size-4 text-muted-foreground" />
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">Конкуренты</h3>
+              </div>
               {analysis.competitors.map((c, i) => (
                 <div
                   key={i}
@@ -412,9 +462,14 @@ export function CompetitorView({
           {/* Capture opportunities */}
           {analysis.opportunities.length > 0 && (
             <div>
-              <h3 className="mb-3 text-sm font-medium text-foreground">
-                Возможности захвата рынка
-              </h3>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-success/10">
+                  <Target className="size-4 text-success" />
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Возможности захвата рынка
+                </h3>
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {analysis.opportunities.map((opp, i) => (
                   <div

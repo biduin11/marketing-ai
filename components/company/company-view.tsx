@@ -9,18 +9,71 @@ import {
   Download,
   Loader2,
   TrendingUp,
+  TrendingDown,
   CheckCircle2,
+  ShieldAlert,
+  Lightbulb,
+  Target,
+  type LucideIcon,
 } from "lucide-react"
 import type { Project } from "@prisma/client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { ScoreCard } from "@/components/shared/score-card"
+import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { RecommendationCard } from "@/components/company/recommendation-card"
 import { CompanyWizard } from "@/components/company/company-wizard"
 import { runCompanyAnalysis } from "@/lib/actions/ai"
 import type { CompanyAnalysis } from "@/lib/ai/schemas/companyAnalysis"
 import { GenerationProgress } from "@/components/shared/generation-progress"
+import { cn } from "@/lib/utils"
+
+type QuadrantTone = "success" | "danger" | "warning" | "neutral"
+
+const QUADRANT_TONE: Record<QuadrantTone, { chip: string; marker: string }> = {
+  success: { chip: "bg-success/10 text-success", marker: "bg-success" },
+  danger: { chip: "bg-danger/10 text-danger", marker: "bg-danger" },
+  warning: { chip: "bg-warning/10 text-warning", marker: "bg-warning" },
+  neutral: { chip: "bg-muted text-foreground", marker: "bg-muted-foreground" },
+}
+
+/** Карточка SWOT-квадранта: иконка-в-чипе + семантический цвет + маркер-список. */
+function QuadrantCard({
+  title,
+  icon: Icon,
+  tone,
+  items,
+}: {
+  title: string
+  icon: LucideIcon
+  tone: QuadrantTone
+  items: string[]
+}) {
+  const t = QUADRANT_TONE[tone]
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="mb-3 flex items-center gap-2">
+        <span className={cn("flex size-8 items-center justify-center rounded-lg", t.chip)}>
+          <Icon className="size-4" />
+        </span>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Нет данных</p>
+      ) : (
+        <ul className="space-y-2">
+          {items.map((item, i) => (
+            <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+              <span className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", t.marker)} />
+              <span className="leading-relaxed">{item}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 const COMPANY_STEPS = [
   { id: "fetch", label: "Собираю данные компании" },
@@ -195,6 +248,37 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
               </div>
             </div>
 
+            {/* Метрик-строка — фирменный приём эталона (#1) */}
+            <StatRow cols={4}>
+              <StatCard
+                label="Сильные стороны"
+                value={analysis.strengths.length}
+                sub="преимуществ"
+                icon={CheckCircle2}
+                tone="success"
+              />
+              <StatCard
+                label="Слабые стороны"
+                value={analysis.weaknesses.length}
+                sub="зон риска"
+                icon={TrendingDown}
+                tone="danger"
+              />
+              <StatCard
+                label="Точки роста"
+                value={analysis.growthPoints.length}
+                sub="направлений"
+                icon={Target}
+              />
+              <StatCard
+                label="Рекомендации"
+                value={analysis.recommendations.length}
+                sub="от AI"
+                icon={Lightbulb}
+                tone="warning"
+              />
+            </StatRow>
+
             <div className="grid gap-6 md:grid-cols-2">
               <Card title="Сильные стороны">
                 <ListBlock items={analysis.strengths} />
@@ -215,21 +299,33 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
             </div>
           </TabsContent>
 
-          {/* SWOT */}
+          {/* SWOT — цветовая кодировка квадрантов (#5) */}
           <TabsContent value="swot" className="mt-6">
             <div className="grid gap-4 md:grid-cols-2">
-              <Card title="Сильные стороны (S)">
-                <ListBlock items={analysis.strengths} />
-              </Card>
-              <Card title="Слабые стороны (W)">
-                <ListBlock items={analysis.weaknesses} />
-              </Card>
-              <Card title="Возможности (O)">
-                <ListBlock items={analysis.opportunities} />
-              </Card>
-              <Card title="Угрозы (T)">
-                <ListBlock items={analysis.threats} />
-              </Card>
+              <QuadrantCard
+                title="Сильные стороны (S)"
+                icon={CheckCircle2}
+                tone="success"
+                items={analysis.strengths}
+              />
+              <QuadrantCard
+                title="Слабые стороны (W)"
+                icon={TrendingDown}
+                tone="danger"
+                items={analysis.weaknesses}
+              />
+              <QuadrantCard
+                title="Возможности (O)"
+                icon={Lightbulb}
+                tone="neutral"
+                items={analysis.opportunities}
+              />
+              <QuadrantCard
+                title="Угрозы (T)"
+                icon={ShieldAlert}
+                tone="warning"
+                items={analysis.threats}
+              />
             </div>
           </TabsContent>
 

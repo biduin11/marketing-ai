@@ -4,64 +4,44 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import {
-  Sparkles,
   RefreshCw,
   Loader2,
   LayoutList,
   Hash,
-  Mail,
   Video,
   Plus,
-  Camera,
-  Send,
-  PlayCircle,
-  FileText,
-  Users,
   BarChart2,
   Eye,
   Clock,
   CheckCircle2,
   Upload,
-  FolderOpen,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { EmptyState } from "@/components/empty-state"
 import { ContentCalendar } from "@/components/content/content-calendar"
+import { PlatformsTab } from "@/components/content/platforms-tab"
 import { runContentPlan } from "@/lib/actions/ai"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
+import type { ContentPlatformItem } from "@/lib/actions/content-platforms"
 
 interface ContentViewProps {
   projectId: string
   plan: ContentPlan | null
   version: number | null
+  platforms: ContentPlatformItem[]
 }
 
-type Tab = "calendar" | "ideas" | "rubrics" | "platforms" | "files"
+type Tab = "calendar" | "ideas" | "rubrics" | "platforms"
 
 const tabs: { id: Tab; label: string }[] = [
   { id: "calendar", label: "Календарь" },
   { id: "ideas", label: "Идеи контента" },
   { id: "rubrics", label: "Рубрики" },
   { id: "platforms", label: "Площадки" },
-  { id: "files", label: "Файлы" },
 ]
 
 // --- Metrics helpers ---
-
-function inferPlatform(item: ContentPlan["calendar"][number]): string {
-  const p = (item as { platform?: string }).platform
-  if (p) return p
-  switch (item.type) {
-    case "reels":
-    case "stories":
-      return "instagram"
-    case "email":
-      return "email"
-    default:
-      return "instagram"
-  }
-}
 
 function computeMetrics(plan: ContentPlan) {
   const cal = plan.calendar
@@ -101,7 +81,7 @@ function computeMetrics(plan: ContentPlan) {
   return { total, reach, er, review, ready, published }
 }
 
-export function ContentView({ projectId, plan, version }: ContentViewProps) {
+export function ContentView({ projectId, plan, version, platforms }: ContentViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>("calendar")
@@ -376,18 +356,11 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
 
           {/* Platforms tab */}
           {activeTab === "platforms" && (
-            <PlatformsTab plan={plan} />
-          )}
-
-          {/* Files tab */}
-          {activeTab === "files" && (
-            <div className="flex h-[40vh] items-center justify-center">
-              <EmptyState
-                icon={FolderOpen}
-                title="Файлы контента"
-                description="Здесь будут храниться готовые материалы: тексты, изображения, видео для публикаций."
-              />
-            </div>
+            <PlatformsTab
+              projectId={projectId}
+              initialPlatforms={platforms}
+              plan={plan}
+            />
           )}
 
           {/* Email sequence — shown in Calendar tab as side section */}
@@ -509,123 +482,6 @@ function RubricsTab({ plan }: { plan: ContentPlan }) {
   )
 }
 
-// --- Platforms tab ---
-
-const PLATFORM_META: Record<
-  string,
-  { label: string; Icon: React.ComponentType<{ className?: string }> }
-> = {
-  instagram: { label: "Instagram", Icon: Camera },
-  telegram: { label: "Telegram", Icon: Send },
-  vk: { label: "VK", Icon: Users },
-  youtube: { label: "YouTube", Icon: PlayCircle },
-  blog: { label: "Блог / SEO", Icon: FileText },
-  email: { label: "Email рассылка", Icon: Mail },
-}
-
-function PlatformsTab({ plan }: { plan: ContentPlan }) {
-  const byPlatform = new Map<string, ContentPlan["calendar"]>()
-  for (const item of plan.calendar) {
-    const p = inferPlatform(item)
-    byPlatform.set(p, [...(byPlatform.get(p) ?? []), item])
-  }
-
-  const entries = Array.from(byPlatform.entries()).sort(
-    (a, b) => b[1].length - a[1].length
-  )
-
-  if (entries.length === 0) {
-    return (
-      <div className="flex h-40 items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          Нет данных по площадкам
-        </p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {entries.map(([platformId, items]) => {
-        const meta = PLATFORM_META[platformId] ?? {
-          label: platformId,
-          Icon: LayoutList,
-        }
-        const { Icon } = meta
-        const formats = Array.from(
-          new Set(
-            items.map(
-              (i) =>
-                (i as { format?: string }).format ??
-                (i.type === "reels"
-                  ? "Reels"
-                  : i.type === "stories"
-                    ? "Сторис"
-                    : i.type === "email"
-                      ? "Email"
-                      : "Пост")
-            )
-          )
-        )
-        const eduPct = Math.round(
-          (items.filter((i) => i.category === "educational").length /
-            items.length) *
-            100
-        )
-        return (
-          <div
-            key={platformId}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm"
-          >
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
-                <Icon className="size-4 text-foreground" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-foreground">
-                  {meta.label}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {items.length} публ. · {eduPct}% польза
-                </p>
-              </div>
-            </div>
-
-            {/* Format chips */}
-            <div className="mb-3 flex flex-wrap gap-1">
-              {formats.map((f) => (
-                <span
-                  key={f}
-                  className="rounded border border-border bg-muted px-1.5 py-0.5 text-xs text-foreground"
-                >
-                  {f}
-                </span>
-              ))}
-            </div>
-
-            {/* Recent titles */}
-            <ul className="space-y-1">
-              {items.slice(0, 3).map((item, i) => (
-                <li
-                  key={i}
-                  className="flex items-start gap-1.5 text-xs text-muted-foreground"
-                >
-                  <span className="mt-1 size-1 shrink-0 rounded-full bg-neutral-300" />
-                  <span className="line-clamp-1">{item.title}</span>
-                </li>
-              ))}
-              {items.length > 3 && (
-                <li className="text-xs text-muted-foreground">
-                  ещё {items.length - 3} публикаций
-                </li>
-              )}
-            </ul>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 // --- Shared sub-components ---
 
