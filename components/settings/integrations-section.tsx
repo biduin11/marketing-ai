@@ -35,8 +35,8 @@ export function IntegrationsSection({
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
-      <h3 className="mb-1 text-base font-semibold text-[#111]">Интеграции</h3>
-      <p className="mb-6 text-sm text-[#6b7280]">
+      <h3 className="mb-1 text-base font-semibold text-foreground">Интеграции</h3>
+      <p className="mb-6 text-sm text-muted-foreground">
         Подключите площадки, чтобы автоматически собирать отзывы и статистику
         соцсетей в раздел «Репутация».
       </p>
@@ -50,12 +50,12 @@ export function IntegrationsSection({
               className="flex items-center justify-between rounded-xl border border-border p-4"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-[#fafafa] text-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-muted text-lg">
                   {platform.icon}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[#111]">{platform.name}</p>
-                  <p className="text-xs text-[#6b7280]">
+                  <p className="text-sm font-medium text-foreground">{platform.name}</p>
+                  <p className="text-xs text-muted-foreground">
                     {integration?.accountName
                       ? `Подключено: ${integration.accountName}`
                       : integration?.accountId
@@ -73,7 +73,7 @@ export function IntegrationsSection({
                 )}
                 <button
                   onClick={() => setActivePlatform(platform)}
-                  className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-[#fafafa]"
+                  className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
                 >
                   {integration ? "Настроить" : "Подключить"}
                 </button>
@@ -164,7 +164,7 @@ function IntegrationDialog({
 
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111]">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               {platform.fields[0].label}
             </label>
             <Input
@@ -172,11 +172,11 @@ function IntegrationDialog({
               onChange={(e) => setAccountId(e.target.value)}
               placeholder={platform.fields[0].label}
             />
-            <p className="mt-1 text-xs text-[#6b7280]">{platform.fields[0].hint}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{platform.fields[0].hint}</p>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111]">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               {platform.fields[1].label}
             </label>
             <Input
@@ -187,11 +187,11 @@ function IntegrationDialog({
                 current?.hasToken ? "•••••• (оставьте пустым, чтобы не менять)" : platform.fields[1].label
               }
             />
-            <p className="mt-1 text-xs text-[#6b7280]">{platform.fields[1].hint}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{platform.fields[1].hint}</p>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-[#111]">
+            <label className="mb-1 block text-sm font-medium text-foreground">
               Название для отображения (необязательно)
             </label>
             <Input

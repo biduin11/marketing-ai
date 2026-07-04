@@ -56,8 +56,20 @@ export async function saveIntegration(
 
   // Only re-encrypt the token when a new one is provided; keep the existing
   // encrypted token when the field is left blank on edit.
-  const encryptedToken =
-    accessToken && accessToken.length > 0 ? encrypt(accessToken) : undefined
+  // Encrypt separately so a missing/invalid key gives a clear, actionable
+  // message instead of being swallowed by the generic save error below.
+  let encryptedToken: string | undefined
+  if (accessToken && accessToken.length > 0) {
+    try {
+      encryptedToken = encrypt(accessToken)
+    } catch {
+      return {
+        success: false,
+        error:
+          "Не задан ключ шифрования INTEGRATION_ENCRYPTION_KEY (64 hex-символа). Добавьте его в переменные окружения и передеплойте.",
+      }
+    }
+  }
 
   try {
     await prisma.integration.upsert({
@@ -77,8 +89,9 @@ export async function saveIntegration(
         ...(isActive !== undefined ? { isActive } : {}),
       },
     })
-  } catch {
-    return { success: false, error: "Не удалось сохранить интеграцию" }
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : String(e)
+    return { success: false, error: `Не удалось сохранить интеграцию: ${detail}` }
   }
 
   revalidatePath("/settings")

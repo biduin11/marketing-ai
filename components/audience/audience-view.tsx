@@ -154,13 +154,13 @@ export function AudienceView({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-[#111]">Клиент</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Клиент</h1>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]">
+          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
             <Download size={15} />
             Экспорт
           </button>
-          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-[#6b7280]">
+          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground">
             <Calendar size={15} />
             {fmtDate(segmentsCreatedAt)}
             <ChevronDown size={14} />
@@ -197,7 +197,7 @@ export function AudienceView({
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   {/* Метрики */}
                   <div>
-                    <h2 className="mb-4 text-base font-semibold text-[#111]">
+                    <h2 className="mb-4 text-base font-semibold text-foreground">
                       Сводка по аудитории
                     </h2>
                     <div className="grid grid-cols-2 gap-4">
@@ -208,7 +208,7 @@ export function AudienceView({
                             value: segments?.segments.length ?? 0,
                             sub: "ключевых сегмента",
                             icon: (
-                              <Users size={18} className="text-[#6b7280]" />
+                              <Users size={18} className="text-muted-foreground" />
                             ),
                           },
                           {
@@ -218,7 +218,7 @@ export function AudienceView({
                               : "—",
                             sub: "чел.",
                             icon: (
-                              <Users size={18} className="text-[#6b7280]" />
+                              <Users size={18} className="text-muted-foreground" />
                             ),
                           },
                           {
@@ -226,7 +226,7 @@ export function AudienceView({
                             value: segments?.potentialReach ?? "—",
                             sub: "",
                             icon: (
-                              <Target size={18} className="text-[#6b7280]" />
+                              <Target size={18} className="text-muted-foreground" />
                             ),
                           },
                           {
@@ -239,7 +239,7 @@ export function AudienceView({
                             icon: (
                               <BarChart2
                                 size={18}
-                                className="text-[#6b7280]"
+                                className="text-muted-foreground"
                               />
                             ),
                           },
@@ -249,16 +249,16 @@ export function AudienceView({
                           key={m.label}
                           className="rounded-xl border border-border p-4"
                         >
-                          <p className="mb-2 text-xs leading-snug text-[#6b7280]">
+                          <p className="mb-2 text-xs leading-snug text-muted-foreground">
                             {m.label}
                           </p>
                           <div className="flex items-end justify-between">
                             <div>
-                              <p className="tabular-nums text-2xl font-bold text-[#111]">
+                              <p className="tabular-nums text-2xl font-bold text-foreground">
                                 {m.value}
                               </p>
                               {m.sub && (
-                                <p className="text-xs text-[#6b7280]">
+                                <p className="text-xs text-muted-foreground">
                                   {m.sub}
                                 </p>
                               )}
@@ -272,7 +272,7 @@ export function AudienceView({
 
                   {/* Donut chart */}
                   <div>
-                    <h2 className="mb-4 text-base font-semibold text-[#111]">
+                    <h2 className="mb-4 text-base font-semibold text-foreground">
                       Распределение по сегментам
                     </h2>
                     {donutData.length > 0 ? (
@@ -309,11 +309,11 @@ export function AudienceView({
                                       DONUT_COLORS[i % DONUT_COLORS.length],
                                   }}
                                 />
-                                <span className="truncate text-sm text-[#111]">
+                                <span className="truncate text-sm text-foreground">
                                   {seg.name}
                                 </span>
                               </div>
-                              <span className="shrink-0 text-sm font-semibold text-[#111]">
+                              <span className="shrink-0 text-sm font-semibold text-foreground">
                                 {seg.share}%
                               </span>
                             </div>
@@ -321,7 +321,7 @@ export function AudienceView({
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-[#6b7280]">
+                      <p className="text-sm text-muted-foreground">
                         Сгенерируйте сегменты для отображения распределения.
                       </p>
                     )}
@@ -333,11 +333,11 @@ export function AudienceView({
               {persona && persona.personas.length > 0 && (
                 <div className="rounded-2xl border border-border bg-card p-6">
                   <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-base font-semibold text-[#111]">
+                    <h2 className="text-base font-semibold text-foreground">
                       Ключевые портреты аудитории
                     </h2>
                     <button
-                      className="flex items-center gap-1 text-sm text-[#6b7280] hover:text-[#111]"
+                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                       onClick={() => setActiveTab("personas")}
                     >
                       Все портреты <ChevronRight size={14} />
@@ -351,15 +351,15 @@ export function AudienceView({
                       >
                         {/* Аватар + имя */}
                         <div className="mb-4 flex items-center gap-3">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f5f5f5]">
-                            <User size={20} className="text-[#6b7280]" />
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted">
+                            <User size={20} className="text-muted-foreground" />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-[#111]">
+                            <p className="text-sm font-semibold text-foreground">
                               {p.name}
                             </p>
                             {p.share != null && (
-                              <p className="text-xs text-[#6b7280]">
+                              <p className="text-xs text-muted-foreground">
                                 {p.share}% аудитории
                               </p>
                             )}
@@ -369,7 +369,7 @@ export function AudienceView({
                         {/* Демография */}
                         <div className="mb-4 space-y-1.5">
                           {(p.gender ?? p.age) && (
-                            <div className="flex items-center gap-2 text-xs text-[#6b7280]">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <User size={12} className="shrink-0" />
                               <span>
                                 {[p.gender, p.age]
@@ -379,13 +379,13 @@ export function AudienceView({
                             </div>
                           )}
                           {p.occupation && (
-                            <div className="flex items-center gap-2 text-xs text-[#6b7280]">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Briefcase size={12} className="shrink-0" />
                               <span>{p.occupation}</span>
                             </div>
                           )}
                           {p.income && (
-                            <div className="flex items-center gap-2 text-xs text-[#6b7280]">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <DollarSign size={12} className="shrink-0" />
                               <span>{p.income}</span>
                             </div>
@@ -395,10 +395,10 @@ export function AudienceView({
                         {/* Цели */}
                         {p.goals.length > 0 && (
                           <div className="mb-3">
-                            <p className="mb-1 text-xs font-semibold text-[#111]">
+                            <p className="mb-1 text-xs font-semibold text-foreground">
                               Цели
                             </p>
-                            <p className="text-xs leading-relaxed text-[#6b7280]">
+                            <p className="text-xs leading-relaxed text-muted-foreground">
                               {p.goals[0]}
                             </p>
                           </div>
@@ -407,10 +407,10 @@ export function AudienceView({
                         {/* Боли */}
                         {p.pains.length > 0 && (
                           <div className="mb-4">
-                            <p className="mb-1 text-xs font-semibold text-[#111]">
+                            <p className="mb-1 text-xs font-semibold text-foreground">
                               Боли
                             </p>
-                            <p className="text-xs leading-relaxed text-[#6b7280]">
+                            <p className="text-xs leading-relaxed text-muted-foreground">
                               {p.pains[0]}
                             </p>
                           </div>
@@ -419,7 +419,7 @@ export function AudienceView({
                         {/* Кнопка подробнее */}
                         <div className="mt-auto">
                           <button
-                            className="flex w-full items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]"
+                            className="flex w-full items-center justify-between rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted"
                             onClick={() => setActiveTab("personas")}
                           >
                             Подробнее <ArrowRight size={14} />
@@ -436,24 +436,24 @@ export function AudienceView({
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                   {/* Основные потребности */}
                   <div className="rounded-2xl border border-border bg-card p-6">
-                    <h3 className="mb-4 text-sm font-semibold text-[#111]">
+                    <h3 className="mb-4 text-sm font-semibold text-foreground">
                       Основные потребности
                     </h3>
                     {segments.needs && segments.needs.length > 0 ? (
                       <div className="space-y-3">
                         {segments.needs.slice(0, 5).map((need, i) => (
                           <div key={i} className="flex items-center gap-3">
-                            <span className="min-w-0 flex-1 text-xs text-[#111]">
+                            <span className="min-w-0 flex-1 text-xs text-foreground">
                               {need.label}
                             </span>
                             <div className="flex shrink-0 items-center gap-2">
-                              <div className="h-1.5 w-20 rounded-full bg-[#eaeaea]">
+                              <div className="h-1.5 w-20 rounded-full bg-border">
                                 <div
                                   className="h-1.5 rounded-full bg-foreground"
                                   style={{ width: `${need.percent}%` }}
                                 />
                               </div>
-                              <span className="w-8 text-right text-xs font-medium text-[#111]">
+                              <span className="w-8 text-right text-xs font-medium text-foreground">
                                 {need.percent}%
                               </span>
                             </div>
@@ -461,7 +461,7 @@ export function AudienceView({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-[#6b7280]">
+                      <p className="text-xs text-muted-foreground">
                         Регенерируйте сегменты для получения данных.
                       </p>
                     )}
@@ -469,24 +469,24 @@ export function AudienceView({
 
                   {/* Главные боли */}
                   <div className="rounded-2xl border border-border bg-card p-6">
-                    <h3 className="mb-4 text-sm font-semibold text-[#111]">
+                    <h3 className="mb-4 text-sm font-semibold text-foreground">
                       Главные боли
                     </h3>
                     {segments.pains && segments.pains.length > 0 ? (
                       <div className="space-y-3">
                         {segments.pains.slice(0, 5).map((pain, i) => (
                           <div key={i} className="flex items-center gap-3">
-                            <span className="min-w-0 flex-1 text-xs text-[#111]">
+                            <span className="min-w-0 flex-1 text-xs text-foreground">
                               {pain.label}
                             </span>
                             <div className="flex shrink-0 items-center gap-2">
-                              <div className="h-1.5 w-20 rounded-full bg-[#eaeaea]">
+                              <div className="h-1.5 w-20 rounded-full bg-border">
                                 <div
                                   className="h-1.5 rounded-full bg-foreground"
                                   style={{ width: `${pain.percent}%` }}
                                 />
                               </div>
-                              <span className="w-8 text-right text-xs font-medium text-[#111]">
+                              <span className="w-8 text-right text-xs font-medium text-foreground">
                                 {pain.percent}%
                               </span>
                             </div>
@@ -494,7 +494,7 @@ export function AudienceView({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-[#6b7280]">
+                      <p className="text-xs text-muted-foreground">
                         Регенерируйте сегменты для получения данных.
                       </p>
                     )}
@@ -502,24 +502,24 @@ export function AudienceView({
 
                   {/* Триггеры */}
                   <div className="rounded-2xl border border-border bg-card p-6">
-                    <h3 className="mb-4 text-sm font-semibold text-[#111]">
+                    <h3 className="mb-4 text-sm font-semibold text-foreground">
                       Триггеры принятия решения
                     </h3>
                     {segments.triggers && segments.triggers.length > 0 ? (
                       <div className="space-y-3">
                         {segments.triggers.slice(0, 5).map((t, i) => (
                           <div key={i} className="flex items-center gap-3">
-                            <span className="min-w-0 flex-1 text-xs text-[#111]">
+                            <span className="min-w-0 flex-1 text-xs text-foreground">
                               {t.label}
                             </span>
                             <div className="flex shrink-0 items-center gap-2">
-                              <div className="h-1.5 w-20 rounded-full bg-[#eaeaea]">
+                              <div className="h-1.5 w-20 rounded-full bg-border">
                                 <div
                                   className="h-1.5 rounded-full bg-foreground"
                                   style={{ width: `${t.percent}%` }}
                                 />
                               </div>
-                              <span className="w-8 text-right text-xs font-medium text-[#111]">
+                              <span className="w-8 text-right text-xs font-medium text-foreground">
                                 {t.percent}%
                               </span>
                             </div>
@@ -527,7 +527,7 @@ export function AudienceView({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-[#6b7280]">
+                      <p className="text-xs text-muted-foreground">
                         Регенерируйте сегменты для получения данных.
                       </p>
                     )}
@@ -791,7 +791,7 @@ export function AudienceView({
                   key={i}
                   className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
                 >
-                  <span className="mt-0.5 size-2 shrink-0 rounded-full bg-[#16a34a]" />
+                  <span className="mt-0.5 size-2 shrink-0 rounded-full bg-success" />
                   <div className="min-w-0">
                     <p className="text-sm text-foreground">{trigger}</p>
                     <p className="mt-0.5 text-xs text-muted-foreground">

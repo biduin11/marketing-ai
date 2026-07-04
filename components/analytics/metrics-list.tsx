@@ -77,7 +77,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
                 {[...metrics]
                   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                   .map((m) => (
-                    <tr key={m.id} className="hover:bg-[#fafafa]">
+                    <tr key={m.id} className="hover:bg-muted">
                       <td className="px-4 py-3 text-sm text-foreground">{formatDate(m.date)}</td>
                       <td className="px-4 py-3 text-sm font-medium text-foreground">{m.channel}</td>
                       <td className="px-4 py-3 text-right text-sm tabular-nums text-foreground">{fmt(m.spend)} ₽</td>
@@ -89,7 +89,7 @@ export function MetricsList({ metrics, onEdit }: MetricsListProps) {
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => onEdit(m)}
-                            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-[#eaeaea] hover:text-foreground"
+                            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
                             title="Редактировать"
                           >
                             <Pencil size={14} />

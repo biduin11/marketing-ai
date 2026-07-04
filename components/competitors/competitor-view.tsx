@@ -327,7 +327,7 @@ export function CompetitorView({
                               key={j}
                               className="flex items-start gap-1.5 text-sm text-foreground"
                             >
-                              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#16a34a]" />
+                              <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-success" />
                               {s}
                             </li>
                           ))}

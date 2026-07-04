@@ -312,7 +312,7 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
           {/* Wins / Risks */}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <ListBlock title="Достижения" items={currentEntry.report.wins} color="bg-[#16a34a]" />
+              <ListBlock title="Достижения" items={currentEntry.report.wins} color="bg-success" />
             </div>
             <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <ListBlock title="Риски" items={currentEntry.report.risks} color="bg-danger" />
@@ -321,12 +321,12 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
 
           {/* Recommendations */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <ListBlock title="Рекомендации" items={currentEntry.report.recommendations} color="bg-[#111111]" />
+            <ListBlock title="Рекомендации" items={currentEntry.report.recommendations} color="bg-foreground" />
           </div>
 
           {/* Next period */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <ListBlock title="Фокус следующего периода" items={currentEntry.report.nextPeriodFocus} color="bg-[#d97706]" />
+            <ListBlock title="Фокус следующего периода" items={currentEntry.report.nextPeriodFocus} color="bg-warning" />
           </div>
         </div>
       )}

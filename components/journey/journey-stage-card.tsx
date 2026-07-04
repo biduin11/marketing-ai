@@ -33,13 +33,13 @@ function SectionList({
   if (!items?.length) return null
   return (
     <div className={colSpan}>
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#6b7280]">
+      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {icon} {title}
       </p>
       <ul className="space-y-1">
         {items.map((item, i) => (
-          <li key={i} className="flex gap-2 text-sm text-[#111]">
-            <span className="mt-0.5 shrink-0 text-[#6b7280]">•</span>
+          <li key={i} className="flex gap-2 text-sm text-foreground">
+            <span className="mt-0.5 shrink-0 text-muted-foreground">•</span>
             <span className="leading-relaxed">{item}</span>
           </li>
         ))}
@@ -56,15 +56,15 @@ export function JourneyStageCard({ stage, index }: JourneyStageCardProps) {
     <div className="rounded-2xl border border-border bg-card p-6">
       {/* Заголовок */}
       <div className="mb-2 flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-[#111]">
+        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
           {index + 1}
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug text-[#111]">
+          <h3 className="text-base font-semibold leading-snug text-foreground">
             {stage.name}
           </h3>
           {stage.description && (
-            <p className="mt-1 text-sm leading-relaxed text-[#6b7280]">
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               {stage.description}
             </p>
           )}

@@ -180,7 +180,7 @@ export function AiChatPanel() {
                 onKeyDown={handleKeyDown}
                 placeholder="Задайте вопрос о проекте..."
                 rows={1}
-                className="flex-1 resize-none rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[#111] max-h-24"
+                className="flex-1 resize-none rounded-xl border border-border bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground max-h-24"
                 style={{ minHeight: "38px" }}
                 disabled={loading}
               />

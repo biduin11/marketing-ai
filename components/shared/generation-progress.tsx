@@ -108,7 +108,7 @@ function StepIcon({ status }: { status: StepStatus }) {
   if (status === "done")
     return <CheckCircle className="size-4 shrink-0 text-success" />
   if (status === "active")
-    return <Loader className="size-4 shrink-0 animate-spin text-[#111]" />
+    return <Loader className="size-4 shrink-0 animate-spin text-foreground" />
   if (status === "error")
     return <XCircle className="size-4 shrink-0 text-danger" />
   return <Circle className="size-4 shrink-0 text-neutral-300" />
