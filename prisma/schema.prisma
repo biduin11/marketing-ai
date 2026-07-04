@@ -118,6 +118,7 @@ model Project {
   strategyTasks StrategyTask[]
   metrics        Metric[]
   customChannels CustomChannel[]
+  contentPlatforms ContentPlatform[]
   inboxSignals   InboxSignal[]
   integrations   Integration[]
   createdAt      DateTime       @default(now())
@@ -166,6 +167,20 @@ model CustomChannel {
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   name      String
   createdAt DateTime @default(now())
+
+  @@unique([projectId, name])
+  @@index([projectId])
+}
+
+model ContentPlatform {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  share     Int? // доля публикаций 0-100 (опционально)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([projectId, name])
   @@index([projectId])

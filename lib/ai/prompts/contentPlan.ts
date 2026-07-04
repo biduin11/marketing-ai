@@ -60,7 +60,32 @@ ${psychotypesBlock}
 - Email-цепочка: 5 писем, прогрев → ценность → продажа → дожим → реактивация.
 - Отвечай ТОЛЬКО через предоставленный инструмент (structured output). Никакого текста вне инструмента.`
 
-export function buildContentPlanInput(card: CompanyCard): string {
+export interface PlatformPreference {
+  name: string
+  share: number | null
+}
+
+function buildPlatformsBlock(platforms: PlatformPreference[]): string {
+  if (platforms.length === 0) return ""
+  const lines = platforms
+    .map((p) =>
+      p.share != null ? `- ${p.name}: ~${p.share}% публикаций` : `- ${p.name}`
+    )
+    .join("\n")
+  const hasShares = platforms.some((p) => p.share != null)
+  return `
+
+ПЛОЩАДКИ ПОЛЬЗОВАТЕЛЯ (приоритет над форматами по умолчанию):
+${lines}
+Распределяй публикации ТОЛЬКО по этим площадкам${
+    hasShares ? ", соблюдая указанные доли" : " равномерно"
+  }. Поле platform каждой записи выбирай из этого списка (маппинг: Instagram→instagram, Telegram→telegram, ВКонтакте/VK→vk, YouTube→youtube, Блог/SEO→blog, Email→email; для прочих площадок используй ближайший подходящий тип).`
+}
+
+export function buildContentPlanInput(
+  card: CompanyCard,
+  platforms: PlatformPreference[] = []
+): string {
   return `Разработай контент-план на месяц для компании по карточке:
 
 Название: ${card.name}
@@ -70,7 +95,7 @@ export function buildContentPlanInput(card: CompanyCard): string {
 Продукты / услуги: ${card.products.length ? card.products.join(", ") : "не указаны"}
 Конкуренты: ${card.competitors.length ? card.competitors.join(", ") : "не указаны"}
 Бюджет: ${formatRub(card.budget)} в месяц
-Цели и задачи: ${card.goals ?? "не указаны"}
+Цели и задачи: ${card.goals ?? "не указаны"}${buildPlatformsBlock(platforms)}
 
 Создай: публикационный календарь (сплит 70/20/10), 10 идей Reels + 15 постов + 10 Stories, 3 сценария Reels и email-цепочку из 5 писем.`
 }
