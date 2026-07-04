@@ -4,6 +4,7 @@ import { useState, useTransition } from "react"
 import { toast } from "sonner"
 import { Calendar } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Progress } from "@/components/ui/progress"
 import { toggleStrategyTask } from "@/lib/actions/strategy-tasks"
 import { cn } from "@/lib/utils"
 
@@ -40,8 +41,23 @@ export function TaskList({ artifactId, tasks }: TaskListProps) {
   if (tasks.length === 0)
     return <p className="text-sm text-muted-foreground">Нет задач</p>
 
+  const doneCount = tasks.filter((t) => state[t.taskKey] ?? false).length
+  const pct = Math.round((doneCount / tasks.length) * 100)
+
   return (
-    <ul className="divide-y divide-border">
+    <div className="space-y-3">
+      {/* Прогресс выполнения — визуализация вместо голого списка (#6) */}
+      <div>
+        <div className="mb-1.5 flex items-center justify-between text-xs">
+          <span className="font-medium text-foreground">
+            Выполнено {doneCount} из {tasks.length}
+          </span>
+          <span className="tabular-nums text-muted-foreground">{pct}%</span>
+        </div>
+        <Progress value={pct} barClassName="bg-success" />
+      </div>
+
+      <ul className="divide-y divide-border">
       {tasks.map((t) => {
         const checked = state[t.taskKey] ?? false
         return (
@@ -70,6 +86,7 @@ export function TaskList({ artifactId, tasks }: TaskListProps) {
           </li>
         )
       })}
-    </ul>
+      </ul>
+    </div>
   )
 }

@@ -3,11 +3,21 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, CalendarDays } from "lucide-react"
+import {
+  Sparkles,
+  RefreshCw,
+  Loader2,
+  CalendarDays,
+  FileText,
+  Target,
+  ListChecks,
+  Milestone,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { KpiCard } from "@/components/strategy/kpi-card"
 import { TaskList, type TaskItem } from "@/components/strategy/task-list"
+import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { ExportPdfButton } from "@/components/shared/export-pdf-button"
 import { runStrategy } from "@/lib/actions/ai"
 import type { Strategy, Horizon } from "@/lib/ai/schemas/strategy"
@@ -159,9 +169,43 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
         </div>
       ) : (
         <div id="strategy-print-area" className="space-y-6">
-          {/* Summary */}
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <p className="text-sm text-muted-foreground">
+          {/* Метрик-строка — фирменный приём эталона (#1) */}
+          <StatRow cols={4}>
+            <StatCard
+              label="Горизонт"
+              value={horizons.find((h) => h.value === horizon)?.label ?? `${horizon} дн.`}
+              sub="планирования"
+              icon={CalendarDays}
+            />
+            <StatCard
+              label="KPI"
+              value={entry.data.kpi.length}
+              sub="целевых метрик"
+              icon={Target}
+            />
+            <StatCard
+              label="Недель / этапов"
+              value={entry.data.weeks.length}
+              sub="в дорожной карте"
+              icon={Milestone}
+            />
+            <StatCard
+              label="Задач"
+              value={tasks.length}
+              sub="к выполнению"
+              icon={ListChecks}
+            />
+          </StatRow>
+
+          {/* Summary — с иконкой-в-чипе (#3) */}
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                <FileText className="size-4 text-muted-foreground" />
+              </span>
+              <h3 className="text-sm font-semibold text-foreground">Резюме стратегии</h3>
+            </div>
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {entry.data.summary}
             </p>
           </div>
@@ -178,31 +222,43 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
 
           {/* Weeks + Tasks */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="mb-4 text-sm font-medium text-foreground">
-                Недели / этапы
-              </h3>
-              <ol className="space-y-4">
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                  <Milestone className="size-4 text-muted-foreground" />
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Недели / этапы
+                </h3>
+              </div>
+              {/* Timeline с вертикальной линией и нумерованными узлами (#7) */}
+              <ol className="relative space-y-0 pl-6">
+                <div className="absolute left-2 top-1 h-[calc(100%-0.5rem)] w-px bg-border" />
                 {entry.data.weeks.map((w) => (
-                  <li key={w.n} className="flex gap-3">
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-foreground">
+                  <li key={w.n} className="relative pb-5 last:pb-0">
+                    <span className="absolute -left-6 flex size-4 items-center justify-center rounded-full border-2 border-card bg-foreground text-[9px] font-bold text-background">
                       {w.n}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {w.title}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{w.focus}</p>
-                    </div>
+                    </span>
+                    <p className="text-sm font-medium text-foreground">
+                      {w.title}
+                    </p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                      {w.focus}
+                    </p>
                   </li>
                 ))}
               </ol>
             </div>
 
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="mb-2 text-sm font-medium text-foreground">
-                Задачи
-              </h3>
+            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <div className="mb-4 flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                  <ListChecks className="size-4 text-muted-foreground" />
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Задачи
+                </h3>
+              </div>
               <TaskList artifactId={entry.artifactId} tasks={tasks} />
             </div>
           </div>
