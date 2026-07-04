@@ -15,7 +15,6 @@ import {
   Clock,
   CheckCircle2,
   Upload,
-  FolderOpen,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -33,14 +32,13 @@ interface ContentViewProps {
   platforms: ContentPlatformItem[]
 }
 
-type Tab = "calendar" | "ideas" | "rubrics" | "platforms" | "files"
+type Tab = "calendar" | "ideas" | "rubrics" | "platforms"
 
 const tabs: { id: Tab; label: string }[] = [
   { id: "calendar", label: "Календарь" },
   { id: "ideas", label: "Идеи контента" },
   { id: "rubrics", label: "Рубрики" },
   { id: "platforms", label: "Площадки" },
-  { id: "files", label: "Файлы" },
 ]
 
 // --- Metrics helpers ---
@@ -363,17 +361,6 @@ export function ContentView({ projectId, plan, version, platforms }: ContentView
               initialPlatforms={platforms}
               plan={plan}
             />
-          )}
-
-          {/* Files tab */}
-          {activeTab === "files" && (
-            <div className="flex h-[40vh] items-center justify-center">
-              <EmptyState
-                icon={FolderOpen}
-                title="Файлы контента"
-                description="Здесь будут храниться готовые материалы: тексты, изображения, видео для публикаций."
-              />
-            </div>
           )}
 
           {/* Email sequence — shown in Calendar tab as side section */}
