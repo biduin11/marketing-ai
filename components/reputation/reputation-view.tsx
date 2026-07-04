@@ -160,8 +160,8 @@ export function ReputationView({
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-[#111]">Репутация и соцсети</h1>
-          <p className="text-sm text-[#6b7280]">
+          <h1 className="text-2xl font-semibold text-foreground">Репутация и соцсети</h1>
+          <p className="text-sm text-muted-foreground">
             Отзывы и статистика соцсетей в одном месте
           </p>
         </div>
@@ -184,8 +184,8 @@ export function ReputationView({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[#111]">Репутация и соцсети</h1>
-        <p className="text-sm text-[#6b7280]">
+        <h1 className="text-2xl font-semibold text-foreground">Репутация и соцсети</h1>
+        <p className="text-sm text-muted-foreground">
           Отзывы и статистика соцсетей в одном месте
         </p>
       </div>
@@ -200,8 +200,8 @@ export function ReputationView({
               m.alert ? "border-warning/20 bg-warning/10" : "border-border bg-card"
             )}
           >
-            <p className="mb-1 text-xs text-[#6b7280]">{m.label}</p>
-            <p className="text-2xl font-bold text-[#111]">
+            <p className="mb-1 text-xs text-muted-foreground">{m.label}</p>
+            <p className="text-2xl font-bold text-foreground">
               {m.icon} {m.value}
               {m.suffix ?? ""}
             </p>
@@ -212,7 +212,7 @@ export function ReputationView({
       {/* ── БЛОК 2: Лента отзывов ── */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-[#111]">Отзывы</h2>
+          <h2 className="text-base font-semibold text-foreground">Отзывы</h2>
           <div className="flex flex-wrap gap-1">
             {(
               [
@@ -228,8 +228,8 @@ export function ReputationView({
                 className={cn(
                   "rounded-lg border px-3 py-1.5 text-sm transition-colors",
                   filter === key
-                    ? "border-[#111] bg-foreground text-background"
-                    : "border-border text-[#6b7280] hover:bg-[#fafafa]"
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:bg-muted"
                 )}
               >
                 {label}
@@ -253,7 +253,7 @@ export function ReputationView({
               >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-border bg-[#fafafa] px-2 py-0.5 text-xs">
+                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs">
                       {platformLabel(review.platform)}
                     </span>
                     <div className="flex gap-0.5">
@@ -263,7 +263,7 @@ export function ReputationView({
                           className={
                             review.rating != null && s <= review.rating
                               ? "text-amber-400"
-                              : "text-[#eaeaea]"
+                              : "text-muted-foreground"
                           }
                         >
                           ★
@@ -271,15 +271,15 @@ export function ReputationView({
                       ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-[#6b7280]">
+                  <span className="shrink-0 text-xs text-muted-foreground">
                     {fmtDate(review.publishedAt)}
                   </span>
                 </div>
 
-                <p className="mb-1 text-sm font-medium text-[#111]">
+                <p className="mb-1 text-sm font-medium text-foreground">
                   {review.author ?? "Аноним"}
                 </p>
-                <p className="mb-3 text-sm leading-relaxed text-[#6b7280]">
+                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
                   {review.text ?? "(без текста)"}
                 </p>
 
@@ -297,7 +297,7 @@ export function ReputationView({
                     {sentimentLabel(review.sentiment)}
                   </span>
                   {review.reply && (
-                    <span className="rounded-full border border-border bg-[#fafafa] px-2 py-0.5 text-xs text-[#6b7280]">
+                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                       Есть ответ
                     </span>
                   )}
@@ -311,7 +311,7 @@ export function ReputationView({
       {/* ── БЛОК 3: Статистика соцсетей ── */}
       {socialByPlatform.length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-base font-semibold text-[#111]">Соцсети</h2>
+          <h2 className="text-base font-semibold text-foreground">Соцсети</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {socialByPlatform.map(({ platform, series }) => {
               const latest = series[series.length - 1]
@@ -322,7 +322,7 @@ export function ReputationView({
                 >
                   <div className="mb-3 flex items-center gap-2">
                     <span className="text-lg">{platformIcon(platform)}</span>
-                    <p className="text-sm font-medium text-[#111]">
+                    <p className="text-sm font-medium text-foreground">
                       {platformLabel(platform)}
                     </p>
                   </div>
@@ -370,15 +370,15 @@ export function ReputationView({
       <div className="rounded-2xl border border-border bg-card p-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-[#111]">AI-анализ репутации</h3>
+            <h3 className="text-base font-semibold text-foreground">AI-анализ репутации</h3>
             {analysisVersion !== null && (
-              <p className="text-xs text-[#6b7280]">версия {analysisVersion}</p>
+              <p className="text-xs text-muted-foreground">версия {analysisVersion}</p>
             )}
           </div>
           <button
             onClick={generate}
             disabled={loading}
-            className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-[#fafafa] disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -399,17 +399,17 @@ export function ReputationView({
           />
         ) : (
           <div className="space-y-6">
-            <p className="text-sm text-[#6b7280]">{analysis.summary}</p>
+            <p className="text-sm text-muted-foreground">{analysis.summary}</p>
 
             {analysis.topComplaints.length > 0 && (
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6b7280]">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Чаще всего критикуют
                   </p>
                   <ul className="space-y-1.5">
                     {analysis.topComplaints.map((c, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-[#111]">
+                      <li key={i} className="flex gap-2 text-sm text-foreground">
                         <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-red-400" />
                         {c}
                       </li>
@@ -417,12 +417,12 @@ export function ReputationView({
                   </ul>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#6b7280]">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Чаще всего хвалят (УТП)
                   </p>
                   <ul className="space-y-1.5">
                     {analysis.topPraises.map((c, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-[#111]">
+                      <li key={i} className="flex gap-2 text-sm text-foreground">
                         <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-green-400" />
                         {c}
                       </li>
@@ -434,18 +434,18 @@ export function ReputationView({
 
             {/* Что делать */}
             <div className="space-y-3">
-              <p className="text-sm font-semibold text-[#111]">Что делать</p>
+              <p className="text-sm font-semibold text-foreground">Что делать</p>
               {analysis.actions.map((action, i) => (
                 <div
                   key={i}
-                  className="flex gap-3 rounded-xl border border-border bg-[#fafafa] p-3"
+                  className="flex gap-3 rounded-xl border border-border bg-muted p-3"
                 >
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
                     {i + 1}
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-[#111]">{action.title}</p>
-                    <p className="mt-0.5 text-xs text-[#6b7280]">{action.description}</p>
+                    <p className="text-sm font-semibold text-foreground">{action.title}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{action.description}</p>
                     {action.urgency === "high" && (
                       <span className="mt-1 block text-xs text-danger">⚡ Срочно</span>
                     )}
@@ -457,13 +457,13 @@ export function ReputationView({
             {/* Шаблоны ответов */}
             {analysis.reviewReplyTemplates.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm font-semibold text-[#111]">Шаблоны ответов</p>
+                <p className="text-sm font-semibold text-foreground">Шаблоны ответов</p>
                 {analysis.reviewReplyTemplates.map((t, i) => (
                   <div key={i} className="rounded-xl border border-border p-3">
-                    <p className="mb-1 text-xs font-medium text-[#6b7280]">
+                    <p className="mb-1 text-xs font-medium text-muted-foreground">
                       Для отзыва: {t.forSentiment === "negative" ? "негативного" : "нейтрального"}
                     </p>
-                    <p className="text-sm text-[#111]">{t.template}</p>
+                    <p className="text-sm text-foreground">{t.template}</p>
                   </div>
                 ))}
               </div>
@@ -478,8 +478,8 @@ export function ReputationView({
 function SocialMetric({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <p className="text-[#6b7280]">{label}</p>
-      <p className="text-sm font-semibold text-[#111]">{value.toLocaleString("ru-RU")}</p>
+      <p className="text-muted-foreground">{label}</p>
+      <p className="text-sm font-semibold text-foreground">{value.toLocaleString("ru-RU")}</p>
     </div>
   )
 }

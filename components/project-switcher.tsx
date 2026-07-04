@@ -131,8 +131,8 @@ export function ProjectSwitcher({
                       className={cn(
                         "ml-2 shrink-0 rounded p-1 transition-colors",
                         isSingleProject
-                          ? "cursor-not-allowed text-[#d1d5db]"
-                          : "text-[#d1d5db] hover:bg-danger/10 hover:text-danger"
+                          ? "cursor-not-allowed text-muted-foreground"
+                          : "text-muted-foreground hover:bg-danger/10 hover:text-danger"
                       )}
                     >
                       <Trash2 className="size-3.5" />

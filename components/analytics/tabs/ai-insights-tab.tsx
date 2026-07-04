@@ -158,7 +158,7 @@ export function AiInsightsTab({ summary, channels, healthScore }: AiInsightsTabP
               { label: "Стоимость лида", ok: summary.cpl > 0 && summary.cpl < 1000 },
             ].map(({ label, ok }) => (
               <div key={label} className="flex items-center gap-2">
-                <span className={cn("size-2 shrink-0 rounded-full", ok ? "bg-[#16a34a]" : "bg-danger")} />
+                <span className={cn("size-2 shrink-0 rounded-full", ok ? "bg-success" : "bg-danger")} />
                 <span className="text-xs text-muted-foreground">{label}</span>
                 <span className={cn("ml-auto text-xs font-medium", ok ? "text-success" : "text-danger")}>{ok ? "OK" : "Внимание"}</span>
               </div>

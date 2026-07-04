@@ -397,7 +397,7 @@ export function ContentView({ projectId, plan, version }: ContentViewProps) {
                 Email-цепочка
               </h3>
               <div className="relative space-y-0 pl-6">
-                <div className="absolute left-2 top-0 h-full w-px bg-[#eaeaea]" />
+                <div className="absolute left-2 top-0 h-full w-px bg-border" />
                 {plan.emailSequence.map((email, i) => (
                   <div key={i} className="relative pb-4 last:pb-0">
                     <span className="absolute -left-4 flex size-4 items-center justify-center rounded-full border-2 border-card bg-foreground text-[9px] font-bold text-background">

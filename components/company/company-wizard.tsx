@@ -274,7 +274,7 @@ function FieldTextarea({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="mt-5 mb-3 text-[11px] font-semibold uppercase tracking-widest text-[#6b7280]">
+    <p className="mt-5 mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
       {children}
     </p>
   )
@@ -282,7 +282,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 function InfoBlock({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-5 rounded-lg border border-border bg-muted px-4 py-3 text-xs text-[#6b7280] leading-relaxed">
+    <div className="mb-5 rounded-lg border border-border bg-muted px-4 py-3 text-xs text-muted-foreground leading-relaxed">
       {children}
     </div>
   )
@@ -307,13 +307,13 @@ function StepperProgress({ step }: { step: number }) {
                   "flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors",
                   done   ? "bg-foreground text-background" :
                   active ? "bg-foreground text-background" :
-                           "bg-muted text-[#6b7280]"
+                           "bg-muted text-muted-foreground"
                 )}>
                   {done ? <Check className="size-3.5" /> : n}
                 </div>
                 <span className={cn(
                   "text-[10px] whitespace-nowrap",
-                  active ? "font-medium text-[#111]" : "text-[#6b7280]"
+                  active ? "font-medium text-foreground" : "text-muted-foreground"
                 )}>{label}</span>
               </div>
               {n < 5 && (
@@ -347,7 +347,7 @@ function Step1({
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-[#111]">О вашем бизнесе</h3>
+          <h3 className="text-sm font-semibold text-foreground">О вашем бизнесе</h3>
           <p className="text-xs text-muted-foreground">
             Основная информация о компании и предлагаемом продукте или услуге
           </p>
@@ -444,7 +444,7 @@ function Step2({ f, set }: { f: FormState; set: (k: keyof FormState, v: string) 
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-semibold text-[#111]">Целевая аудитория</h3>
+        <h3 className="text-sm font-semibold text-foreground">Целевая аудитория</h3>
         <p className="text-xs text-muted-foreground">Кто ваш клиент и что для него важно</p>
       </div>
 
@@ -497,7 +497,7 @@ function Step3({ f, set }: { f: FormState; set: (k: keyof FormState, v: string) 
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-semibold text-[#111]">Маркетинг сейчас</h3>
+        <h3 className="text-sm font-semibold text-foreground">Маркетинг сейчас</h3>
         <p className="text-xs text-muted-foreground">Текущие каналы, бюджет и цели продвижения</p>
       </div>
 
@@ -628,7 +628,7 @@ function Step4({ f, set }: { f: FormState; set: (k: keyof FormState, v: string) 
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-semibold text-[#111]">Экономика и ROI</h3>
+        <h3 className="text-sm font-semibold text-foreground">Экономика и ROI</h3>
       </div>
 
       <InfoBlock>
@@ -706,7 +706,7 @@ function Step5({
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-sm font-semibold text-[#111]">Конкуренты</h3>
+        <h3 className="text-sm font-semibold text-foreground">Конкуренты</h3>
       </div>
 
       <InfoBlock>
@@ -723,7 +723,7 @@ function Step5({
             >
               <Trash2 className="size-3.5" />
             </button>
-            <p className="mb-3 text-xs font-medium text-[#6b7280]">Конкурент {i + 1}</p>
+            <p className="mb-3 text-xs font-medium text-muted-foreground">Конкурент {i + 1}</p>
             <div className="space-y-3">
               <FieldText
                 id={`comp-name-${i}`}

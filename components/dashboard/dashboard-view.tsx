@@ -97,10 +97,10 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  DRAFT: "text-[#6b7280] bg-muted",
+  DRAFT: "text-muted-foreground bg-muted",
   ACTIVE: "text-success bg-success/10",
   PAUSED: "text-warning bg-warning/10",
-  ARCHIVED: "text-[#6b7280] bg-muted",
+  ARCHIVED: "text-muted-foreground bg-muted",
 }
 
 const REPORT_LABELS: Record<string, string> = {
@@ -326,7 +326,7 @@ export function DashboardView({
                     <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
                     {p.niche && <p className="truncate text-xs text-muted-foreground">{p.niche}</p>}
                   </div>
-                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-[#6b7280]")}>
+                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground")}>
                     {STATUS_LABELS[p.status] ?? p.status}
                   </span>
                 </div>

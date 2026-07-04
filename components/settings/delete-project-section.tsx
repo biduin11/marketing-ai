@@ -53,9 +53,9 @@ export function DeleteProjectSection({
   }
 
   return (
-    <div className="rounded-2xl border border-[#dc2626]/20 bg-card p-6">
+    <div className="rounded-2xl border border-danger/20 bg-card p-6">
       <h3 className="mb-1 text-sm font-semibold text-danger">Опасная зона</h3>
-      <p className="mb-4 text-sm text-[#6b7280]">
+      <p className="mb-4 text-sm text-muted-foreground">
         Удаление проекта необратимо. Все AI-анализы, стратегии и данные будут уничтожены.
       </p>
 
@@ -80,7 +80,7 @@ export function DeleteProjectSection({
       </div>
 
       {isSingleProject && (
-        <p className="mt-2 text-xs text-[#6b7280]">
+        <p className="mt-2 text-xs text-muted-foreground">
           Создайте новый проект перед удалением этого.
         </p>
       )}

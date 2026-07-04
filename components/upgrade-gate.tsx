@@ -20,7 +20,7 @@ export function UpgradeGate({
   return (
     <div className={`rounded-2xl border border-border bg-warning/10 p-5 ${className ?? ""}`}>
       <div className="flex items-start gap-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#d97706]/10">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-warning/10">
           <Zap className="size-4 text-warning" />
         </div>
         <div className="flex-1">

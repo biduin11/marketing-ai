@@ -135,9 +135,9 @@ function EmotionChart({
 
 function RowLabel({ icon, label }: { icon: ReactNode; label: string }) {
   return (
-    <div className="flex items-start gap-2 border-b border-r border-border bg-[#fafafa] p-4">
-      <span className="mt-0.5 shrink-0 text-[#6b7280]">{icon}</span>
-      <span className="text-xs font-medium leading-tight text-[#6b7280]">
+    <div className="flex items-start gap-2 border-b border-r border-border bg-muted p-4">
+      <span className="mt-0.5 shrink-0 text-muted-foreground">{icon}</span>
+      <span className="text-xs font-medium leading-tight text-muted-foreground">
         {label}
       </span>
     </div>
@@ -200,15 +200,15 @@ export function JourneyView({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-[#111]">
+        <h1 className="text-2xl font-semibold text-foreground">
           Карта пути клиента (CJM)
         </h1>
         <div className="flex flex-wrap items-center gap-3">
-          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-[#111] hover:bg-[#fafafa]">
+          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
             <Download size={15} />
             Экспорт
           </button>
-          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-[#6b7280]">
+          <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground">
             <Calendar size={15} />
             {fmtDate(cjmCreatedAt)}
             <ChevronDown size={14} />
@@ -264,10 +264,10 @@ export function JourneyView({
             <div className="rounded-2xl border border-border bg-card p-6">
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_auto]">
                 <div>
-                  <h2 className="mb-3 text-base font-semibold text-[#111]">
+                  <h2 className="mb-3 text-base font-semibold text-foreground">
                     Обзор CJM
                   </h2>
-                  <p className="max-w-md text-sm leading-relaxed text-[#6b7280]">
+                  <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
                     {cjm.summary}
                   </p>
                 </div>
@@ -278,13 +278,13 @@ export function JourneyView({
                         label: "Этапов пути",
                         value: n,
                         sub: "ключевых этапов",
-                        icon: <Map size={18} className="text-[#6b7280]" />,
+                        icon: <Map size={18} className="text-muted-foreground" />,
                       },
                       {
                         label: "Точек контакта",
                         value: touchpointsCount,
                         sub: "с клиентом",
-                        icon: <Phone size={18} className="text-[#6b7280]" />,
+                        icon: <Phone size={18} className="text-muted-foreground" />,
                       },
                       {
                         label: "Проблемных зон",
@@ -293,7 +293,7 @@ export function JourneyView({
                         icon: (
                           <AlertTriangle
                             size={18}
-                            className="text-[#6b7280]"
+                            className="text-muted-foreground"
                           />
                         ),
                       },
@@ -302,7 +302,7 @@ export function JourneyView({
                         value: opportunitiesCount,
                         sub: "для роста",
                         icon: (
-                          <TrendingUp size={18} className="text-[#6b7280]" />
+                          <TrendingUp size={18} className="text-muted-foreground" />
                         ),
                       },
                       ...(cjm.cesScore != null
@@ -312,7 +312,7 @@ export function JourneyView({
                               value: `${cjm.cesScore}/10`,
                               sub: cjm.cesLevel ?? "",
                               icon: (
-                                <Smile size={18} className="text-[#6b7280]" />
+                                <Smile size={18} className="text-muted-foreground" />
                               ),
                             },
                           ]
@@ -323,16 +323,16 @@ export function JourneyView({
                       key={m.label}
                       className="min-w-[120px] rounded-xl border border-border p-4"
                     >
-                      <p className="mb-2 text-xs leading-snug text-[#6b7280]">
+                      <p className="mb-2 text-xs leading-snug text-muted-foreground">
                         {m.label}
                       </p>
                       <div className="flex items-end justify-between gap-2">
                         <div>
-                          <p className="tabular-nums text-2xl font-bold text-[#111]">
+                          <p className="tabular-nums text-2xl font-bold text-foreground">
                             {m.value}
                           </p>
                           {m.sub && (
-                            <p className="text-xs text-[#6b7280]">{m.sub}</p>
+                            <p className="text-xs text-muted-foreground">{m.sub}</p>
                           )}
                         </div>
                         {m.icon}
@@ -355,20 +355,20 @@ export function JourneyView({
                     }}
                   >
                     {/* Stage headers */}
-                    <div className="border-b border-r border-border bg-[#fafafa] p-4">
-                      <span className="text-xs font-semibold text-[#6b7280]">
+                    <div className="border-b border-r border-border bg-muted p-4">
+                      <span className="text-xs font-semibold text-muted-foreground">
                         Этапы
                       </span>
                     </div>
                     {stages.map((s, i) => (
                       <div
                         key={i}
-                        className="border-b border-r border-border bg-[#fafafa] p-4 last:border-r-0"
+                        className="border-b border-r border-border bg-muted p-4 last:border-r-0"
                       >
-                        <p className="text-xs font-bold text-[#111]">
+                        <p className="text-xs font-bold text-foreground">
                           {i + 1}. {s.name}
                         </p>
-                        <p className="mt-1 text-xs leading-snug text-[#6b7280]">
+                        <p className="mt-1 text-xs leading-snug text-muted-foreground">
                           {s.description}
                         </p>
                       </div>
@@ -384,7 +384,7 @@ export function JourneyView({
                         key={i}
                         className="border-b border-r border-border p-4 last:border-r-0"
                       >
-                        <p className="text-xs leading-relaxed text-[#111]">
+                        <p className="text-xs leading-relaxed text-foreground">
                           {s.customerGoal ?? s.description}
                         </p>
                       </div>
@@ -404,9 +404,9 @@ export function JourneyView({
                           {s.customerActions.slice(0, 3).map((a, j) => (
                             <li
                               key={j}
-                              className="flex items-start gap-1.5 text-xs text-[#111]"
+                              className="flex items-start gap-1.5 text-xs text-foreground"
                             >
-                              <span className="mt-0.5 shrink-0 text-[#6b7280]">
+                              <span className="mt-0.5 shrink-0 text-muted-foreground">
                                 •
                               </span>
                               {a}
@@ -426,19 +426,19 @@ export function JourneyView({
                         key={i}
                         className="border-b border-r border-border p-4 last:border-r-0"
                       >
-                        <p className="text-xs leading-relaxed text-[#6b7280]">
+                        <p className="text-xs leading-relaxed text-muted-foreground">
                           {s.touchpoints.join(", ")}
                         </p>
                       </div>
                     ))}
 
                     {/* Эмоции — spanning all stage columns */}
-                    <div className="flex items-start gap-2 border-b border-r border-border bg-[#fafafa] p-4">
+                    <div className="flex items-start gap-2 border-b border-r border-border bg-muted p-4">
                       <Smile
                         size={13}
-                        className="mt-0.5 shrink-0 text-[#6b7280]"
+                        className="mt-0.5 shrink-0 text-muted-foreground"
                       />
-                      <span className="text-xs font-medium leading-tight text-[#6b7280]">
+                      <span className="text-xs font-medium leading-tight text-muted-foreground">
                         Эмоции клиента
                       </span>
                     </div>
@@ -468,7 +468,7 @@ export function JourneyView({
                               size={11}
                               className="mt-0.5 shrink-0 text-warning"
                             />
-                            <p className="text-xs leading-snug text-[#111]">
+                            <p className="text-xs leading-snug text-foreground">
                               {p}
                             </p>
                           </div>
@@ -493,9 +493,9 @@ export function JourneyView({
                           >
                             <Lightbulb
                               size={11}
-                              className="mt-0.5 shrink-0 text-[#6b7280]"
+                              className="mt-0.5 shrink-0 text-muted-foreground"
                             />
-                            <p className="text-xs leading-snug text-[#111]">
+                            <p className="text-xs leading-snug text-foreground">
                               {o}
                             </p>
                           </div>
@@ -517,14 +517,14 @@ export function JourneyView({
                           <div className="flex items-start gap-1.5">
                             <TrendingUp
                               size={11}
-                              className="mt-0.5 shrink-0 text-[#6b7280]"
+                              className="mt-0.5 shrink-0 text-muted-foreground"
                             />
-                            <p className="text-xs leading-snug text-[#111]">
+                            <p className="text-xs leading-snug text-foreground">
                               {s.recommendation}
                             </p>
                           </div>
                         ) : (
-                          <p className="text-xs text-[#6b7280]">—</p>
+                          <p className="text-xs text-muted-foreground">—</p>
                         )}
                       </div>
                     ))}
@@ -536,7 +536,7 @@ export function JourneyView({
             {/* Секция 3 — Ключевые инсайты */}
             {insights.length > 0 && (
               <div>
-                <h2 className="mb-4 text-base font-semibold text-[#111]">
+                <h2 className="mb-4 text-base font-semibold text-foreground">
                   Ключевые инсайты
                 </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -547,10 +547,10 @@ export function JourneyView({
                         key={i}
                         className="rounded-2xl border border-border bg-card p-5"
                       >
-                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f5]">
-                          <Icon size={16} className="text-[#6b7280]" />
+                        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-muted">
+                          <Icon size={16} className="text-muted-foreground" />
                         </div>
-                        <p className="text-sm leading-relaxed text-[#111]">
+                        <p className="text-sm leading-relaxed text-foreground">
                           {insight}
                         </p>
                       </div>
@@ -568,14 +568,14 @@ export function JourneyView({
                 key={i}
                 className="rounded-2xl border border-border bg-card p-5"
               >
-                <h3 className="mb-3 text-sm font-semibold text-[#111]">
+                <h3 className="mb-3 text-sm font-semibold text-foreground">
                   {i + 1}. {s.name}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {s.touchpoints.map((tp, j) => (
                     <span
                       key={j}
-                      className="rounded-lg border border-border px-3 py-1.5 text-xs text-[#111]"
+                      className="rounded-lg border border-border px-3 py-1.5 text-xs text-foreground"
                     >
                       {tp}
                     </span>
@@ -589,7 +589,7 @@ export function JourneyView({
           <TabsContent value="problems" className="mt-6">
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="mb-4 text-base font-semibold text-[#111]">
+                <h2 className="mb-4 text-base font-semibold text-foreground">
                   Проблемы и барьеры
                 </h2>
                 <div className="space-y-3">
@@ -603,8 +603,8 @@ export function JourneyView({
                         className="mt-0.5 shrink-0 text-warning"
                       />
                       <div className="min-w-0">
-                        <p className="text-sm text-[#111]">{item.text}</p>
-                        <p className="mt-0.5 text-xs text-[#6b7280]">
+                        <p className="text-sm text-foreground">{item.text}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {item.stage}
                         </p>
                       </div>
@@ -613,7 +613,7 @@ export function JourneyView({
                 </div>
               </div>
               <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="mb-4 text-base font-semibold text-[#111]">
+                <h2 className="mb-4 text-base font-semibold text-foreground">
                   Возможности для роста
                 </h2>
                 <div className="space-y-3">
@@ -624,11 +624,11 @@ export function JourneyView({
                     >
                       <Lightbulb
                         size={14}
-                        className="mt-0.5 shrink-0 text-[#6b7280]"
+                        className="mt-0.5 shrink-0 text-muted-foreground"
                       />
                       <div className="min-w-0">
-                        <p className="text-sm text-[#111]">{item.text}</p>
-                        <p className="mt-0.5 text-xs text-[#6b7280]">
+                        <p className="text-sm text-foreground">{item.text}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {item.stage}
                         </p>
                       </div>
@@ -642,7 +642,7 @@ export function JourneyView({
           {/* ─── ЭМОЦИИ ─── */}
           <TabsContent value="emotions" className="mt-6 space-y-6">
             <div className="rounded-2xl border border-border bg-card p-6">
-              <h2 className="mb-6 text-base font-semibold text-[#111]">
+              <h2 className="mb-6 text-base font-semibold text-foreground">
                 Эмоциональный путь клиента
               </h2>
               <EmotionChart stages={stages} height={160} />
@@ -668,14 +668,14 @@ export function JourneyView({
                     className="rounded-2xl border border-border bg-card p-4"
                   >
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-[#111]">
+                      <p className="text-sm font-semibold text-foreground">
                         {i + 1}. {s.name}
                       </p>
                       <span className={`text-xs ${riskColor}`}>{riskLabel}</span>
                     </div>
                     <div className="mt-3 flex items-center gap-3">
                       <span className="text-2xl">{getEmotionEmoji(score)}</span>
-                      <p className="text-sm text-[#6b7280]">
+                      <p className="text-sm text-muted-foreground">
                         {getEmotionLabel(s)}
                       </p>
                     </div>
@@ -697,11 +697,11 @@ export function JourneyView({
                     {i + 1}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm leading-relaxed text-[#111]">
+                    <p className="text-sm leading-relaxed text-foreground">
                       {rec.text}
                     </p>
                     {rec.stage && (
-                      <p className="mt-1 text-xs text-[#6b7280]">{rec.stage}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{rec.stage}</p>
                     )}
                   </div>
                 </div>
