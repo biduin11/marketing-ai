@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, Tag, BookOpen } from "lucide-react"
+import { Sparkles, RefreshCw, Loader2, Tag, BookOpen, Megaphone, Gift } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
+import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { runOffer } from "@/lib/actions/ai"
 import type { Offer } from "@/lib/ai/schemas/offer"
 import { OFFER_TYPE_META, TONE_CLASSES } from "@/lib/status-variants"
@@ -85,25 +86,65 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* USP + Tagline */}
+          {/* Метрик-строка — фирменный приём эталона (#1) */}
+          <StatRow cols={4}>
+            <StatCard
+              label="Офферов"
+              value={offer.offers.length}
+              sub="всего"
+              icon={Tag}
+            />
+            <StatCard
+              label="Акций"
+              value={offer.offers.filter((o) => o.type === "promotion").length}
+              sub="активных"
+              icon={Megaphone}
+              tone="warning"
+            />
+            <StatCard
+              label="Спецпредложений"
+              value={offer.offers.filter((o) => o.type === "special").length}
+              sub="в наборе"
+              icon={Gift}
+              tone="success"
+            />
+            <StatCard
+              label="Лид-магнитов"
+              value={offer.leadMagnets.length}
+              sub="для привлечения"
+              icon={BookOpen}
+            />
+          </StatRow>
+
+          {/* USP + Tagline — с иконкой-в-чипе (#3) */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Главное УТП
-            </p>
-            <p className="text-xl font-semibold text-foreground">{offer.usp}</p>
-            {offer.tagline && (
-              <p className="mt-3 inline-block rounded-full border border-border bg-muted px-3 py-1 text-sm text-muted-foreground">
-                {offer.tagline}
-              </p>
-            )}
+            <div className="flex items-start gap-4">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
+                <Sparkles className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Главное УТП
+                </p>
+                <p className="text-xl font-semibold leading-snug text-foreground">{offer.usp}</p>
+                {offer.tagline && (
+                  <p className="mt-3 inline-block rounded-full border border-border bg-muted px-3 py-1 text-sm text-muted-foreground">
+                    {offer.tagline}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Offers grid */}
           {offer.offers.length > 0 && (
             <div>
-              <h3 className="mb-3 text-sm font-medium text-foreground">
-                Офферы
-              </h3>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                  <Tag className="size-4 text-muted-foreground" />
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">Офферы</h3>
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {offer.offers.map((o, i) => {
                   const meta = OFFER_TYPE_META[o.type]
@@ -146,9 +187,12 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
           {/* Lead magnets */}
           {offer.leadMagnets.length > 0 && (
             <div>
-              <h3 className="mb-3 text-sm font-medium text-foreground">
-                Лид-магниты
-              </h3>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-muted">
+                  <BookOpen className="size-4 text-muted-foreground" />
+                </span>
+                <h3 className="text-sm font-semibold text-foreground">Лид-магниты</h3>
+              </div>
               <div className="grid gap-4 md:grid-cols-2">
                 {offer.leadMagnets.map((lm, i) => (
                   <div
