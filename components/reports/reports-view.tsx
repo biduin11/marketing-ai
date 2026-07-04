@@ -3,15 +3,90 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Sparkles, RefreshCw, Loader2, FileText, Download } from "lucide-react"
+import {
+  Sparkles,
+  RefreshCw,
+  Loader2,
+  FileText,
+  Download,
+  Trophy,
+  ShieldAlert,
+  Lightbulb,
+  Flag,
+  CheckCircle2,
+  AlertTriangle,
+  type LucideIcon,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { EmptyState } from "@/components/empty-state"
+import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { runReport } from "@/lib/actions/ai"
 import { uploadReportPdf } from "@/lib/actions/blob"
 import type { ExecutiveReport } from "@/lib/ai/schemas/executiveReport"
 import { cn } from "@/lib/utils"
+
+type SectionTone = "success" | "danger" | "warning" | "neutral"
+
+const SECTION_TONE: Record<
+  SectionTone,
+  { chip: string; icon: string; marker: string }
+> = {
+  success: { chip: "bg-success/10 text-success", icon: "text-success", marker: "bg-success" },
+  danger: { chip: "bg-danger/10 text-danger", icon: "text-danger", marker: "bg-danger" },
+  warning: { chip: "bg-warning/10 text-warning", icon: "text-warning", marker: "bg-warning" },
+  neutral: { chip: "bg-muted text-foreground", icon: "text-foreground", marker: "bg-foreground" },
+}
+
+/** Карточка секции с иконкой-в-чипе, заголовком и счётчиком (паттерн эталона #3). */
+function SectionCard({
+  title,
+  icon: Icon,
+  tone,
+  count,
+  children,
+}: {
+  title: string
+  icon: LucideIcon
+  tone: SectionTone
+  count?: number
+  children: React.ReactNode
+}) {
+  const t = SECTION_TONE[tone]
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="mb-4 flex items-center gap-2">
+        <span className={cn("flex size-8 items-center justify-center rounded-lg", t.chip)}>
+          <Icon className="size-4" />
+        </span>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {count != null && (
+          <Badge variant="muted" className="ml-auto">
+            {count}
+          </Badge>
+        )}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+/** Список с семантическими маркерами-точками вместо голых буллетов. */
+function MarkerList({ items, tone }: { items: string[]; tone: SectionTone }) {
+  const t = SECTION_TONE[tone]
+  return (
+    <ul className="space-y-2.5">
+      {items.map((item, i) => (
+        <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
+          <span className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", t.marker)} />
+          <span className="leading-relaxed">{item}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 type ReportTab = "weekly" | "monthly" | "quarterly"
 type ArtifactType = "REPORT_WEEKLY" | "REPORT_MONTHLY" | "REPORT_QUARTERLY"
@@ -49,22 +124,6 @@ function formatPeriod(from: string, to: string): string {
   const f = new Date(from).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })
   const t = new Date(to).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" })
   return `${f} — ${t}`
-}
-
-function ListBlock({ title, items, color }: { title: string; items: string[]; color: string }) {
-  return (
-    <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
-      <ul className="space-y-1.5">
-        {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-            <span className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", color)} />
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
 }
 
 export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsViewProps) {
@@ -292,42 +351,125 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
           />
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* Headline */}
+        <div className="space-y-5">
+          {/* Headline — акцентный вывод с иконкой-в-чипе */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Главный вывод · версия {currentEntry.version}
-            </p>
-            <p className="text-lg font-semibold text-foreground">{currentEntry.report.headline}</p>
+            <div className="flex items-start gap-4">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-foreground text-background">
+                <Sparkles className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Главный вывод
+                  </p>
+                  <Badge variant="outline" size="sm">
+                    версия {currentEntry.version}
+                  </Badge>
+                </div>
+                <p className="text-lg font-semibold leading-snug text-foreground">
+                  {currentEntry.report.headline}
+                </p>
+              </div>
+            </div>
           </div>
+
+          {/* Метрик-строка — фирменный приём эталона (#1) */}
+          <StatRow cols={4}>
+            <StatCard
+              label="Достижения"
+              value={currentEntry.report.wins.length}
+              sub="за период"
+              icon={Trophy}
+              tone="success"
+            />
+            <StatCard
+              label="Риски"
+              value={currentEntry.report.risks.length}
+              sub="требуют внимания"
+              icon={ShieldAlert}
+              tone="danger"
+            />
+            <StatCard
+              label="Рекомендации"
+              value={currentEntry.report.recommendations.length}
+              sub="к внедрению"
+              icon={Lightbulb}
+            />
+            <StatCard
+              label="Фокусы"
+              value={currentEntry.report.nextPeriodFocus.length}
+              sub="след. период"
+              icon={Flag}
+              tone="warning"
+            />
+          </StatRow>
 
           {/* Summary */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Исполнительное резюме
+          <SectionCard title="Исполнительное резюме" icon={FileText} tone="neutral">
+            <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              {currentEntry.report.summary}
             </p>
-            <p className="whitespace-pre-line text-sm text-foreground">{currentEntry.report.summary}</p>
-          </div>
+          </SectionCard>
 
           {/* Wins / Risks */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <ListBlock title="Достижения" items={currentEntry.report.wins} color="bg-success" />
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-              <ListBlock title="Риски" items={currentEntry.report.risks} color="bg-danger" />
-            </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <SectionCard
+              title="Достижения"
+              icon={CheckCircle2}
+              tone="success"
+              count={currentEntry.report.wins.length}
+            >
+              <MarkerList items={currentEntry.report.wins} tone="success" />
+            </SectionCard>
+            <SectionCard
+              title="Риски"
+              icon={AlertTriangle}
+              tone="danger"
+              count={currentEntry.report.risks.length}
+            >
+              <MarkerList items={currentEntry.report.risks} tone="danger" />
+            </SectionCard>
           </div>
 
-          {/* Recommendations */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <ListBlock title="Рекомендации" items={currentEntry.report.recommendations} color="bg-foreground" />
-          </div>
+          {/* Recommendations — нумерованные кружки (#4) */}
+          <SectionCard
+            title="Рекомендации"
+            icon={Lightbulb}
+            tone="neutral"
+            count={currentEntry.report.recommendations.length}
+          >
+            <ol className="space-y-3">
+              {currentEntry.report.recommendations.map((rec, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background">
+                    {i + 1}
+                  </span>
+                  <p className="text-sm leading-relaxed text-foreground">{rec}</p>
+                </li>
+              ))}
+            </ol>
+          </SectionCard>
 
-          {/* Next period */}
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-            <ListBlock title="Фокус следующего периода" items={currentEntry.report.nextPeriodFocus} color="bg-warning" />
-          </div>
+          {/* Next period focus — мини-карточки с флагом вместо буллетов */}
+          <SectionCard
+            title="Фокус следующего периода"
+            icon={Flag}
+            tone="warning"
+            count={currentEntry.report.nextPeriodFocus.length}
+          >
+            <div className="grid gap-3 sm:grid-cols-2">
+              {currentEntry.report.nextPeriodFocus.map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2.5 rounded-xl border border-border bg-muted/40 p-3"
+                >
+                  <Flag className="mt-0.5 size-3.5 shrink-0 text-warning" />
+                  <p className="text-sm leading-snug text-foreground">{item}</p>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
         </div>
       )}
     </div>
