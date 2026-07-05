@@ -25,8 +25,15 @@ const toStringArray = (val: unknown) =>
 
 const competitorDetailSchema = z.object({
   name: z.string().optional(),
-  site: z.string().optional(),
   description: z.string().optional(),
+  site: z.string().optional(),
+  vk: z.string().optional(),
+  telegram: z.string().optional(),
+  instagram: z.string().optional(),
+  youtube: z.string().optional(),
+  tiktok: z.string().optional(),
+  yandexMaps: z.string().optional(),
+  twogis: z.string().optional(),
 })
 
 export const updateProjectSchema = z.object({

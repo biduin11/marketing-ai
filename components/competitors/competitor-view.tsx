@@ -6,13 +6,74 @@ import { toast } from "sonner"
 import {
   Sparkles, RefreshCw, Loader2, Crosshair, Star, Globe,
   MessageSquare, TrendingUp, AlertCircle, AlertTriangle,
-  Users, Target, Award,
+  Users, Target, Award, Send, Camera, PlayCircle, Music2,
+  MapPin, Compass, type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
 import { StatCard, StatRow } from "@/components/shared/stat-card"
+import { Badge } from "@/components/ui/badge"
 import { runCompetitorAnalysis } from "@/lib/actions/ai"
 import type { CompetitorAnalysis } from "@/lib/ai/schemas/competitorAnalysis"
+
+type SocialProfile = CompetitorAnalysis["competitors"][number]["socialProfiles"][number]
+
+const PLATFORM_ICON: Record<string, LucideIcon> = {
+  Telegram: Send,
+  Instagram: Camera,
+  YouTube: PlayCircle,
+  TikTok: Music2,
+  "ВКонтакте": Users,
+  "Яндекс.Карты": MapPin,
+  "2ГИС": Compass,
+  "Сайт": Globe,
+}
+
+const ENGAGEMENT_VARIANT: Record<NonNullable<SocialProfile["engagement"]>, "success" | "warning" | "muted"> = {
+  high: "success",
+  medium: "warning",
+  low: "muted",
+  none: "muted",
+}
+
+const ENGAGEMENT_LABEL: Record<NonNullable<SocialProfile["engagement"]>, string> = {
+  high: "высокая",
+  medium: "средняя",
+  low: "низкая",
+  none: "нет",
+}
+
+function SocialProfileChip({ profile }: { profile: SocialProfile }) {
+  const Icon = PLATFORM_ICON[profile.platform] ?? Globe
+
+  if (!profile.found) {
+    return (
+      <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-2 py-1 opacity-50">
+        <Icon className="size-3.5 text-muted-foreground" />
+        <p className="text-xs text-muted-foreground">{profile.platform} — нет</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2 py-1">
+      <Icon className="size-3.5 text-foreground" />
+      <div>
+        <p className="text-xs font-medium text-foreground">{profile.platform}</p>
+        {profile.followers != null && (
+          <p className="text-xs text-muted-foreground">
+            {profile.followers.toLocaleString("ru-RU")} подп.
+          </p>
+        )}
+      </div>
+      {profile.engagement && (
+        <Badge variant={ENGAGEMENT_VARIANT[profile.engagement]} size="sm">
+          {ENGAGEMENT_LABEL[profile.engagement]}
+        </Badge>
+      )}
+    </div>
+  )
+}
 
 interface CompetitorViewProps {
   projectId: string
@@ -68,23 +129,6 @@ function PresenceBadge({
       className={`rounded border px-2 py-0.5 text-xs font-medium ${colors[variant]}`}
     >
       {label}
-    </span>
-  )
-}
-
-function SocialActivityBadge({ activity }: { activity?: string | null }) {
-  if (!activity) return null
-  const map: Record<string, { label: string; cls: string }> = {
-    active: { label: "Активны", cls: "bg-success/10 text-success border-success/20" },
-    moderate: { label: "Умеренно", cls: "bg-muted text-foreground border-border" },
-    low: { label: "Редко", cls: "bg-warning/10 text-warning border-warning/20" },
-    none: { label: "Нет активности", cls: "bg-muted text-muted-foreground border-border" },
-  }
-  const item = map[activity]
-  if (!item) return null
-  return (
-    <span className={`rounded border px-2 py-0.5 text-xs font-medium ${item.cls}`}>
-      {item.label}
     </span>
   )
 }
@@ -330,39 +374,18 @@ export function CompetitorView({
                   )}
 
                   {/* Social presence */}
-                  {(() => {
-                    const hasSocial = !!(c.instagram || c.vk || c.telegram)
-                    if (hasSocial || c.socialActivity != null) {
-                      return (
-                        <div className="mb-3 flex flex-wrap items-center gap-1.5">
-                          {c.instagram && (
-                            <span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
-                              Instagram
-                            </span>
-                          )}
-                          {c.vk && (
-                            <span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
-                              ВКонтакте
-                            </span>
-                          )}
-                          {c.telegram && (
-                            <span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-foreground">
-                              Telegram
-                            </span>
-                          )}
-                          <SocialActivityBadge activity={c.socialActivity} />
-                          {c.socialNote && (
-                            <span className="text-xs text-muted-foreground">{c.socialNote}</span>
-                          )}
-                        </div>
-                      )
-                    }
-                    return (
-                      <p className="mb-3 text-xs text-muted-foreground">
-                        {c.socialNote ?? "Соцсети не найдены"}
+                  {c.socialProfiles.length > 0 && (
+                    <div className="mb-3">
+                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Соцсети и каналы
                       </p>
-                    )
-                  })()}
+                      <div className="flex flex-wrap gap-2">
+                        {c.socialProfiles.map((profile) => (
+                          <SocialProfileChip key={profile.platform} profile={profile} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Strengths & weaknesses */}
                   <div className="mb-3 grid gap-3 sm:grid-cols-2">
