@@ -94,6 +94,10 @@ prisma/
   Каждый запуск («Обновить» на странице «Репутация») создаёт новый снапшот; версий/кэша по
   inputHash нет — генерация запускается только вручную, т.к. использует дорогой web_search.
 
+> MARKET_ANALYSIS — вкладка «Рынок» на странице «Анализ компании» (`/company`). Размер и рост
+  рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — через Anthropic
+  web_search. Кэш по inputHash, генерация только по кнопке «Сгенерировать»/«Регенерировать».
+
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
 
@@ -101,7 +105,8 @@ prisma/
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
   AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER |
-  CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY | DIRECTOR_DAILY (расширяется с каждой итерацией)
+  CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY | DIRECTOR_DAILY |
+  REPUTATION_ANALYSIS | MARKET_ANALYSIS (расширяется с каждой итерацией)
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
