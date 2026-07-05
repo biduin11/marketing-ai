@@ -24,8 +24,10 @@ import { ScoreCard } from "@/components/shared/score-card"
 import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { RecommendationCard } from "@/components/company/recommendation-card"
 import { CompanyWizard } from "@/components/company/company-wizard"
+import { MarketTab } from "@/components/company/market-tab"
 import { runCompanyAnalysis } from "@/lib/actions/ai"
 import type { CompanyAnalysis } from "@/lib/ai/schemas/companyAnalysis"
+import type { MarketAnalysis } from "@/lib/ai/schemas/market"
 import { GenerationProgress } from "@/components/shared/generation-progress"
 import { cn } from "@/lib/utils"
 
@@ -87,6 +89,9 @@ interface CompanyViewProps {
   project: Project
   analysis: CompanyAnalysis | null
   version: number | null
+  marketAnalysis: MarketAnalysis | null
+  marketVersion: number | null
+  marketGeneratedAt: string | null
 }
 
 function ListBlock({ items }: { items: string[] }) {
@@ -119,7 +124,14 @@ function Card({
   )
 }
 
-export function CompanyView({ project, analysis, version }: CompanyViewProps) {
+export function CompanyView({
+  project,
+  analysis,
+  version,
+  marketAnalysis,
+  marketVersion,
+  marketGeneratedAt,
+}: CompanyViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [genCompleted, setGenCompleted] = useState(false)
@@ -349,18 +361,13 @@ export function CompanyView({ project, analysis, version }: CompanyViewProps) {
           </TabsContent>
 
           {/* Market */}
-          <TabsContent value="market" className="mt-6 space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card title="Регионы">
-                <ListBlock items={project.regions} />
-              </Card>
-              <Card title="Конкуренты">
-                <ListBlock items={project.competitors} />
-              </Card>
-            </div>
-            <Card title="Угрозы рынка">
-              <ListBlock items={analysis.threats} />
-            </Card>
+          <TabsContent value="market" className="mt-6">
+            <MarketTab
+              projectId={project.id}
+              analysis={marketAnalysis}
+              version={marketVersion}
+              generatedAt={marketGeneratedAt}
+            />
           </TabsContent>
 
           {/* Audit (full recommendations) */}
