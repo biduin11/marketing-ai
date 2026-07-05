@@ -2,61 +2,53 @@
 
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { toast } from "sonner"
-import { Star, RefreshCw, Loader2, MessageSquare } from "lucide-react"
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
+import {
+  Star,
+  RefreshCw,
+  Loader2,
+  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
+  Copy,
+  AlertTriangle,
+  ExternalLink,
+} from "lucide-react"
 import { EmptyState } from "@/components/empty-state"
-import { buttonVariants } from "@/components/ui/button"
 import { GenerationProgress } from "@/components/shared/generation-progress"
-import { platformLabel, platformIcon } from "@/lib/config/platforms"
+import { StatCard, StatRow } from "@/components/shared/stat-card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { TONE_CLASSES, type StatusTone } from "@/lib/status-variants"
 import { runReputationAnalysis } from "@/lib/actions/ai"
-import type { ReputationAnalysis } from "@/lib/ai/schemas/reputation"
-import type { Platform } from "@prisma/client"
+import type { Reputation, ReputationRecommendation } from "@/lib/ai/schemas/reputation"
 import { cn } from "@/lib/utils"
-
-interface ReviewItem {
-  id: string
-  platform: Platform
-  author: string | null
-  rating: number | null
-  text: string | null
-  reply: string | null
-  sentiment: string | null
-  publishedAt: string
-}
-
-interface SocialStatItem {
-  platform: Platform
-  date: string
-  followers: number
-  reach: number
-  engagement: number
-  views: number
-  clicks: number
-}
 
 interface ReputationViewProps {
   projectId: string
-  hasIntegrations: boolean
-  reviews: ReviewItem[]
-  socialStats: SocialStatItem[]
-  analysis: ReputationAnalysis | null
-  analysisVersion: number | null
+  reputation: Reputation | null
+  searchedAt: string | null
 }
 
-const REVIEW_PLATFORMS: Platform[] = ["YANDEX_MAPS", "TWOGIS"]
-const SOCIAL_PLATFORMS: Platform[] = ["VK", "TELEGRAM", "AVITO"]
-
-type ReviewFilter = "all" | "positive" | "negative" | "unanswered"
-
 const GEN_STEPS = [
-  { id: "collect", label: "Собираю отзывы и статистику" },
-  { id: "sentiment", label: "Анализирую тональность" },
-  { id: "patterns", label: "Ищу паттерны жалоб и похвал" },
-  { id: "actions", label: "Формирую план действий" },
+  { id: "yandex", label: "Ищу отзывы на Яндекс.Картах" },
+  { id: "twogis", label: "Ищу отзывы на 2ГИС" },
+  { id: "other", label: "Ищу отзывы на других площадках" },
+  { id: "analyze", label: "Анализирую тональность и паттерны" },
   { id: "save", label: "Сохраняю результат" },
 ]
+
+const URGENCY_TONE: Record<ReputationRecommendation["urgency"], StatusTone> = {
+  high: "danger",
+  medium: "warning",
+  low: "muted",
+}
+
+const URGENCY_LABEL: Record<ReputationRecommendation["urgency"], string> = {
+  high: "Срочно",
+  medium: "Средне",
+  low: "Не срочно",
+}
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("ru-RU", {
@@ -66,79 +58,53 @@ function fmtDate(iso: string): string {
   })
 }
 
-function sentimentLabel(s: string | null): string {
-  if (s === "positive") return "Позитивный"
-  if (s === "negative") return "Негативный"
-  return "Нейтральный"
+function Stars({ rating }: { rating: number | null }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((s) => (
+        <span
+          key={s}
+          className={
+            rating != null && s <= Math.round(rating)
+              ? "text-warning"
+              : "text-muted-foreground/30"
+          }
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  )
 }
 
 export function ReputationView({
   projectId,
-  hasIntegrations,
-  reviews,
-  socialStats,
-  analysis,
-  analysisVersion,
+  reputation,
+  searchedAt,
 }: ReputationViewProps) {
   const router = useRouter()
-  const [filter, setFilter] = useState<ReviewFilter>("all")
   const [loading, setLoading] = useState(false)
   const [genCompleted, setGenCompleted] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
 
-  const platformReviews = useMemo(
-    () => reviews.filter((r) => REVIEW_PLATFORMS.includes(r.platform)),
-    [reviews]
-  )
+  const allReviews = useMemo(() => {
+    if (!reputation) return []
+    return reputation.sources
+      .flatMap((source) =>
+        source.recentReviews.map((review) => ({ ...review, platform: source.platform }))
+      )
+      .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""))
+  }, [reputation])
 
-  // ── Block 1: summary metrics ──
-  const rated = platformReviews.filter((r) => r.rating != null)
-  const avgRating =
-    rated.length > 0
-      ? (rated.reduce((s, r) => s + (r.rating ?? 0), 0) / rated.length).toFixed(1)
-      : "—"
-  const totalReviews = platformReviews.length
-  const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
-  const newReviews = platformReviews.filter(
-    (r) => new Date(r.publishedAt).getTime() >= monthAgo
-  ).length
-  const unanswered = platformReviews.filter((r) => !r.reply).length
-
-  const summaryCards = [
-    { label: "Средний рейтинг", value: avgRating, suffix: "/5", icon: "⭐", alert: false },
-    { label: "Отзывов всего", value: totalReviews, icon: "💬", alert: false },
-    { label: "Новых за месяц", value: newReviews, icon: "🆕", alert: false },
-    { label: "Требуют ответа", value: unanswered, icon: "⚠️", alert: unanswered > 0 },
-  ]
-
-  // ── Block 2: filtered feed ──
-  const filteredReviews = useMemo(() => {
-    switch (filter) {
-      case "positive":
-        return platformReviews.filter((r) => r.sentiment === "positive")
-      case "negative":
-        return platformReviews.filter((r) => r.sentiment === "negative")
-      case "unanswered":
-        return platformReviews.filter((r) => !r.reply)
-      default:
-        return platformReviews
-    }
-  }, [platformReviews, filter])
-
-  // ── Block 3: social stats grouped by platform ──
-  const socialByPlatform = useMemo(() => {
-    return SOCIAL_PLATFORMS.map((p) => ({
-      platform: p,
-      series: socialStats.filter((s) => s.platform === p),
-    })).filter((g) => g.series.length > 0)
-  }, [socialStats])
+  const highUrgencyCount =
+    reputation?.recommendations.filter((r) => r.urgency === "high").length ?? 0
 
   async function generate() {
     setLoading(true)
     setGenCompleted(false)
     setGenError(null)
     try {
-      const result = await runReputationAnalysis(projectId, true)
+      const result = await runReputationAnalysis(projectId)
       if (!result.success) {
         setGenError(result.error)
         toast.error(result.error)
@@ -156,25 +122,50 @@ export function ReputationView({
     }
   }
 
-  if (!hasIntegrations) {
+  function copyTemplate(text: string) {
+    navigator.clipboard.writeText(text)
+    toast.success("Шаблон скопирован")
+  }
+
+  const header = (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 className="text-2xl font-semibold text-foreground">Репутация</h1>
+        <p className="text-sm text-muted-foreground">
+          {searchedAt
+            ? `Последний анализ: ${fmtDate(searchedAt)}`
+            : "AI ищет реальные отзывы о компании в интернете"}
+        </p>
+      </div>
+      <Button size="sm" onClick={generate} disabled={loading}>
+        {loading ? (
+          <Loader2 className="size-3.5 animate-spin" />
+        ) : (
+          <RefreshCw className="size-3.5" />
+        )}
+        {reputation ? "Обновить" : "Запустить анализ"}
+      </Button>
+    </div>
+  )
+
+  if (loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Репутация и соцсети</h1>
-          <p className="text-sm text-muted-foreground">
-            Отзывы и статистика соцсетей в одном месте
-          </p>
-        </div>
-        <div className="flex h-[50vh] items-center justify-center">
+        {header}
+        <GenerationProgress steps={GEN_STEPS} completed={genCompleted} error={genError} />
+      </div>
+    )
+  }
+
+  if (!reputation) {
+    return (
+      <div className="space-y-6">
+        {header}
+        <div className="flex min-h-[50vh] items-center justify-center">
           <EmptyState
             icon={Star}
-            title="Нет подключённых площадок"
-            description="Подключите Яндекс.Карты, 2ГИС, ВКонтакте, Telegram или Авито, чтобы собирать отзывы и статистику."
-            action={
-              <Link href="/settings" className={cn(buttonVariants({ size: "sm" }))}>
-                Подключить
-              </Link>
-            }
+            title="Анализ ещё не запускался"
+            description="Нажмите «Запустить анализ» — AI найдёт отзывы о компании на Яндекс.Картах, 2ГИС и других площадках через веб-поиск."
           />
         </div>
       </div>
@@ -183,182 +174,180 @@ export function ReputationView({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-foreground">Репутация и соцсети</h1>
-        <p className="text-sm text-muted-foreground">
-          Отзывы и статистика соцсетей в одном месте
-        </p>
-      </div>
+      {header}
 
-      {/* ── БЛОК 1: Сводка ── */}
-      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {summaryCards.map((m) => (
-          <div
-            key={m.label}
-            className={cn(
-              "rounded-2xl border p-4",
-              m.alert ? "border-warning/20 bg-warning/10" : "border-border bg-card"
-            )}
-          >
-            <p className="mb-1 text-xs text-muted-foreground">{m.label}</p>
-            <p className="text-2xl font-bold text-foreground">
-              {m.icon} {m.value}
-              {m.suffix ?? ""}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* ── БЛОК 2: Лента отзывов ── */}
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-foreground">Отзывы</h2>
-          <div className="flex flex-wrap gap-1">
-            {(
-              [
-                ["all", "Все"],
-                ["positive", "Позитивные"],
-                ["negative", "Негативные"],
-                ["unanswered", "Без ответа"],
-              ] as [ReviewFilter, string][]
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                className={cn(
-                  "rounded-lg border px-3 py-1.5 text-sm transition-colors",
-                  filter === key
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:bg-muted"
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+      {reputation.dataConfidence === "low" && (
+        <div className="flex items-start gap-3 rounded-2xl border border-warning/20 bg-warning/10 p-4">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
+          <p className="text-sm text-warning">
+            Мало данных найдено. Проверьте название компании и город в анкете проекта —
+            это поможет AI точнее найти отзывы.
+          </p>
         </div>
+      )}
 
-        {filteredReviews.length === 0 ? (
-          <EmptyState
-            icon={MessageSquare}
-            title="Отзывов пока нет"
-            description="После синхронизации здесь появятся отзывы с Яндекс.Карт и 2ГИС."
-          />
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {filteredReviews.map((review) => (
-              <div
-                key={review.id}
-                className="rounded-2xl border border-border bg-card p-4"
-              >
-                <div className="mb-2 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs">
-                      {platformLabel(review.platform)}
-                    </span>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <span
-                          key={s}
-                          className={
-                            review.rating != null && s <= review.rating
-                              ? "text-amber-400"
-                              : "text-muted-foreground"
-                          }
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
+      {/* БЛОК 1 — сводка */}
+      <StatRow cols={4}>
+        <StatCard
+          label="Средний рейтинг"
+          value={reputation.summary.avgRating != null ? reputation.summary.avgRating.toFixed(1) : "—"}
+          sub={reputation.summary.avgRating != null ? "из 5" : undefined}
+          icon={Star}
+        />
+        <StatCard
+          label="Найдено отзывов"
+          value={reputation.summary.totalReviewsFound}
+          icon={MessageSquare}
+        />
+        <StatCard
+          label="Позитивная тональность"
+          value={`${reputation.summary.sentiment.positive}%`}
+          icon={ThumbsUp}
+          tone={reputation.summary.sentiment.positive >= 60 ? "success" : "default"}
+        />
+        <StatCard
+          label="Требуют ответа"
+          value={highUrgencyCount}
+          icon={AlertTriangle}
+          tone={highUrgencyCount > 0 ? "danger" : "default"}
+        />
+      </StatRow>
+
+      {/* БЛОК 2 — источники */}
+      <div className="space-y-3">
+        <h2 className="text-base font-semibold text-foreground">Источники</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {reputation.sources.map((source) => (
+            <div
+              key={source.platform}
+              className={cn(
+                "rounded-2xl border p-4",
+                source.found ? "border-border bg-card" : "border-dashed border-border bg-muted/40"
+              )}
+            >
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-foreground">{source.platform}</p>
+                {source.url && (
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground"
+                    aria-label={`Открыть ${source.platform}`}
+                  >
+                    <ExternalLink className="size-3.5" />
+                  </a>
+                )}
+              </div>
+              {source.found ? (
+                <>
+                  <div className="mb-1 flex items-center gap-2">
+                    <Stars rating={source.rating} />
+                    {source.rating != null && (
+                      <span className="text-sm font-medium text-foreground">{source.rating}</span>
+                    )}
                   </div>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {fmtDate(review.publishedAt)}
-                  </span>
-                </div>
+                  <p className="text-xs text-muted-foreground">
+                    {source.reviewsCount != null ? `${source.reviewsCount} отзывов` : "количество неизвестно"}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Не найдено</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
+      {/* БЛОК 3 — лента отзывов */}
+      {allReviews.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold text-foreground">Последние отзывы</h2>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {allReviews.map((review, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card p-4">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="neutral" size="sm">{review.platform}</Badge>
+                    <Stars rating={review.rating} />
+                  </div>
+                  {review.date && (
+                    <span className="shrink-0 text-xs text-muted-foreground">{review.date}</span>
+                  )}
+                </div>
                 <p className="mb-1 text-sm font-medium text-foreground">
                   {review.author ?? "Аноним"}
                 </p>
-                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
-                  {review.text ?? "(без текста)"}
-                </p>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded-full border px-2 py-0.5 text-xs",
-                      review.sentiment === "positive"
-                        ? "border-success/20 bg-success/10 text-success"
-                        : review.sentiment === "negative"
-                          ? "border-danger/20 bg-danger/10 text-danger"
-                          : "border-gray-200 bg-gray-50 text-gray-600"
-                    )}
-                  >
-                    {sentimentLabel(review.sentiment)}
-                  </span>
-                  {review.reply && (
-                    <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                      Есть ответ
-                    </span>
-                  )}
-                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">{review.text}</p>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* ── БЛОК 3: Статистика соцсетей ── */}
-      {socialByPlatform.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-base font-semibold text-foreground">Соцсети</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {socialByPlatform.map(({ platform, series }) => {
-              const latest = series[series.length - 1]
+      {/* БЛОК 4 — хвалят / жалуются */}
+      {(reputation.topPraises.length > 0 || reputation.topComplaints.length > 0) && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-success/10">
+                <ThumbsUp className="size-4 text-success" />
+              </span>
+              <p className="text-sm font-semibold text-foreground">Хвалят</p>
+            </div>
+            <ul className="space-y-1.5">
+              {reputation.topPraises.map((p, i) => (
+                <li key={i} className="flex gap-2 text-sm text-foreground">
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-success" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-danger/10">
+                <ThumbsDown className="size-4 text-danger" />
+              </span>
+              <p className="text-sm font-semibold text-foreground">Жалуются</p>
+            </div>
+            <ul className="space-y-1.5">
+              {reputation.topComplaints.map((c, i) => (
+                <li key={i} className="flex gap-2 text-sm text-foreground">
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-danger" />
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* БЛОК 5 — рекомендации */}
+      {reputation.recommendations.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold text-foreground">Рекомендации</h2>
+          <div className="space-y-2">
+            {reputation.recommendations.map((rec, i) => {
+              const tone = TONE_CLASSES[URGENCY_TONE[rec.urgency]]
               return (
                 <div
-                  key={platform}
-                  className="rounded-2xl border border-border bg-card p-4"
+                  key={i}
+                  className={cn("flex gap-3 rounded-xl border p-3", tone.border, tone.bg)}
                 >
-                  <div className="mb-3 flex items-center gap-2">
-                    <span className="text-lg">{platformIcon(platform)}</span>
-                    <p className="text-sm font-medium text-foreground">
-                      {platformLabel(platform)}
-                    </p>
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">{rec.title}</p>
+                      <Badge variant={rec.urgency === "high" ? "danger" : rec.urgency === "medium" ? "warning" : "muted"} size="sm">
+                        {URGENCY_LABEL[rec.urgency]}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{rec.platform}</span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{rec.description}</p>
                   </div>
-
-                  <div className="mb-3 grid grid-cols-2 gap-2 text-xs">
-                    <SocialMetric label="Подписчики" value={latest.followers} />
-                    {platform === "TELEGRAM" ? (
-                      <SocialMetric label="Просмотры" value={latest.views} />
-                    ) : platform === "AVITO" ? (
-                      <SocialMetric label="Звонки" value={latest.clicks} />
-                    ) : (
-                      <SocialMetric label="Охват" value={latest.reach} />
-                    )}
-                    <SocialMetric label="Вовлечённость" value={latest.engagement} />
-                    <SocialMetric label="Просмотры" value={latest.views} />
-                  </div>
-
-                  {series.length > 1 && (
-                    <ResponsiveContainer width="100%" height={80}>
-                      <LineChart data={series}>
-                        <XAxis dataKey="date" hide />
-                        <YAxis hide />
-                        <Tooltip
-                          labelFormatter={(v) => fmtDate(String(v))}
-                          formatter={(v) => [String(v), "Подписчики"]}
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="followers"
-                          stroke="var(--foreground)"
-                          strokeWidth={1.5}
-                          dot={false}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  )}
                 </div>
               )
             })}
@@ -366,120 +355,37 @@ export function ReputationView({
         </div>
       )}
 
-      {/* ── БЛОК 4: AI-анализ репутации ── */}
-      <div className="rounded-2xl border border-border bg-card p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-base font-semibold text-foreground">AI-анализ репутации</h3>
-            {analysisVersion !== null && (
-              <p className="text-xs text-muted-foreground">версия {analysisVersion}</p>
-            )}
+      {/* БЛОК 6 — шаблоны ответов */}
+      {reputation.replyTemplates.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-base font-semibold text-foreground">Шаблоны ответов</h2>
+          <div className="grid gap-3 md:grid-cols-2">
+            {reputation.replyTemplates.map((t, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card p-4">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <Badge
+                    variant={
+                      t.forType === "negative" ? "danger" : t.forType === "positive" ? "success" : "neutral"
+                    }
+                    size="sm"
+                  >
+                    {t.forType === "negative" ? "Негативный" : t.forType === "positive" ? "Позитивный" : "Нейтральный"}
+                  </Badge>
+                  <button
+                    type="button"
+                    onClick={() => copyTemplate(t.template)}
+                    className="flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <Copy className="size-3" />
+                    Копировать
+                  </button>
+                </div>
+                <p className="text-sm text-foreground">{t.template}</p>
+              </div>
+            ))}
           </div>
-          <button
-            onClick={generate}
-            disabled={loading}
-            className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
-          >
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <RefreshCw size={14} />
-            )}
-            Обновить
-          </button>
         </div>
-
-        {loading ? (
-          <GenerationProgress steps={GEN_STEPS} completed={genCompleted} error={genError} />
-        ) : !analysis ? (
-          <EmptyState
-            icon={Star}
-            title="Анализ ещё не готов"
-            description="Нажмите «Обновить», чтобы AI разобрал отзывы и статистику и дал план действий."
-          />
-        ) : (
-          <div className="space-y-6">
-            <p className="text-sm text-muted-foreground">{analysis.summary}</p>
-
-            {analysis.topComplaints.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Чаще всего критикуют
-                  </p>
-                  <ul className="space-y-1.5">
-                    {analysis.topComplaints.map((c, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-foreground">
-                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-red-400" />
-                        {c}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Чаще всего хвалят (УТП)
-                  </p>
-                  <ul className="space-y-1.5">
-                    {analysis.topPraises.map((c, i) => (
-                      <li key={i} className="flex gap-2 text-sm text-foreground">
-                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-green-400" />
-                        {c}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {/* Что делать */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground">Что делать</p>
-              {analysis.actions.map((action, i) => (
-                <div
-                  key={i}
-                  className="flex gap-3 rounded-xl border border-border bg-muted p-3"
-                >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
-                    {i + 1}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">{action.title}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{action.description}</p>
-                    {action.urgency === "high" && (
-                      <span className="mt-1 block text-xs text-danger">⚡ Срочно</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Шаблоны ответов */}
-            {analysis.reviewReplyTemplates.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-semibold text-foreground">Шаблоны ответов</p>
-                {analysis.reviewReplyTemplates.map((t, i) => (
-                  <div key={i} className="rounded-xl border border-border p-3">
-                    <p className="mb-1 text-xs font-medium text-muted-foreground">
-                      Для отзыва: {t.forSentiment === "negative" ? "негативного" : "нейтрального"}
-                    </p>
-                    <p className="text-sm text-foreground">{t.template}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function SocialMetric({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <p className="text-muted-foreground">{label}</p>
-      <p className="text-sm font-semibold text-foreground">{value.toLocaleString("ru-RU")}</p>
+      )}
     </div>
   )
 }
