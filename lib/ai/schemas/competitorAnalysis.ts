@@ -24,6 +24,13 @@ export const competitorAnalysisSchema = z.object({
         gisReviewsCount: z.number().int().min(0).nullable().optional()
           .describe("Количество отзывов на 2ГИС. null если не найдено"),
 
+        avitoListingsCount: z.number().int().min(0).nullable().optional()
+          .describe("Количество активных объявлений на Авито. null если не найдено"),
+        avitoPriceRange: z.string().nullable().optional()
+          .describe("Ценовой диапазон объявлений на Авито, например '15 000–45 000 ₽'. null если не найдено"),
+        avitoNote: z.string().nullable().optional()
+          .describe("Заметка по активности на Авито, например 'Объявления обновляются раз в неделю'. null если не найдено"),
+
         commonComplaints: z.array(z.string()).default([])
           .describe("Частые жалобы клиентов в отзывах (наши возможности роста)"),
         commonPraise: z.array(z.string()).default([])
@@ -66,7 +73,7 @@ export const competitorAnalysisSchema = z.object({
         dataConfidence: z.enum(["high", "medium", "low"]).default("medium")
           .describe("Достоверность: high=много реальных данных, medium=частично, low=почти ничего не найдено (данные ненадёжны)"),
         dataFoundVia: z.array(z.string()).default([])
-          .describe("Источники, где реально найдены данные: yandex_maps, 2gis, site, vk, telegram, search"),
+          .describe("Источники, где реально найдены данные: yandex_maps, 2gis, avito, site, vk, telegram, search"),
 
         threatLevel: z.enum(["high", "medium", "low"]).default("medium")
           .describe("Уровень угрозы конкурента для нас"),
