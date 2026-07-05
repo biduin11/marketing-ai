@@ -8,6 +8,7 @@ import {
   competitorAnalysisSystem,
   buildCompetitorAnalysisInput,
   type CompanyCard,
+  type CompetitorDetail,
 } from "@/lib/ai/prompts/competitorAnalysis"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
@@ -24,6 +25,27 @@ function toCard(project: Project): CompanyCard {
     goals: project.goals,
     socials: project.socials,
   }
+}
+
+const competitorDetailedRawSchema = z.array(
+  z.object({
+    name: z.string().optional(),
+    site: z.string().optional(),
+    description: z.string().optional(),
+  })
+)
+
+/** Parses the questionnaire's per-competitor links (name/site/description) from Json. */
+function parseCompetitorsDetailed(raw: Project["competitorsDetailed"]): CompetitorDetail[] {
+  const parsed = competitorDetailedRawSchema.safeParse(raw)
+  if (!parsed.success) return []
+  return parsed.data
+    .filter((c) => c.name?.trim() || c.site?.trim())
+    .map((c) => ({
+      name: c.name?.trim() || "Без названия",
+      site: c.site?.trim() || null,
+      description: c.description?.trim() || null,
+    }))
 }
 
 async function generateWithWebSearch(
@@ -97,7 +119,8 @@ export async function generateCompetitorAnalysis(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card })
+  const detailed = parseCompetitorsDetailed(project.competitorsDetailed)
+  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card, detailed })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPETITOR_ANALYSIS")
@@ -108,7 +131,7 @@ export async function generateCompetitorAnalysis(
     target: "draft-7",
   }) as Record<string, unknown>
 
-  const userMessage = buildCompetitorAnalysisInput(card)
+  const userMessage = buildCompetitorAnalysisInput(card, detailed)
 
   let data: z.infer<typeof competitorAnalysisSchema>
 

@@ -52,14 +52,6 @@ enum ArtifactType {
   REPUTATION_ANALYSIS
 }
 
-enum Platform {
-  YANDEX_MAPS
-  TWOGIS
-  AVITO
-  VK
-  TELEGRAM
-}
-
 enum Plan {
   FREE
   PRO
@@ -120,7 +112,7 @@ model Project {
   customChannels CustomChannel[]
   contentPlatforms ContentPlatform[]
   inboxSignals   InboxSignal[]
-  integrations   Integration[]
+  reputationSnapshots ReputationSnapshot[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -216,56 +208,13 @@ model StrategyTask {
   @@index([projectId])
 }
 
-model Integration {
-  id          String    @id @default(cuid())
-  projectId   String
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  platform    Platform
-  accessToken String? // encrypted at rest (AES-256-GCM)
-  accountId   String? // external counter/community/organization ID
-  accountName String? // display name
-  isActive    Boolean   @default(true)
-  lastSyncAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model ReputationSnapshot {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  payload   Json
+  model     String
+  createdAt DateTime @default(now())
 
-  reviews     Review[]
-  socialStats SocialStat[]
-
-  @@unique([projectId, platform])
-  @@index([projectId])
-}
-
-model Review {
-  id            String      @id @default(cuid())
-  integrationId String
-  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  externalId    String // review ID in the external system
-  author        String?
-  rating        Int? // 1-5
-  text          String?
-  reply         String? // company reply
-  publishedAt   DateTime
-  sentiment     String? // positive/neutral/negative (AI analysis)
-  createdAt     DateTime    @default(now())
-
-  @@unique([integrationId, externalId])
-  @@index([integrationId, publishedAt])
-}
-
-model SocialStat {
-  id            String      @id @default(cuid())
-  integrationId String
-  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
-  date          DateTime
-  followers     Int         @default(0)
-  reach         Int         @default(0)
-  engagement    Int         @default(0)
-  posts         Int         @default(0)
-  views         Int         @default(0)
-  clicks        Int         @default(0)
-  createdAt     DateTime    @default(now())
-
-  @@unique([integrationId, date])
-  @@index([integrationId, date])
+  @@index([projectId, createdAt])
 }

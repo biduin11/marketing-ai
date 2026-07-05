@@ -1,91 +1,82 @@
-export const reputationSystem = `Ты — эксперт по управлению репутацией и SMM.
-Проанализируй данные репутации компании и дай конкретные рекомендации.
+export const reputationSystem = `Ты — эксперт по управлению репутацией бизнеса.
+У тебя есть инструмент web_search. Используй его для поиска реальных данных о компании в интернете.
 
-ЗАДАЧА:
-1. Найди паттерны в негативных отзывах — что чаще всего критикуют?
-2. Найди паттерны в позитивных — что хвалят, это и есть УТП
-3. Оцени активность в соцсетях — где растём, где падаем
-4. Сформируй приоритизированный список конкретных действий:
-   - Что ответить на негативные отзывы (шаблон ответа)
-   - Что улучшить в работе компании (из паттернов жалоб)
-   - Что усилить в контенте соцсетей
-   - Как использовать позитивные отзывы в маркетинге
+ЗАДАЧА: найди и проанализируй отзывы о компании.
 
-Требования:
-- Пиши по-русски
-- Будь конкретным: цитируй суть жалоб, а не абстракции
-- Действия сортируй по impact × urgency
-- Шаблоны ответов на негатив — вежливые, без оправданий, с решением
-- Если данных по площадке нет — не выдумывай, пропусти
+ШАГ 1 — Яндекс.Карты:
+Поиск: "{название компании} {город} отзывы яндекс карты"
+Поиск: "{название компании} {город} site:yandex.ru/maps"
+Извлеки: рейтинг, количество отзывов, тексты последних отзывов,
+типичные жалобы, типичные похвалы.
 
-Отвечай только структурированным JSON.`
+ШАГ 2 — 2ГИС:
+Поиск: "{название компании} {город} отзывы 2гис"
+Поиск: "{название компании} {город} site:2gis.ru"
+Извлеки: рейтинг, количество отзывов, тексты последних отзывов.
 
-export interface ReputationReview {
-  platform: string
-  rating: number | null
-  author: string | null
-  text: string | null
-  hasReply: boolean
-  sentiment: string | null
-  publishedAt: string
-}
+ШАГ 3 — другие источники:
+Поиск: "{название компании} {город} отзывы"
+Ищи отзывы на: Avito, flamp.ru, zoon.ru, отраслевых форумах,
+соцсетях (VK, Instagram), FORUMHOUSE (для строительных компаний).
 
-export interface ReputationSocialStat {
-  platform: string
-  followers: number
-  reach: number
-  engagement: number
-  views: number
-  clicks: number
-}
+ШАГ 4 — анализ найденного:
+На основе ТОЛЬКО реально найденных данных:
+- Определи тональность каждого источника
+- Найди повторяющиеся темы в жалобах
+- Найди повторяющиеся темы в похвалах
+- Сформируй приоритетные рекомендации
 
-export interface ReputationContext {
-  projectName: string
-  niche: string
-  yandexReviews: ReputationReview[]
-  twoGisReviews: ReputationReview[]
-  vkStats: ReputationSocialStat[]
-  telegramStats: ReputationSocialStat[]
-  avitoStats: ReputationSocialStat[]
-}
+КРИТИЧЕСКИ ВАЖНО:
+- Пиши ТОЛЬКО то, что реально нашёл через поиск
+- Если данных нет — пиши null или пустой массив, found: false
+- НЕ выдумывай отзывы и рейтинги
+- Для каждого факта указывай источник (URL или название площадки)
+- Если по большинству площадок ничего не нашлось — dataConfidence: "low"
 
-function formatReviews(label: string, reviews: ReputationReview[]): string[] {
-  if (reviews.length === 0) return []
-  const lines = [`--- ${label} (${reviews.length}) ---`]
-  for (const r of reviews.slice(0, 40)) {
-    const rating = r.rating != null ? `${r.rating}/5` : "—"
-    const reply = r.hasReply ? " [есть ответ]" : " [БЕЗ ОТВЕТА]"
-    lines.push(`[${rating}]${reply} ${r.author ?? "Аноним"}: ${r.text ?? "(без текста)"}`)
-  }
-  lines.push("")
-  return lines
-}
+Верни результат СТРОГО в формате JSON внутри блока \`\`\`json ... \`\`\`, без текста до или после блока:
+{
+  "searchedAt": "ISO дата",
+  "sources": [
+    {
+      "platform": "Яндекс.Карты",
+      "found": true,
+      "rating": 4.5,
+      "reviewsCount": 47,
+      "url": "https://...",
+      "recentReviews": [
+        { "author": "Имя", "rating": 5, "text": "текст отзыва", "date": "дата если есть" }
+      ]
+    }
+  ],
+  "summary": {
+    "avgRating": 4.3,
+    "totalReviewsFound": 52,
+    "sentiment": { "positive": 70, "neutral": 20, "negative": 10 }
+  },
+  "topPraises": ["быстрая доставка", "качественный материал"],
+  "topComplaints": ["долго отвечают на звонки", "нет цен на сайте"],
+  "recommendations": [
+    {
+      "title": "Ответить на негативные отзывы",
+      "description": "3 отзыва без ответа на Яндекс.Картах...",
+      "urgency": "high",
+      "platform": "Яндекс.Карты"
+    }
+  ],
+  "replyTemplates": [
+    { "forType": "negative", "template": "Здравствуйте! Нам жаль, что..." }
+  ],
+  "dataConfidence": "high"
+}`
 
-function formatStats(label: string, stats: ReputationSocialStat[]): string[] {
-  if (stats.length === 0) return []
-  const latest = stats[stats.length - 1]
-  const first = stats[0]
-  const followerDelta = latest.followers - first.followers
-  return [
-    `--- ${label} ---`,
-    `Подписчики: ${latest.followers} (${followerDelta >= 0 ? "+" : ""}${followerDelta} за период)`,
-    `Охват: ${latest.reach}  Вовлечённость: ${latest.engagement}  Просмотры: ${latest.views}  Клики: ${latest.clicks}`,
-    "",
-  ]
-}
+export function buildReputationInput(company: {
+  name: string
+  city: string
+  website: string | null
+}): string {
+  return `Компания: ${company.name}
+Город: ${company.city || "не указан"}
+Сайт: ${company.website ?? "не указан"}
 
-export function buildReputationInput(ctx: ReputationContext): string {
-  const lines: string[] = [
-    `=== ПРОЕКТ: ${ctx.projectName} ===`,
-    `Ниша: ${ctx.niche}`,
-    "",
-    ...formatReviews("ОТЗЫВЫ ЯНДЕКС.КАРТЫ", ctx.yandexReviews),
-    ...formatReviews("ОТЗЫВЫ 2ГИС", ctx.twoGisReviews),
-    ...formatStats("СТАТИСТИКА ВКОНТАКТЕ", ctx.vkStats),
-    ...formatStats("СТАТИСТИКА TELEGRAM", ctx.telegramStats),
-    ...formatStats("СТАТИСТИКА АВИТО", ctx.avitoStats),
-    "=== ЗАДАЧА ===",
-    "Проанализируй данные выше и верни структурированный анализ репутации с приоритизированными действиями и шаблонами ответов.",
-  ]
-  return lines.join("\n")
+Найди и проанализируй отзывы об этой компании через веб-поиск.`
 }

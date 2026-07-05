@@ -89,6 +89,10 @@ prisma/
   createdAt, updatedAt (unique [projectId, name]; index [projectId])
   Управляемые площадки контент-плана (вкладка «Площадки»). Входят в `inputHash` генерации
   CONTENT_PLAN и передаются в промт — AI распределяет контент по ним с учётом долей.
+- `ReputationSnapshot` — id, projectId, payload (Json), model, createdAt (index [projectId, createdAt])
+  Результат AI-анализа репутации через Anthropic web_search (без интеграций и парсинга).
+  Каждый запуск («Обновить» на странице «Репутация») создаёт новый снапшот; версий/кэша по
+  inputHash нет — генерация запускается только вручную, т.к. использует дорогой web_search.
 
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
@@ -187,8 +191,7 @@ STRIPE_SECRET_KEY=        # (нужен с Итерации 6)
 STRIPE_WEBHOOK_SECRET=    # (нужен с Итерации 6)
 STRIPE_PRO_PRICE_ID=      # price_xxx из Stripe Dashboard (нужен с Итерации 6)
 NEXT_PUBLIC_APP_URL=      # https://твой-домен.vercel.app (нужен с Итерации 6)
-CRON_SECRET=              # случайная строка для защиты /api/cron/director и /api/cron/sync-integrations
-INTEGRATION_ENCRYPTION_KEY= # 32 байта hex (openssl rand -hex 32) — шифрование accessToken интеграций
+CRON_SECRET=              # случайная строка для защиты /api/cron/director
 ```
 
 ---

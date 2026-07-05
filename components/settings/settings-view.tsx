@@ -4,12 +4,10 @@ import { User } from "lucide-react"
 import { PlanCard } from "@/components/settings/plan-card"
 import { UsageBar } from "@/components/settings/usage-bar"
 import { ChannelsSection } from "@/components/settings/channels-section"
-import { IntegrationsSection } from "@/components/settings/integrations-section"
 import { DeleteProjectSection } from "@/components/settings/delete-project-section"
 import type { UsageInfo } from "@/lib/services/usage.service"
 import type { ProjectListItem } from "@/lib/actions/projects"
 import type { ChannelItem } from "@/lib/actions/channels"
-import type { IntegrationListItem } from "@/lib/actions/integrations"
 
 interface SettingsViewProps {
   name: string | null
@@ -20,10 +18,9 @@ interface SettingsViewProps {
   projects: ProjectListItem[]
   activeProjectId: string | null
   channels: ChannelItem[]
-  integrations: IntegrationListItem[]
 }
 
-export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels, integrations }: SettingsViewProps) {
+export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels }: SettingsViewProps) {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null
 
   return (
@@ -54,10 +51,6 @@ export function SettingsView({ name, email, usage, projectCount, maxProjects, pr
 
       {activeProject && (
         <ChannelsSection projectId={activeProject.id} initialChannels={channels} />
-      )}
-
-      {activeProject && (
-        <IntegrationsSection projectId={activeProject.id} integrations={integrations} />
       )}
 
       {/* Danger zone */}

@@ -16,7 +16,7 @@ import { generateCjm } from "@/lib/services/cjm.service"
 import { generateContentPlan } from "@/lib/services/contentPlan.service"
 import { generateExecutiveReport } from "@/lib/services/report.service"
 import { generateDirectorAnalysis } from "@/lib/services/director.service"
-import { generateReputationAnalysis } from "@/lib/services/reputation.service"
+import { generateReputationSnapshot } from "@/lib/services/reputation.service"
 import { listMetrics } from "@/lib/actions/metrics"
 import { filterByRange } from "@/lib/services/analytics.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
@@ -306,8 +306,7 @@ export async function runDirectorAnalysis(
 }
 
 export async function runReputationAnalysis(
-  projectId: string,
-  force = false
+  projectId: string
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
@@ -316,7 +315,7 @@ export async function runReputationAnalysis(
   if (limit) return limit
 
   try {
-    await generateReputationAnalysis(project, { force })
+    await generateReputationSnapshot(project)
     revalidatePath("/reputation")
     return { success: true }
   } catch (error) {
