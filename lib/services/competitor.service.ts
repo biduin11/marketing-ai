@@ -30,21 +30,37 @@ function toCard(project: Project): CompanyCard {
 const competitorDetailedRawSchema = z.array(
   z.object({
     name: z.string().optional(),
-    site: z.string().optional(),
     description: z.string().optional(),
+    site: z.string().optional(),
+    vk: z.string().optional(),
+    telegram: z.string().optional(),
+    instagram: z.string().optional(),
+    youtube: z.string().optional(),
+    tiktok: z.string().optional(),
+    yandexMaps: z.string().optional(),
+    twogis: z.string().optional(),
   })
 )
 
-/** Parses the questionnaire's per-competitor links (name/site/description) from Json. */
+const LINK_KEYS = ["site", "vk", "telegram", "instagram", "youtube", "tiktok", "yandexMaps", "twogis"] as const
+
+/** Parses the questionnaire's per-competitor links (site/socials/maps + description) from Json. */
 function parseCompetitorsDetailed(raw: Project["competitorsDetailed"]): CompetitorDetail[] {
   const parsed = competitorDetailedRawSchema.safeParse(raw)
   if (!parsed.success) return []
   return parsed.data
-    .filter((c) => c.name?.trim() || c.site?.trim())
+    .filter((c) => c.name?.trim() || LINK_KEYS.some((key) => c[key]?.trim()))
     .map((c) => ({
       name: c.name?.trim() || "Без названия",
-      site: c.site?.trim() || null,
       description: c.description?.trim() || null,
+      site: c.site?.trim() || null,
+      vk: c.vk?.trim() || null,
+      telegram: c.telegram?.trim() || null,
+      instagram: c.instagram?.trim() || null,
+      youtube: c.youtube?.trim() || null,
+      tiktok: c.tiktok?.trim() || null,
+      yandexMaps: c.yandexMaps?.trim() || null,
+      twogis: c.twogis?.trim() || null,
     }))
 }
 

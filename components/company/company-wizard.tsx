@@ -21,7 +21,31 @@ import { cn } from "@/lib/utils"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Competitor = { name: string; site: string; description: string }
+type Competitor = {
+  name: string
+  description: string
+  site: string
+  vk: string
+  telegram: string
+  instagram: string
+  youtube: string
+  tiktok: string
+  yandexMaps: string
+  twogis: string
+}
+
+const EMPTY_COMPETITOR: Competitor = {
+  name: "",
+  description: "",
+  site: "",
+  vk: "",
+  telegram: "",
+  instagram: "",
+  youtube: "",
+  tiktok: "",
+  yandexMaps: "",
+  twogis: "",
+}
 
 interface FormState {
   // Step 1
@@ -126,7 +150,9 @@ function parseSocialLinks(raw: unknown): SocialLinksJson {
 }
 
 function initForm(p: Project): FormState {
-  const comps = (p.competitorsDetailed as Competitor[] | null) ?? []
+  const comps = ((p.competitorsDetailed as Partial<Competitor>[] | null) ?? []).map(
+    (c): Competitor => ({ ...EMPTY_COMPETITOR, ...c })
+  )
   return {
     name: p.name,
     niche: p.niche ?? "",
@@ -732,13 +758,64 @@ function Step5({
                 onChange={(v) => onUpdateCompetitor(i, "name", v)}
                 placeholder="Название компании"
               />
-              <FieldText
-                id={`comp-site-${i}`}
-                label="Сайт или соцсеть"
-                value={c.site}
-                onChange={(v) => onUpdateCompetitor(i, "site", v)}
-                placeholder="https://competitor.ru или vk.com/competitor"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <FieldText
+                  id={`comp-site-${i}`}
+                  label="Сайт"
+                  value={c.site}
+                  onChange={(v) => onUpdateCompetitor(i, "site", v)}
+                  placeholder="https://competitor.ru"
+                />
+                <FieldText
+                  id={`comp-vk-${i}`}
+                  label="ВКонтакте"
+                  value={c.vk}
+                  onChange={(v) => onUpdateCompetitor(i, "vk", v)}
+                  placeholder="vk.com/competitor"
+                />
+                <FieldText
+                  id={`comp-telegram-${i}`}
+                  label="Telegram"
+                  value={c.telegram}
+                  onChange={(v) => onUpdateCompetitor(i, "telegram", v)}
+                  placeholder="t.me/competitor или @competitor"
+                />
+                <FieldText
+                  id={`comp-instagram-${i}`}
+                  label="Instagram"
+                  value={c.instagram}
+                  onChange={(v) => onUpdateCompetitor(i, "instagram", v)}
+                  placeholder="@competitor или ссылка"
+                />
+                <FieldText
+                  id={`comp-youtube-${i}`}
+                  label="YouTube"
+                  value={c.youtube}
+                  onChange={(v) => onUpdateCompetitor(i, "youtube", v)}
+                  placeholder="youtube.com/@competitor"
+                />
+                <FieldText
+                  id={`comp-tiktok-${i}`}
+                  label="TikTok"
+                  value={c.tiktok}
+                  onChange={(v) => onUpdateCompetitor(i, "tiktok", v)}
+                  placeholder="@competitor"
+                />
+                <FieldText
+                  id={`comp-yandex-${i}`}
+                  label="Яндекс.Карты"
+                  value={c.yandexMaps}
+                  onChange={(v) => onUpdateCompetitor(i, "yandexMaps", v)}
+                  placeholder="ссылка на карточку организации"
+                />
+                <FieldText
+                  id={`comp-twogis-${i}`}
+                  label="2ГИС"
+                  value={c.twogis}
+                  onChange={(v) => onUpdateCompetitor(i, "twogis", v)}
+                  placeholder="ссылка на карточку в 2ГИС"
+                />
+              </div>
               <FieldTextarea
                 id={`comp-desc-${i}`}
                 label="Краткое описание / чем отличаются"
@@ -801,7 +878,7 @@ export function CompanyWizard({ project }: { project: Project }) {
     if (form.competitorsDetailed.length >= 3) return
     setForm((f) => ({
       ...f,
-      competitorsDetailed: [...f.competitorsDetailed, { name: "", site: "", description: "" }],
+      competitorsDetailed: [...f.competitorsDetailed, { ...EMPTY_COMPETITOR }],
     }))
   }
 

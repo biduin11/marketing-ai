@@ -64,6 +64,37 @@ socialActivity ставь ТОЛЬКО если реально нашёл акк
    Поиск: "[название] авито [город]"
    → извлеки: avitoListingsCount, avitoPriceRange, avitoNote (активность обновлений).
 
+6. Ссылка на Telegram (t.me/... или @handle):
+   Поиск: "t.me/{handle}" или "[название] telegram канал"
+   → извлеки: количество подписчиков, частоту постов, темы последнего контента, вовлечённость.
+
+7. Ссылка на Instagram (@handle или ссылка):
+   Поиск: "instagram.com/{handle}" или "[название] instagram"
+   → извлеки: количество подписчиков, частоту постов, тематику Reels/Stories, вовлечённость.
+   ВАЖНО: Meta часто блокирует прямой доступ — если данных нет, пиши found: false, не выдумывай.
+
+8. Ссылка на YouTube (youtube.com/@handle):
+   Поиск: "youtube.com/@{handle}" или "[название] youtube канал"
+   → извлеки: количество подписчиков, количество видео, тематику контента, просмотры последних видео.
+
+9. Ссылка на TikTok (@handle):
+   Поиск: "tiktok.com/@{handle}" или "[название] tiktok"
+   → извлеки: количество подписчиков, лайки, тематику видео, частоту публикаций.
+
+Для пунктов 6-9 заполняй по одному объекту в socialProfiles на каждую упомянутую в анкете
+платформу (даже если не найдена — тогда { platform, found: false }, остальные поля null):
+{
+  platform: "Telegram",
+  handle: "@finkrovlya",
+  url: "t.me/finkrovlya",
+  followers: 1240,
+  postsFrequency: "2-3 раза в неделю",
+  contentThemes: ["акции", "фото работ", "советы"],
+  engagement: "medium",
+  lastActivity: "3 дня назад",
+  found: true
+}
+
 Если ссылка недоступна или по ней ничего не нашлось — не выдумывай данные,
 ставь null и добавь в *Note короткое пояснение (например: "Ссылка не открылась").
 Для конкурентов БЕЗ ссылки в анкете — ищи как обычно по названию и городу (ШАГ 1 ниже).
@@ -105,15 +136,36 @@ socialActivity ставь ТОЛЬКО если реально нашёл акк
 
 export interface CompetitorDetail {
   name: string
-  site: string | null
   description: string | null
+  site: string | null
+  vk: string | null
+  telegram: string | null
+  instagram: string | null
+  youtube: string | null
+  tiktok: string | null
+  yandexMaps: string | null
+  twogis: string | null
 }
+
+const LINK_LABELS: [keyof CompetitorDetail, string][] = [
+  ["site", "Сайт"],
+  ["yandexMaps", "Яндекс.Карты"],
+  ["twogis", "2ГИС"],
+  ["vk", "ВКонтакте"],
+  ["telegram", "Telegram"],
+  ["instagram", "Instagram"],
+  ["youtube", "YouTube"],
+  ["tiktok", "TikTok"],
+]
 
 function formatCompetitorsDetailed(detailed: CompetitorDetail[]): string {
   return detailed
     .map((c, i) => {
       const lines = [`${i + 1}. ${c.name}`]
-      lines.push(`   Ссылка: ${c.site ?? "не указана"}`)
+      const links = LINK_LABELS.filter(([key]) => c[key])
+        .map(([key, label]) => `${label}: ${c[key]}`)
+        .join(", ")
+      lines.push(`   Ссылки: ${links || "не указаны"}`)
       lines.push(`   Известно о нём: ${c.description ?? "нет данных"}`)
       return lines.join("\n")
     })

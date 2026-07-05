@@ -56,18 +56,23 @@ export const competitorAnalysisSchema = z.object({
         siteNote: z.string().nullable().optional()
           .describe("Заметка по сайту, если что-то неясно. Например: 'Сайт не найден в поиске'"),
 
-        // Соцсети — null = НЕ найдено (это не то же самое, что 'неактивен')
-        instagram: z.string().nullable().optional()
-          .describe("@username или URL Instagram. null если не найден"),
-        vk: z.string().nullable().optional()
-          .describe("@username или URL ВКонтакте. null если не найден"),
-        telegram: z.string().nullable().optional()
-          .describe("@username или URL Telegram. null если не найден"),
-        // Активность указывать ТОЛЬКО если реально нашёл аккаунты
-        socialActivity: z.enum(["active", "moderate", "low", "none"]).nullable().optional()
-          .describe("Активность в соцсетях (active/moderate/low/none). null если соцсети не найдены — НЕ ставить 'none' по умолчанию"),
-        socialNote: z.string().nullable().optional()
-          .describe("Заметка по соцсетям. Например: 'Аккаунт найден, последний пост 2022'"),
+        // Соцсети и каналы — по одному объекту на платформу из анкеты (VK/Telegram/
+        // Instagram/YouTube/TikTok). found: false, если не нашёл — остальные поля null.
+        socialProfiles: z.array(
+          z.object({
+            platform: z.string().describe("Название платформы: Telegram, Instagram, YouTube, TikTok, ВКонтакте"),
+            handle: z.string().nullable().describe("@username или короткое имя. null если не найден"),
+            url: z.string().nullable().describe("Ссылка на профиль/канал. null если не найден"),
+            followers: z.number().nullable().describe("Количество подписчиков. null если не найдено"),
+            postsFrequency: z.string().nullable().describe("Частота публикаций, например '2-3 раза в неделю'. null если не найдено"),
+            contentThemes: z.array(z.string()).default([]).describe("Темы контента, которые встречаются чаще всего"),
+            engagement: z.enum(["high", "medium", "low", "none"]).nullable()
+              .describe("Вовлечённость аудитории. null если не удалось оценить"),
+            lastActivity: z.string().nullable().describe("Когда была последняя активность, например '3 дня назад'. null если не найдено"),
+            found: z.boolean().describe("false, если платформа указана в анкете, но аккаунт/канал не найден в поиске"),
+          })
+        ).default([])
+          .describe("Присутствие конкурента в соцсетях и видео-каналах"),
 
         // Достоверность данных по конкуренту в целом
         dataConfidence: z.enum(["high", "medium", "low"]).default("medium")
