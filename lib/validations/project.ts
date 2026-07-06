@@ -36,6 +36,13 @@ const competitorDetailSchema = z.object({
   twogis: z.string().optional(),
 })
 
+const productDetailSchema = z.object({
+  name: z.string().optional(),
+  margin: z.coerce.number().min(0).max(100).optional(),
+  salesShare: z.coerce.number().min(0).max(100).optional(),
+  stage: z.string().optional(),
+})
+
 export const updateProjectSchema = z.object({
   // Core (existing)
   name: z
@@ -72,6 +79,7 @@ export const updateProjectSchema = z.object({
   salesPerMonth:      z.coerce.number().int().min(0).optional(),
   avgCheck:           z.coerce.number().int().min(0).optional(),
   competitorsDetailed: z.array(competitorDetailSchema).optional(),
+  productsDetailed: z.array(productDetailSchema).optional(),
 })
 
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>

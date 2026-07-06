@@ -155,7 +155,7 @@ export async function updateProject(
     clientType, audienceSegments, clientValues, objections, clientLanguage,
     currentChannels, marketingGoal, socialLinks, proofFacts,
     margin, conversionRate, currentCpl, leadsPerMonth, salesPerMonth, avgCheck,
-    competitorsDetailed,
+    competitorsDetailed, productsDetailed,
   } = parsed.data
 
   // Keep competitors[] in sync with detailed list for AI prompts backward compat
@@ -198,6 +198,7 @@ export async function updateProject(
         salesPerMonth: salesPerMonth ?? null,
         avgCheck: avgCheck ?? null,
         competitorsDetailed: competitorsDetailed ?? undefined,
+        productsDetailed: productsDetailed ?? undefined,
       },
     })
 

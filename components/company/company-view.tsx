@@ -25,9 +25,11 @@ import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { RecommendationCard } from "@/components/company/recommendation-card"
 import { CompanyWizard } from "@/components/company/company-wizard"
 import { MarketTab } from "@/components/company/market-tab"
+import { ProductTab } from "@/components/company/product-tab"
 import { runCompanyAnalysis } from "@/lib/actions/ai"
 import type { CompanyAnalysis } from "@/lib/ai/schemas/companyAnalysis"
 import type { MarketAnalysis } from "@/lib/ai/schemas/market"
+import type { ProductAnalysis } from "@/lib/ai/schemas/product"
 import { GenerationProgress } from "@/components/shared/generation-progress"
 import { cn } from "@/lib/utils"
 
@@ -92,6 +94,9 @@ interface CompanyViewProps {
   marketAnalysis: MarketAnalysis | null
   marketVersion: number | null
   marketGeneratedAt: string | null
+  productAnalysis: ProductAnalysis | null
+  productVersion: number | null
+  productGeneratedAt: string | null
 }
 
 function ListBlock({ items }: { items: string[] }) {
@@ -131,6 +136,9 @@ export function CompanyView({
   marketAnalysis,
   marketVersion,
   marketGeneratedAt,
+  productAnalysis,
+  productVersion,
+  productGeneratedAt,
 }: CompanyViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -351,13 +359,13 @@ export function CompanyView({
           </TabsContent>
 
           {/* Product */}
-          <TabsContent value="product" className="mt-6 space-y-6">
-            <Card title="Продукты и услуги">
-              <ListBlock items={project.products} />
-            </Card>
-            <Card title="Возможности для продукта">
-              <ListBlock items={analysis.opportunities} />
-            </Card>
+          <TabsContent value="product" className="mt-6">
+            <ProductTab
+              projectId={project.id}
+              analysis={productAnalysis}
+              version={productVersion}
+              generatedAt={productGeneratedAt}
+            />
           </TabsContent>
 
           {/* Market */}
