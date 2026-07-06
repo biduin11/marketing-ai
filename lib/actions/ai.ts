@@ -18,6 +18,7 @@ import { generateExecutiveReport } from "@/lib/services/report.service"
 import { generateDirectorAnalysis } from "@/lib/services/director.service"
 import { generateReputationSnapshot } from "@/lib/services/reputation.service"
 import { generateMarketAnalysis } from "@/lib/services/market.service"
+import { generateProductAnalysis } from "@/lib/services/product.service"
 import { listMetrics } from "@/lib/actions/metrics"
 import { filterByRange } from "@/lib/services/analytics.service"
 import { horizonInputSchema } from "@/lib/validations/ai"
@@ -199,6 +200,27 @@ export async function runMarketAnalysis(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Не удалось сгенерировать анализ рынка"
+    return { success: false, error: message }
+  }
+}
+
+export async function runProductAnalysis(
+  projectId: string,
+  force = false
+): Promise<ActionResult> {
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
+  try {
+    await generateProductAnalysis(project, { force })
+    revalidatePath("/company")
+    return { success: true }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось сгенерировать анализ продуктов"
     return { success: false, error: message }
   }
 }

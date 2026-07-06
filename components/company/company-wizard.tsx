@@ -47,12 +47,29 @@ const EMPTY_COMPETITOR: Competitor = {
   twogis: "",
 }
 
+type ProductDetail = {
+  name: string
+  margin: string
+  salesShare: string
+  stage: string
+}
+
+const EMPTY_PRODUCT: ProductDetail = {
+  name: "",
+  margin: "",
+  salesShare: "",
+  stage: "",
+}
+
+const PRODUCT_STAGE_OPTIONS = ["Новинка", "Рост", "Зрелость", "Спад"]
+
 interface FormState {
   // Step 1
   name: string
   niche: string
   region: string
   products: string
+  productsDetailed: ProductDetail[]
   avgCheck: string
   dealCycle: string
   brandTone: string
@@ -153,11 +170,24 @@ function initForm(p: Project): FormState {
   const comps = ((p.competitorsDetailed as Partial<Competitor>[] | null) ?? []).map(
     (c): Competitor => ({ ...EMPTY_COMPETITOR, ...c })
   )
+  const prods = (
+    ((p as unknown as Record<string, unknown>).productsDetailed as
+      | { name?: string; margin?: number; salesShare?: number; stage?: string }[]
+      | null) ?? []
+  ).map(
+    (item): ProductDetail => ({
+      name: item.name ?? "",
+      margin: item.margin != null ? String(item.margin) : "",
+      salesShare: item.salesShare != null ? String(item.salesShare) : "",
+      stage: item.stage ?? "",
+    })
+  )
   return {
     name: p.name,
     niche: p.niche ?? "",
     region: p.regions[0] ?? "",
     products: p.products.join(", "),
+    productsDetailed: prods,
     avgCheck: (p as unknown as Record<string, unknown>).avgCheck?.toString() ?? "",
     dealCycle: ((p as unknown as Record<string, unknown>).dealCycle as string) ?? "",
     brandTone: ((p as unknown as Record<string, unknown>).brandTone as string) ?? "",
@@ -235,6 +265,17 @@ function buildPayload(f: FormState) {
     salesPerMonth: f.salesPerMonth ? Number(f.salesPerMonth) : undefined,
     avgCheck: f.avgCheck ? Number(f.avgCheck) : undefined,
     competitorsDetailed: f.competitorsDetailed.length > 0 ? f.competitorsDetailed : undefined,
+    productsDetailed:
+      f.productsDetailed.filter((p) => p.name.trim()).length > 0
+        ? f.productsDetailed
+            .filter((p) => p.name.trim())
+            .map((p) => ({
+              name: p.name.trim(),
+              margin: p.margin ? Number(p.margin) : undefined,
+              salesShare: p.salesShare ? Number(p.salesShare) : undefined,
+              stage: p.stage || undefined,
+            }))
+        : undefined,
   }
 }
 
@@ -365,9 +406,12 @@ function StepperProgress({ step }: { step: number }) {
 // ─── Steps ────────────────────────────────────────────────────────────────────
 
 function Step1({
-  f, set, nameError,
+  f, set, nameError, onAddProduct, onUpdateProduct, onRemoveProduct,
 }: {
   f: FormState; set: (k: keyof FormState, v: string) => void; nameError: string
+  onAddProduct: () => void
+  onUpdateProduct: (i: number, key: keyof ProductDetail, val: string) => void
+  onRemoveProduct: (i: number) => void
 }) {
   return (
     <div className="space-y-4">
@@ -442,6 +486,69 @@ function Step1({
           options={DEAL_CYCLE_OPTIONS}
           placeholder="— необязательно —"
         />
+      </div>
+
+      <SectionLabel>Продукты — необязательно</SectionLabel>
+      <p className="mb-3 -mt-2 text-xs text-muted-foreground">
+        Чем точнее данные — тем точнее BCG-матрица и ABC-анализ
+      </p>
+      <div className="space-y-3">
+        {f.productsDetailed.map((p, i) => (
+          <div key={i} className="relative rounded-xl border border-border bg-muted p-4">
+            <button
+              type="button"
+              onClick={() => onRemoveProduct(i)}
+              className="absolute right-3 top-3 rounded p-0.5 text-muted-foreground hover:text-danger"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+            <p className="mb-3 text-xs font-medium text-muted-foreground">Продукт {i + 1}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <FieldText
+                  id={`prod-name-${i}`}
+                  label="Название продукта"
+                  value={p.name}
+                  onChange={(v) => onUpdateProduct(i, "name", v)}
+                  placeholder="Металлочерепица"
+                />
+              </div>
+              <FieldText
+                id={`prod-margin-${i}`}
+                label="Маржа %"
+                value={p.margin}
+                onChange={(v) => onUpdateProduct(i, "margin", v)}
+                type="number"
+                placeholder="34"
+              />
+              <FieldText
+                id={`prod-share-${i}`}
+                label="Доля продаж %"
+                value={p.salesShare}
+                onChange={(v) => onUpdateProduct(i, "salesShare", v)}
+                type="number"
+                placeholder="40"
+              />
+              <div className="col-span-2">
+                <FieldSelect
+                  id={`prod-stage-${i}`}
+                  label="Стадия"
+                  value={p.stage}
+                  onChange={(v) => onUpdateProduct(i, "stage", v)}
+                  options={PRODUCT_STAGE_OPTIONS}
+                  placeholder="— не указана —"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {f.productsDetailed.length < 10 && (
+          <Button type="button" variant="outline" size="sm" onClick={onAddProduct} className="w-full">
+            <Plus className="size-3.5" />
+            Добавить продукт
+          </Button>
+        )}
       </div>
 
       <SectionLabel>Голос бренда — необязательно</SectionLabel>
@@ -874,6 +981,29 @@ export function CompanyWizard({ project }: { project: Project }) {
     setStep((s) => Math.max(s - 1, 1))
   }
 
+  function addProduct() {
+    if (form.productsDetailed.length >= 10) return
+    setForm((f) => ({
+      ...f,
+      productsDetailed: [...f.productsDetailed, { ...EMPTY_PRODUCT }],
+    }))
+  }
+
+  function updateProduct(i: number, key: keyof ProductDetail, val: string) {
+    setForm((f) => {
+      const next = [...f.productsDetailed]
+      next[i] = { ...next[i], [key]: val }
+      return { ...f, productsDetailed: next }
+    })
+  }
+
+  function removeProduct(i: number) {
+    setForm((f) => ({
+      ...f,
+      productsDetailed: f.productsDetailed.filter((_, idx) => idx !== i),
+    }))
+  }
+
   function addCompetitor() {
     if (form.competitorsDetailed.length >= 3) return
     setForm((f) => ({
@@ -935,7 +1065,16 @@ export function CompanyWizard({ project }: { project: Project }) {
           </DialogHeader>
 
           <div className="max-h-[58vh] overflow-y-auto pr-1">
-            {step === 1 && <Step1 f={form} set={set} nameError={nameError} />}
+            {step === 1 && (
+              <Step1
+                f={form}
+                set={set}
+                nameError={nameError}
+                onAddProduct={addProduct}
+                onUpdateProduct={updateProduct}
+                onRemoveProduct={removeProduct}
+              />
+            )}
             {step === 2 && <Step2 f={form} set={set} />}
             {step === 3 && <Step3 f={form} set={set} />}
             {step === 4 && <Step4 f={form} set={set} />}

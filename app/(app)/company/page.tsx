@@ -8,6 +8,8 @@ import { companyAnalysisSchema } from "@/lib/ai/schemas/companyAnalysis"
 import type { CompanyAnalysis } from "@/lib/ai/schemas/companyAnalysis"
 import { marketAnalysisSchema } from "@/lib/ai/schemas/market"
 import type { MarketAnalysis } from "@/lib/ai/schemas/market"
+import { productAnalysisSchema } from "@/lib/ai/schemas/product"
+import type { ProductAnalysis } from "@/lib/ai/schemas/product"
 
 export default async function CompanyPage() {
   const projectId = await getActiveProjectId()
@@ -37,9 +39,10 @@ export default async function CompanyPage() {
     )
   }
 
-  const [artifact, marketArtifact] = await Promise.all([
+  const [artifact, marketArtifact, productArtifact] = await Promise.all([
     getLatestArtifact(project.id, "COMPANY_ANALYSIS"),
     getLatestArtifact(project.id, "MARKET_ANALYSIS"),
+    getLatestArtifact(project.id, "PRODUCT_ANALYSIS"),
   ])
 
   let analysis: CompanyAnalysis | null = null
@@ -54,6 +57,12 @@ export default async function CompanyPage() {
     if (parsed.success) marketAnalysis = parsed.data
   }
 
+  let productAnalysis: ProductAnalysis | null = null
+  if (productArtifact) {
+    const parsed = productAnalysisSchema.safeParse(productArtifact.payload)
+    if (parsed.success) productAnalysis = parsed.data
+  }
+
   return (
     <CompanyView
       project={project}
@@ -62,6 +71,9 @@ export default async function CompanyPage() {
       marketAnalysis={marketAnalysis}
       marketVersion={marketArtifact?.version ?? null}
       marketGeneratedAt={marketArtifact?.createdAt.toISOString() ?? null}
+      productAnalysis={productAnalysis}
+      productVersion={productArtifact?.version ?? null}
+      productGeneratedAt={productArtifact?.createdAt.toISOString() ?? null}
     />
   )
 }

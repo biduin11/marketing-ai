@@ -51,6 +51,7 @@ enum ArtifactType {
   DIRECTOR_DAILY
   REPUTATION_ANALYSIS
   MARKET_ANALYSIS
+  PRODUCT_ANALYSIS
 }
 
 enum Plan {
@@ -107,6 +108,7 @@ model Project {
   salesPerMonth       Int?
   avgCheck            Int?
   competitorsDetailed Json?
+  productsDetailed    Json?
   artifacts     AiArtifact[]
   strategyTasks StrategyTask[]
   metrics        Metric[]

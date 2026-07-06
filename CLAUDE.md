@@ -98,6 +98,11 @@ prisma/
   рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — через Anthropic
   web_search. Кэш по inputHash, генерация только по кнопке «Сгенерировать»/«Регенерировать».
 
+> PRODUCT_ANALYSIS — вкладка «Продукт» на странице «Анализ компании» (`/company`). BCG-матрица,
+  жизненный цикл, ABC-анализ ассортимента, возможности развития, продуктовая стратегия — без
+  web_search (данные из анкеты, поле `Project.productsDetailed`: `[{name, margin, salesShare,
+  stage}]`, шаг «Бизнес»). Кэш по inputHash.
+
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
 
@@ -106,7 +111,7 @@ prisma/
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
   AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER |
   CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY | DIRECTOR_DAILY |
-  REPUTATION_ANALYSIS | MARKET_ANALYSIS (расширяется с каждой итерацией)
+  REPUTATION_ANALYSIS | MARKET_ANALYSIS | PRODUCT_ANALYSIS (расширяется с каждой итерацией)
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
