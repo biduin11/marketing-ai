@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { anthropic } from "@/lib/ai/client"
+import { generateTextWithGemini } from "@/lib/ai/generate-with-gemini"
 import { getLatestArtifact } from "@/lib/services/artifacts"
 import { listMetrics } from "@/lib/actions/metrics"
 import { computeSummary, computeChannelBreakdown, filterByRange } from "@/lib/services/analytics.service"
@@ -150,6 +151,16 @@ ${context}
 Если данных недостаточно — честно скажи об этом. Будь краток: 2-4 абзаца максимум, если не просят подробнее.`
 
   try {
+    if (process.env.AI_PROVIDER === "gemini") {
+      const transcript = history.map((m) => `${m.role === "user" ? "Пользователь" : "Ассистент"}: ${m.content}`).join("\n")
+      const reply = await generateTextWithGemini({
+        system: systemPrompt,
+        user: transcript ? `${transcript}\nПользователь: ${message}` : message,
+        maxTokens: 1024,
+      })
+      return { success: true, reply }
+    }
+
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,

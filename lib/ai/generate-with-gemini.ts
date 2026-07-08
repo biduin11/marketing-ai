@@ -52,3 +52,25 @@ export async function generateStructuredWithGemini<T extends z.ZodType>({
 
   return { data: parsed.data, model: GEMINI_MODEL }
 }
+
+interface GenerateTextWithGeminiArgs {
+  system?: string
+  user: string
+  maxTokens?: number
+}
+
+/** Gemini fallback for plain-text generations (chat replies, post copy) — no JSON/schema involved. */
+export async function generateTextWithGemini({
+  system,
+  user,
+  maxTokens = 1500,
+}: GenerateTextWithGeminiArgs): Promise<string> {
+  const model = getGeminiClient().getGenerativeModel({
+    model: GEMINI_MODEL,
+    ...(system && { systemInstruction: system }),
+    generationConfig: { maxOutputTokens: maxTokens },
+  })
+
+  const result = await model.generateContent(user)
+  return result.response.text()
+}
