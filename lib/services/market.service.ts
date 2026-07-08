@@ -132,6 +132,7 @@ export async function generateMarketAnalysis(
       toolName: "save_market_analysis",
       toolDescription: "Сохранить структурированный анализ рынка",
       model: AI_MODELS.ANALYSIS,
+      maxTokens: 16000,
     })
     data = result.data
     usedModel = result.model

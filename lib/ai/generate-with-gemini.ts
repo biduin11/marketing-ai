@@ -6,7 +6,13 @@ function extractJson(text: string): unknown {
   const fenced = text.match(/```json\s*([\s\S]*?)```/)
   const raw = fenced?.[1] ?? text.match(/\{[\s\S]*\}/)?.[0]
   if (!raw) throw new Error("Gemini не вернул JSON")
-  return JSON.parse(raw)
+  try {
+    return JSON.parse(raw)
+  } catch {
+    throw new Error(
+      "Gemini вернул невалидный JSON (похоже на обрыв ответа лимитом токенов — увеличьте maxTokens)"
+    )
+  }
 }
 
 interface GenerateStructuredWithGeminiArgs<T extends z.ZodType> {
@@ -47,6 +53,14 @@ export async function generateStructuredWithGemini<T extends z.ZodType>({
   })
 
   const result = await model.generateContent(user)
+
+  const finishReason = result.response.candidates?.[0]?.finishReason
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error(
+      `Ответ Gemini обрезан лимитом токенов (maxTokens=${maxTokens}) до завершения JSON — увеличьте maxTokens`
+    )
+  }
+
   const text = result.response.text()
 
   const parsed = schema.safeParse(extractJson(text))
