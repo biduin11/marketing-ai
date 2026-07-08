@@ -1,7 +1,7 @@
 import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { anthropic, AI_MODELS } from "@/lib/ai/client"
 import { generateStructured } from "@/lib/ai/generate"
 import { marketAnalysisSchema } from "@/lib/ai/schemas/market"
 import {
@@ -41,7 +41,7 @@ async function generateWithWebSearch(
   }
 
   const response = await anthropic.beta.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.ANALYSIS,
     max_tokens: 16000,
     system: marketAnalysisSystem,
     tools: [
@@ -72,7 +72,7 @@ async function generateWithWebSearch(
     .map((b) => ({ type: "text" as const, text: (b as { text: string }).text }))
 
   const forcedResponse = await anthropic.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.ANALYSIS,
     max_tokens: 8000,
     system: marketAnalysisSystem,
     tools: [saveToolDef],
@@ -124,6 +124,7 @@ export async function generateMarketAnalysis(
       schema: marketAnalysisSchema,
       toolName: "save_market_analysis",
       toolDescription: "Сохранить структурированный анализ рынка",
+      model: AI_MODELS.ANALYSIS,
     })
     data = result.data
   }
@@ -135,7 +136,7 @@ export async function generateMarketAnalysis(
       type: "MARKET_ANALYSIS",
       version,
       payload: data,
-      model: AI_MODEL,
+      model: AI_MODELS.ANALYSIS,
       inputHash,
     },
   })

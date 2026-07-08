@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { generateStructured } from "@/lib/ai/generate"
+import { AI_MODELS } from "@/lib/ai/client"
 import {
   audienceSegmentsSchema,
   buyerPersonaSchema,
@@ -50,6 +51,7 @@ export async function generateAudienceSegments(
     schema: audienceSegmentsSchema,
     toolName: "save_audience_segments",
     toolDescription: "Сохранить структурированные сегменты аудитории",
+    model: AI_MODELS.AUDIENCE,
   })
 
   const version = await getNextVersion(project.id, "AUDIENCE_SEGMENTS")
@@ -76,6 +78,7 @@ export async function generateBuyerPersona(
     schema: buyerPersonaSchema,
     toolName: "save_buyer_persona",
     toolDescription: "Сохранить структурированные Buyer Persona",
+    model: AI_MODELS.AUDIENCE,
   })
 
   const version = await getNextVersion(project.id, "BUYER_PERSONA")
@@ -102,6 +105,7 @@ export async function generateJtbd(
     schema: jtbdSchema,
     toolName: "save_jtbd",
     toolDescription: "Сохранить структурированный анализ Jobs To Be Done",
+    model: AI_MODELS.AUDIENCE,
   })
 
   const version = await getNextVersion(project.id, "JTBD")

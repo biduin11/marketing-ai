@@ -1,6 +1,6 @@
 import type { Project, ReputationSnapshot } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { anthropic, AI_MODELS } from "@/lib/ai/client"
 import { reputationSchema, type Reputation } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
 
@@ -24,7 +24,7 @@ async function analyzeReputation(
   const city = project.regions[0] ?? ""
 
   const response = await anthropic.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.REPUTATION,
     max_tokens: 8000,
     tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 8 }],
     system: reputationSystem,
@@ -50,7 +50,7 @@ async function analyzeReputation(
     throw new Error("AI-ответ не прошёл валидацию схемы")
   }
 
-  return { payload: parsed.data, model: AI_MODEL }
+  return { payload: parsed.data, model: AI_MODELS.REPUTATION }
 }
 
 export async function generateReputationSnapshot(

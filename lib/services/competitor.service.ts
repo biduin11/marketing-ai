@@ -1,7 +1,7 @@
 import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { anthropic, AI_MODELS } from "@/lib/ai/client"
 import { generateStructured } from "@/lib/ai/generate"
 import { competitorAnalysisSchema } from "@/lib/ai/schemas/competitorAnalysis"
 import {
@@ -76,7 +76,7 @@ async function generateWithWebSearch(
 
   // web_search_20250305 is a server-side tool — Anthropic executes searches inline
   const response = await anthropic.beta.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.COMPETITORS,
     max_tokens: 16000,
     system: competitorAnalysisSystem,
     tools: [
@@ -108,7 +108,7 @@ async function generateWithWebSearch(
     .map((b) => ({ type: "text" as const, text: (b as { text: string }).text }))
 
   const forcedResponse = await anthropic.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.COMPETITORS,
     max_tokens: 8000,
     system: competitorAnalysisSystem,
     tools: [saveToolDef],
@@ -161,6 +161,7 @@ export async function generateCompetitorAnalysis(
       schema: competitorAnalysisSchema,
       toolName: "save_competitor_analysis",
       toolDescription: "Сохранить структурированный анализ конкурентов",
+      model: AI_MODELS.COMPETITORS,
     })
     data = result.data
   }
@@ -172,7 +173,7 @@ export async function generateCompetitorAnalysis(
       type: "COMPETITOR_ANALYSIS",
       version,
       payload: data,
-      model: AI_MODEL,
+      model: AI_MODELS.COMPETITORS,
       inputHash,
     },
   })

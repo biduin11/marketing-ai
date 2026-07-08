@@ -1,6 +1,7 @@
 import type { Project, AiArtifact, ArtifactType } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { generateStructured } from "@/lib/ai/generate"
+import { AI_MODELS } from "@/lib/ai/client"
 import { strategySchema, type Horizon } from "@/lib/ai/schemas/strategy"
 import {
   strategySystem,
@@ -61,6 +62,7 @@ export async function generateStrategy(
     schema: strategySchema,
     toolName: "save_strategy",
     toolDescription: "Сохранить структурированную маркетинговую стратегию",
+    model: AI_MODELS.ANALYSIS,
   })
 
   const version = await getNextVersion(project.id, type)
