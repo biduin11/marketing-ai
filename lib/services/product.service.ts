@@ -2,6 +2,7 @@ import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { generateStructured } from "@/lib/ai/generate"
+import { AI_MODELS } from "@/lib/ai/client"
 import { productAnalysisSchema } from "@/lib/ai/schemas/product"
 import {
   productAnalysisSystem,
@@ -65,6 +66,7 @@ export async function generateProductAnalysis(
     schema: productAnalysisSchema,
     toolName: "save_product_analysis",
     toolDescription: "Сохранить структурированный анализ продуктового портфеля",
+    model: AI_MODELS.ANALYSIS,
   })
 
   const version = await getNextVersion(project.id, "PRODUCT_ANALYSIS")

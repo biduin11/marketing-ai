@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { generateStructured } from "@/lib/ai/generate"
+import { AI_MODELS } from "@/lib/ai/client"
 import { cjmSchema } from "@/lib/ai/schemas/cjm"
 import {
   cjmSystem,
@@ -43,6 +44,7 @@ export async function generateCjm(
     toolName: "save_cjm",
     toolDescription: "Сохранить структурированную карту пути клиента (CJM)",
     maxTokens: 8000,
+    model: AI_MODELS.CJM,
   })
 
   const version = await getNextVersion(project.id, "CJM")

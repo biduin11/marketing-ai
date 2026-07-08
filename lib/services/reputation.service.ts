@@ -1,6 +1,6 @@
 import type { Project, ReputationSnapshot } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { anthropic, AI_MODELS } from "@/lib/ai/client"
 import { reputationSchema, type Reputation } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
 
@@ -21,10 +21,20 @@ function extractJson(text: string): unknown {
 async function analyzeReputation(
   project: Project
 ): Promise<{ payload: Reputation; model: string }> {
+  // This module's entire value is grounded web_search — Anthropic-only.
+  // Gemini has no equivalent wired up here, and letting it answer without
+  // search would risk fabricating reviews/ratings, which the system prompt
+  // explicitly forbids. Fail loudly instead of silently hallucinating.
+  if (process.env.AI_PROVIDER === "gemini") {
+    throw new Error(
+      "Анализ репутации требует веб-поиска (доступен только через Anthropic) — временно недоступен при AI_PROVIDER=gemini"
+    )
+  }
+
   const city = project.regions[0] ?? ""
 
   const response = await anthropic.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.REPUTATION,
     max_tokens: 8000,
     tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 8 }],
     system: reputationSystem,
@@ -50,7 +60,7 @@ async function analyzeReputation(
     throw new Error("AI-ответ не прошёл валидацию схемы")
   }
 
-  return { payload: parsed.data, model: AI_MODEL }
+  return { payload: parsed.data, model: AI_MODELS.REPUTATION }
 }
 
 export async function generateReputationSnapshot(

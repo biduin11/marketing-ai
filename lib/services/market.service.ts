@@ -1,7 +1,7 @@
 import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { anthropic, AI_MODELS } from "@/lib/ai/client"
 import { generateStructured } from "@/lib/ai/generate"
 import { marketAnalysisSchema } from "@/lib/ai/schemas/market"
 import {
@@ -41,7 +41,7 @@ async function generateWithWebSearch(
   }
 
   const response = await anthropic.beta.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.ANALYSIS,
     max_tokens: 16000,
     system: marketAnalysisSystem,
     tools: [
@@ -72,7 +72,7 @@ async function generateWithWebSearch(
     .map((b) => ({ type: "text" as const, text: (b as { text: string }).text }))
 
   const forcedResponse = await anthropic.messages.create({
-    model: AI_MODEL,
+    model: AI_MODELS.ANALYSIS,
     max_tokens: 8000,
     system: marketAnalysisSystem,
     tools: [saveToolDef],
@@ -113,8 +113,15 @@ export async function generateMarketAnalysis(
   const userMessage = buildMarketAnalysisInput(context)
 
   let data: z.infer<typeof marketAnalysisSchema>
+  let usedModel: string = AI_MODELS.ANALYSIS
+
+  // web_search is Anthropic-only — while AI_PROVIDER=gemini is set, skip
+  // straight to the no-web-search fallback (which generateStructured()
+  // already routes to Gemini) instead of wasting a failing Anthropic call.
+  const useGemini = process.env.AI_PROVIDER === "gemini"
 
   try {
+    if (useGemini) throw new Error("AI_PROVIDER=gemini: web_search unavailable")
     data = await generateWithWebSearch(userMessage, rawSchema)
   } catch {
     // Fallback: standard structured output without web search
@@ -124,8 +131,10 @@ export async function generateMarketAnalysis(
       schema: marketAnalysisSchema,
       toolName: "save_market_analysis",
       toolDescription: "Сохранить структурированный анализ рынка",
+      model: AI_MODELS.ANALYSIS,
     })
     data = result.data
+    usedModel = result.model
   }
 
   const version = await getNextVersion(project.id, "MARKET_ANALYSIS")
@@ -135,7 +144,7 @@ export async function generateMarketAnalysis(
       type: "MARKET_ANALYSIS",
       version,
       payload: data,
-      model: AI_MODEL,
+      model: usedModel,
       inputHash,
     },
   })

@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
 
 interface GenerateStructuredArgs<T extends z.ZodType> {
   system: string
@@ -8,6 +9,8 @@ interface GenerateStructuredArgs<T extends z.ZodType> {
   toolName: string
   toolDescription: string
   maxTokens?: number
+  /** Task-specific model override — defaults to AI_MODEL (see lib/ai/client.ts AI_MODELS). */
+  model?: string
 }
 
 /**
@@ -22,14 +25,21 @@ export async function generateStructured<T extends z.ZodType>({
   toolName,
   toolDescription,
   maxTokens = 8000,
+  model = AI_MODEL,
 }: GenerateStructuredArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
+  // Temporary switch while the Anthropic balance is topped up (see AI_PROVIDER
+  // in CLAUDE.md) — every caller of generateStructured() gets this for free.
+  if (process.env.AI_PROVIDER === "gemini") {
+    return generateStructuredWithGemini({ system, user, schema, maxTokens })
+  }
+
   // Zod 4 native JSON Schema — strip $schema meta-field; Anthropic rejects it.
   const { $schema: _unused, ...inputSchema } = z.toJSONSchema(schema, {
     target: "draft-7",
   }) as Record<string, unknown>
 
   const response = await anthropic.messages.create({
-    model: AI_MODEL,
+    model,
     max_tokens: maxTokens,
     system,
     tools: [
@@ -53,5 +63,5 @@ export async function generateStructured<T extends z.ZodType>({
     throw new Error("AI-ответ не прошёл валидацию схемы")
   }
 
-  return { data: parsed.data, model: AI_MODEL }
+  return { data: parsed.data, model }
 }
