@@ -3,6 +3,7 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { anthropic } from "@/lib/ai/client"
+import { generateTextWithGemini } from "@/lib/ai/generate-with-gemini"
 import { getLatestArtifact } from "@/lib/services/artifacts"
 import { canGenerateAi } from "@/lib/gates"
 import { z } from "zod"
@@ -95,6 +96,11 @@ ${type === "email" ? `- Тема письма: дай вариант темы в
 Пиши по-русски. Готовый текст — сразу, без вступлений.`
 
   try {
+    if (process.env.AI_PROVIDER === "gemini") {
+      const text = await generateTextWithGemini({ user: prompt, maxTokens: 1500 })
+      return { success: true, text }
+    }
+
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1500,
