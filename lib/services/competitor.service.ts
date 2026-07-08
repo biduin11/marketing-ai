@@ -150,8 +150,15 @@ export async function generateCompetitorAnalysis(
   const userMessage = buildCompetitorAnalysisInput(card, detailed)
 
   let data: z.infer<typeof competitorAnalysisSchema>
+  let usedModel: string = AI_MODELS.COMPETITORS
+
+  // web_search is Anthropic-only — while AI_PROVIDER=gemini is set, skip
+  // straight to the no-web-search fallback (which generateStructured()
+  // already routes to Gemini) instead of wasting a failing Anthropic call.
+  const useGemini = process.env.AI_PROVIDER === "gemini"
 
   try {
+    if (useGemini) throw new Error("AI_PROVIDER=gemini: web_search unavailable")
     data = await generateWithWebSearch(userMessage, rawSchema)
   } catch {
     // Fallback: standard structured output without web search
@@ -164,6 +171,7 @@ export async function generateCompetitorAnalysis(
       model: AI_MODELS.COMPETITORS,
     })
     data = result.data
+    usedModel = result.model
   }
 
   const version = await getNextVersion(project.id, "COMPETITOR_ANALYSIS")
@@ -173,7 +181,7 @@ export async function generateCompetitorAnalysis(
       type: "COMPETITOR_ANALYSIS",
       version,
       payload: data,
-      model: AI_MODELS.COMPETITORS,
+      model: usedModel,
       inputHash,
     },
   })

@@ -21,6 +21,16 @@ function extractJson(text: string): unknown {
 async function analyzeReputation(
   project: Project
 ): Promise<{ payload: Reputation; model: string }> {
+  // This module's entire value is grounded web_search — Anthropic-only.
+  // Gemini has no equivalent wired up here, and letting it answer without
+  // search would risk fabricating reviews/ratings, which the system prompt
+  // explicitly forbids. Fail loudly instead of silently hallucinating.
+  if (process.env.AI_PROVIDER === "gemini") {
+    throw new Error(
+      "Анализ репутации требует веб-поиска (доступен только через Anthropic) — временно недоступен при AI_PROVIDER=gemini"
+    )
+  }
+
   const city = project.regions[0] ?? ""
 
   const response = await anthropic.messages.create({

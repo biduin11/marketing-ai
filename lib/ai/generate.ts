@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { anthropic, AI_MODEL } from "@/lib/ai/client"
+import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
 
 interface GenerateStructuredArgs<T extends z.ZodType> {
   system: string
@@ -26,6 +27,12 @@ export async function generateStructured<T extends z.ZodType>({
   maxTokens = 8000,
   model = AI_MODEL,
 }: GenerateStructuredArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
+  // Temporary switch while the Anthropic balance is topped up (see AI_PROVIDER
+  // in CLAUDE.md) — every caller of generateStructured() gets this for free.
+  if (process.env.AI_PROVIDER === "gemini") {
+    return generateStructuredWithGemini({ system, user, schema, maxTokens })
+  }
+
   // Zod 4 native JSON Schema — strip $schema meta-field; Anthropic rejects it.
   const { $schema: _unused, ...inputSchema } = z.toJSONSchema(schema, {
     target: "draft-7",

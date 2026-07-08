@@ -196,6 +196,13 @@ DATABASE_URL=          # Neon connection string
 AUTH_SECRET=           # openssl rand -base64 32
 AUTH_URL=              # https://твой-домен.vercel.app (на проде)
 ANTHROPIC_API_KEY=     # sk-ant-...  (нужен с Итерации 1)
+GEMINI_API_KEY=        # aistudio.google.com (бесплатно) — временный fallback, см. AI_PROVIDER
+AI_PROVIDER=           # "gemini" — временно переключает ВСЕ AI-генерации на Gemini 1.5 Flash,
+                       # пока не пополнен баланс Anthropic. Пусто/не задано = Anthropic (по умолчанию).
+                       # Ограничение: web_search-зависимые модули (Рынок/Конкуренты) деградируют
+                       # до анализа без реального поиска; Репутация полностью недоступна (у неё
+                       # нет смысла без реального поиска — модуль скорее выдаст ошибку, чем начнёт
+                       # выдумывать отзывы). Верни в пустое значение, как только баланс пополнен.
 BLOB_READ_WRITE_TOKEN=    # (нужен с Итерации 4)
 STRIPE_SECRET_KEY=        # (нужен с Итерации 6)
 STRIPE_WEBHOOK_SECRET=    # (нужен с Итерации 6)

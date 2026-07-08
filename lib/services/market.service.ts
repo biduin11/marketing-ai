@@ -113,8 +113,15 @@ export async function generateMarketAnalysis(
   const userMessage = buildMarketAnalysisInput(context)
 
   let data: z.infer<typeof marketAnalysisSchema>
+  let usedModel: string = AI_MODELS.ANALYSIS
+
+  // web_search is Anthropic-only — while AI_PROVIDER=gemini is set, skip
+  // straight to the no-web-search fallback (which generateStructured()
+  // already routes to Gemini) instead of wasting a failing Anthropic call.
+  const useGemini = process.env.AI_PROVIDER === "gemini"
 
   try {
+    if (useGemini) throw new Error("AI_PROVIDER=gemini: web_search unavailable")
     data = await generateWithWebSearch(userMessage, rawSchema)
   } catch {
     // Fallback: standard structured output without web search
@@ -127,6 +134,7 @@ export async function generateMarketAnalysis(
       model: AI_MODELS.ANALYSIS,
     })
     data = result.data
+    usedModel = result.model
   }
 
   const version = await getNextVersion(project.id, "MARKET_ANALYSIS")
@@ -136,7 +144,7 @@ export async function generateMarketAnalysis(
       type: "MARKET_ANALYSIS",
       version,
       payload: data,
-      model: AI_MODELS.ANALYSIS,
+      model: usedModel,
       inputHash,
     },
   })
