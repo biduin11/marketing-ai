@@ -1,7 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateAI, parseAIJson } from "@/lib/ai/providers"
-import { AI_TASKS } from "@/lib/ai/models"
+import { generateStructured } from "@/lib/ai/generate"
+import { AI_MODELS } from "@/lib/ai/client"
 import { companyAnalysisSchema } from "@/lib/ai/schemas/companyAnalysis"
 import {
   companyAnalysisSystem,
@@ -45,19 +45,15 @@ export async function generateCompanyAnalysis(
     }
   }
 
-  const task = AI_TASKS.COMPANY_ANALYSIS
-
-  const text = await generateAI({
-    provider: task.provider,
-    model: task.model,
-    useWebSearch: task.useWebSearch,
+  const { data, model } = await generateStructured({
     system: companyAnalysisSystem,
-    prompt: buildCompanyAnalysisInput(card),
+    user: buildCompanyAnalysisInput(card),
     schema: companyAnalysisSchema,
-    maxTokens: 8000,
+    toolName: "save_company_analysis",
+    toolDescription:
+      "Сохранить структурированный маркетинговый анализ компании",
+    model: AI_MODELS.ANALYSIS,
   })
-
-  const data = parseAIJson(text, companyAnalysisSchema)
 
   const version = await getNextVersion(project.id, "COMPANY_ANALYSIS")
 
@@ -67,7 +63,7 @@ export async function generateCompanyAnalysis(
       type: "COMPANY_ANALYSIS",
       version,
       payload: data,
-      model: task.model,
+      model,
       inputHash,
     },
   })

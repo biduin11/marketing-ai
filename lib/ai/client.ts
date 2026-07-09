@@ -34,6 +34,9 @@ export const anthropic =
 if (process.env.NODE_ENV !== "production")
   globalForAnthropic.anthropic = anthropic
 
+/** Model used for all DeepSeek-backed generations (deepseek-chat/V3 — not reasoner, see generate-with-deepseek.ts). */
+export const DEEPSEEK_MODEL = "deepseek-chat"
+
 /**
  * DeepSeek — OpenAI-compatible API. Lazily instantiated (like the Gemini
  * client in gemini-client.ts) so importing this module doesn't throw when
