@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk"
+import OpenAI from "openai"
 import { env } from "@/env.mjs"
 
 /** Default AI model — used as a fallback where no task-specific model applies. */
@@ -32,3 +33,24 @@ export const anthropic =
 
 if (process.env.NODE_ENV !== "production")
   globalForAnthropic.anthropic = anthropic
+
+/**
+ * DeepSeek — OpenAI-compatible API. Lazily instantiated (like the Gemini
+ * client in gemini-client.ts) so importing this module doesn't throw when
+ * DEEPSEEK_API_KEY is unset and no task routes to DeepSeek yet.
+ */
+let deepseekClient: OpenAI | null = null
+
+export function getDeepSeekClient(): OpenAI {
+  if (!deepseekClient) {
+    const apiKey = process.env.DEEPSEEK_API_KEY
+    if (!apiKey) {
+      throw new Error("DEEPSEEK_API_KEY is not set")
+    }
+    deepseekClient = new OpenAI({ apiKey, baseURL: "https://api.deepseek.com" })
+  }
+  return deepseekClient
+}
+
+// Gemini client lives in lib/ai/gemini-client.ts (getGeminiClient() + GEMINI_MODEL) —
+// not duplicated here to avoid two separate lazy-init implementations drifting apart.
