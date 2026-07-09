@@ -175,7 +175,7 @@ export async function generateDirectorAnalysis(
     schema: directorAnalysisSchema,
     toolName: "save_director_analysis",
     toolDescription: "Сохранить ежедневный анализ AI-директора",
-    maxTokens: 3000,
+    maxTokens: 8000,
     model: AI_MODELS.DIRECTOR,
   })
 

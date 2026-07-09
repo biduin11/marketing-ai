@@ -24,7 +24,7 @@ export async function generateStructured<T extends z.ZodType>({
   schema,
   toolName,
   toolDescription,
-  maxTokens = 8000,
+  maxTokens = 16000,
   model = AI_MODEL,
 }: GenerateStructuredArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
   // Temporary switch while the Anthropic balance is topped up (see AI_PROVIDER

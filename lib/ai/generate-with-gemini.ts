@@ -49,6 +49,7 @@ export async function generateStructuredWithGemini<T extends z.ZodType>({
       responseMimeType: "application/json",
       responseSchema,
       maxOutputTokens: maxTokens,
+      temperature: 0.3,
     },
   })
 
