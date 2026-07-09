@@ -57,3 +57,24 @@ export function getDeepSeekClient(): OpenAI {
 
 // Gemini client lives in lib/ai/gemini-client.ts (getGeminiClient() + GEMINI_MODEL) —
 // not duplicated here to avoid two separate lazy-init implementations drifting apart.
+
+/** Model used for all OpenAI-backed generations, see generate-with-openai.ts. */
+export const OPENAI_MODEL = "gpt-4o"
+
+/**
+ * OpenAI. Lazily instantiated (same reasoning as getDeepSeekClient) so
+ * importing this module doesn't throw when OPENAI_API_KEY is unset and no
+ * task routes to OpenAI yet.
+ */
+let openaiClient: OpenAI | null = null
+
+export function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY is not set")
+    }
+    openaiClient = new OpenAI({ apiKey })
+  }
+  return openaiClient
+}

@@ -1,114 +1,95 @@
 /**
- * Task → provider/model routing. Only COMPANY_ANALYSIS is wired into a
- * service so far (see company.service.ts) — the rest are reserved for the
- * next steps, one service at a time, per confirmation.
+ * Task → provider/model routing. Constants only, no dispatch logic — not
+ * currently wired into generate.ts (which switches provider globally via
+ * AI_PROVIDER, not per-task) or any service.
  *
- * Two deviations from the original spec, both flagged before implementing:
- * - `gemini-1.5-flash` → `gemini-2.5-flash` (1.5 is retired, 404s on
- *   v1beta generateContent — this is the exact bug fixed in the previous
- *   Gemini-fallback work).
- * - `deepseek-reasoner` → `deepseek-chat` for every DeepSeek task. R1
- *   (reasoner) does not support DeepSeek's JSON-object response format —
- *   only deepseek-chat (V3) does. Since every task here needs reliable
- *   structured JSON, chat is the safe default. Swap back to `deepseek-reasoner`
- *   per-task if reasoning quality matters more than JSON-mode reliability
- *   for that task — just know parseAIJson() has to carry the schema-drift
- *   risk alone then (no responseSchema equivalent for DeepSeek).
+ * One deviation from the spec, flagged before applying: `gemini-1.5-flash`
+ * (DIRECTOR, REPORT) → `gemini-2.5-flash`. 1.5-flash is retired — 404s on
+ * v1beta generateContent — this is the exact bug already fixed once in the
+ * Gemini-fallback work; kept it fixed here rather than reintroducing it.
  */
 export const AI_TASKS = {
-  // ═══ ANTHROPIC (Claude Sonnet) ═══
-  // Только задачи требующие web_search или максимального качества анализа
-
+  // ═══ ANTHROPIC — web_search + стратегический анализ ═══
+  COMPANY_ANALYSIS: {
+    provider: "anthropic" as const,
+    model: "claude-sonnet-4-6",
+    useWebSearch: false,
+  },
+  SWOT: {
+    provider: "anthropic" as const,
+    model: "claude-sonnet-4-6",
+    useWebSearch: false,
+  },
+  STRATEGY: {
+    provider: "anthropic" as const,
+    model: "claude-sonnet-4-6",
+    useWebSearch: false,
+  },
   COMPETITORS: {
     provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: true,
-    reason: "Нужен web_search для реальных данных",
   },
   REPUTATION: {
     provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: true,
-    reason: "Нужен web_search для поиска отзывов",
   },
   MARKET: {
     provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: true,
-    reason: "Нужен web_search для рыночных данных",
   },
 
-  // ═══ DEEPSEEK (V3 chat — JSON-mode capable) ═══
-  // Тяжёлый аналитический анализ без поиска
-
-  COMPANY_ANALYSIS: {
-    provider: "deepseek" as const,
-    model: "deepseek-chat",
-    useWebSearch: false,
-    reason: "Глубокий анализ без поиска",
-  },
-  SWOT: {
-    provider: "deepseek" as const,
-    model: "deepseek-chat",
-    useWebSearch: false,
-    reason: "Стратегический анализ",
-  },
-  STRATEGY: {
-    provider: "deepseek" as const,
-    model: "deepseek-chat",
-    useWebSearch: false,
-    reason: "Стратегическое планирование",
-  },
-  PRODUCT: {
-    provider: "deepseek" as const,
-    model: "deepseek-chat",
-    useWebSearch: false,
-    reason: "BCG, ABC, продуктовый анализ",
-  },
+  // ═══ OPENAI GPT-4o — структурированный анализ ═══
   CJM: {
-    provider: "deepseek" as const,
-    model: "deepseek-chat",
+    provider: "openai" as const,
+    model: "gpt-4o",
     useWebSearch: false,
-    reason: "Построение пути клиента",
   },
   AUDIENCE: {
-    provider: "deepseek" as const,
-    model: "deepseek-chat",
+    provider: "openai" as const,
+    model: "gpt-4o",
     useWebSearch: false,
-    reason: "Анализ аудитории и персоны",
+  },
+  PRODUCT: {
+    provider: "openai" as const,
+    model: "gpt-4o",
+    useWebSearch: false,
   },
 
-  // ═══ GEMINI 2.5 FLASH ═══
-  // Быстрые и частые генерации
+  // ═══ OPENAI GPT-4o-mini — копирайтинг ═══
+  OFFERS: {
+    provider: "openai" as const,
+    model: "gpt-4o-mini",
+    useWebSearch: false,
+  },
 
+  // ═══ GEMINI 2.5 Flash — контент и творческие задачи ═══
   CONTENT_PLAN: {
     provider: "gemini" as const,
     model: "gemini-2.5-flash",
     useWebSearch: false,
-    reason: "Частая генерация",
-  },
-  OFFERS: {
-    provider: "gemini" as const,
-    model: "gemini-2.5-flash",
-    useWebSearch: false,
-    reason: "Быстрая генерация офферов",
-  },
-  DIRECTOR: {
-    provider: "gemini" as const,
-    model: "gemini-2.5-flash",
-    useWebSearch: false,
-    reason: "Ежедневный дайджест, нужна скорость",
   },
   POSITIONING: {
     provider: "gemini" as const,
     model: "gemini-2.5-flash",
     useWebSearch: false,
-    reason: "Генерация позиционирования",
+  },
+
+  // ═══ GEMINI 2.5 Flash — рутинные частые генерации ═══
+  // (было gemini-1.5-flash в спеке — retired, см. комментарий выше файла)
+  DIRECTOR: {
+    provider: "gemini" as const,
+    model: "gemini-2.5-flash",
+    useWebSearch: false,
   },
   REPORT: {
     provider: "gemini" as const,
     model: "gemini-2.5-flash",
     useWebSearch: false,
-    reason: "Генерация отчётов",
   },
 } as const
+
+export type AITask = keyof typeof AI_TASKS
+export type AIProvider = "anthropic" | "openai" | "gemini"

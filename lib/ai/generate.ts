@@ -2,6 +2,7 @@ import { z } from "zod"
 import { anthropic, AI_MODEL } from "@/lib/ai/client"
 import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
 import { generateStructuredWithDeepseek } from "@/lib/ai/generate-with-deepseek"
+import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
 
 interface GenerateStructuredArgs<T extends z.ZodType> {
   system: string
@@ -35,6 +36,9 @@ export async function generateStructured<T extends z.ZodType>({
   }
   if (process.env.AI_PROVIDER === "deepseek") {
     return generateStructuredWithDeepseek({ system, user, schema, maxTokens })
+  }
+  if (process.env.AI_PROVIDER === "openai") {
+    return generateStructuredWithOpenAI({ system, user, schema, maxTokens })
   }
 
   // Zod 4 native JSON Schema — strip $schema meta-field; Anthropic rejects it.
