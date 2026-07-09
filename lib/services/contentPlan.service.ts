@@ -1,7 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
-import { AI_MODELS } from "@/lib/ai/client"
+import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
 import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
 import {
   contentPlanSystem,
@@ -45,15 +44,11 @@ export async function generateContentPlan(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await generateStructuredWithGemini({
     system: contentPlanSystem,
     user: buildContentPlanInput(card, platforms),
     schema: contentPlanSchema,
-    toolName: "save_content_plan",
-    toolDescription:
-      "Сохранить структурированный контент-план с календарём, идеями и сценариями",
     maxTokens: 16000,
-    model: AI_MODELS.CONTENT,
   })
 
   const version = await getNextVersion(project.id, "CONTENT_PLAN")

@@ -1,7 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
-import { AI_MODELS } from "@/lib/ai/client"
+import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { offerSchema } from "@/lib/ai/schemas/offer"
 import {
   offerSystem,
@@ -37,13 +36,11 @@ export async function generateOffer(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await generateStructuredWithOpenAI({
     system: offerSystem,
     user: buildOfferInput(card),
     schema: offerSchema,
-    toolName: "save_offer",
-    toolDescription: "Сохранить структурированные офферы и УТП компании",
-    model: AI_MODELS.OFFERS,
+    model: "gpt-4o-mini",
   })
 
   const version = await getNextVersion(project.id, "OFFER")

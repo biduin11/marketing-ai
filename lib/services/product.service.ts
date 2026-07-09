@@ -1,8 +1,7 @@
 import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
-import { AI_MODELS } from "@/lib/ai/client"
+import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { productAnalysisSchema } from "@/lib/ai/schemas/product"
 import {
   productAnalysisSystem,
@@ -60,13 +59,10 @@ export async function generateProductAnalysis(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await generateStructuredWithOpenAI({
     system: productAnalysisSystem,
     user: buildProductAnalysisInput(context),
     schema: productAnalysisSchema,
-    toolName: "save_product_analysis",
-    toolDescription: "Сохранить структурированный анализ продуктового портфеля",
-    model: AI_MODELS.ANALYSIS,
     maxTokens: 16000,
   })
 
