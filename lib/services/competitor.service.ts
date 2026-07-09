@@ -169,6 +169,7 @@ export async function generateCompetitorAnalysis(
       toolName: "save_competitor_analysis",
       toolDescription: "Сохранить структурированный анализ конкурентов",
       model: AI_MODELS.COMPETITORS,
+      maxTokens: 16000,
     })
     data = result.data
     usedModel = result.model

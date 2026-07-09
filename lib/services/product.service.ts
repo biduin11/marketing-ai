@@ -67,6 +67,7 @@ export async function generateProductAnalysis(
     toolName: "save_product_analysis",
     toolDescription: "Сохранить структурированный анализ продуктового портфеля",
     model: AI_MODELS.ANALYSIS,
+    maxTokens: 16000,
   })
 
   const version = await getNextVersion(project.id, "PRODUCT_ANALYSIS")
