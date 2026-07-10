@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
 import { listProjects } from "@/lib/actions/projects"
-import { AppSidebar } from "@/components/app-sidebar"
-import { AppHeader } from "@/components/app-header"
-import { AiChatPanel } from "@/components/ai-chat/ai-chat-panel"
+import { AppShell } from "@/components/app-shell"
 
 export default async function AppLayout({
   children,
@@ -23,18 +21,12 @@ export default async function AppLayout({
   }))
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <AppSidebar
-        userEmail={session.user.email}
-        userName={session.user.name}
-      />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <AppHeader projects={projectItems} />
-        <main className="flex-1 overflow-y-auto bg-background p-6">
-          {children}
-        </main>
-      </div>
-      <AiChatPanel />
-    </div>
+    <AppShell
+      userEmail={session.user.email}
+      userName={session.user.name}
+      projects={projectItems}
+    >
+      {children}
+    </AppShell>
   )
 }
