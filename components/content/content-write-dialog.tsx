@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Loader2, Sparkles, Copy, Check } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -10,8 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
 import { writeContentText } from "@/lib/actions/content-write"
-import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
+import { updateContentItemStatus } from "@/lib/actions/content"
+import type { ContentPlan, ContentStatus } from "@/lib/ai/schemas/contentPlan"
 
 type ContentItem = ContentPlan["calendar"][number]
 
@@ -20,6 +23,7 @@ interface ContentWriteDialogProps {
   onClose: () => void
   projectId: string
   item: ContentItem
+  itemIndex: number
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -29,15 +33,42 @@ const TYPE_LABELS: Record<string, string> = {
   email: "Email",
 }
 
+const STATUS_OPTIONS: { value: ContentStatus; label: string; className: string }[] = [
+  { value: "draft", label: "Черновик", className: "bg-muted text-muted-foreground" },
+  { value: "ready", label: "Подготовлено", className: "bg-muted text-foreground" },
+  { value: "review", label: "На согласовании", className: "bg-warning/10 text-warning" },
+  { value: "published", label: "Опубликовано", className: "bg-success/10 text-success" },
+]
+
 export function ContentWriteDialog({
   open,
   onClose,
   projectId,
   item,
+  itemIndex,
 }: ContentWriteDialogProps) {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [text, setText] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [status, setStatus] = useState<ContentStatus>(item.status ?? "draft")
+
+  async function handleStatusChange(next: ContentStatus) {
+    if (next === status) return
+    const previous = status
+    setStatus(next)
+    const result = await updateContentItemStatus({
+      projectId,
+      itemIndex,
+      status: next,
+    })
+    if (!result.success) {
+      toast.error(result.error)
+      setStatus(previous)
+      return
+    }
+    router.refresh()
+  }
 
   async function generate() {
     setLoading(true)
@@ -144,6 +175,27 @@ export function ContentWriteDialog({
             )}
             {loading ? "Генерирую..." : text ? "Перегенерировать" : "Написать текст"}
           </Button>
+        </div>
+
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+          <span className="text-xs text-muted-foreground">Статус:</span>
+          <div className="flex gap-1">
+            {STATUS_OPTIONS.map((s) => (
+              <button
+                key={s.value}
+                onClick={() => void handleStatusChange(s.value)}
+                className={cn(
+                  "text-xs px-2 py-1 rounded-full border border-transparent transition-all",
+                  s.className,
+                  status === s.value
+                    ? "ring-2 ring-offset-1 ring-foreground font-semibold"
+                    : "opacity-60 hover:opacity-100"
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

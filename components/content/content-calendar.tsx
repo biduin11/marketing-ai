@@ -86,7 +86,10 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
   const [view, setView] = useState<"week" | "month">("week")
   const [selectedWeek, setSelectedWeek] = useState<Week>(1)
   const [platformFilter, setPlatformFilter] = useState<PlatformId | "all">("all")
-  const [writeItem, setWriteItem] = useState<CalendarItem | null>(null)
+  const [writeItem, setWriteItem] = useState<{ item: CalendarItem; index: number } | null>(
+    null
+  )
+  const openWrite = (item: CalendarItem, index: number) => setWriteItem({ item, index })
 
   const weekItems = items.filter((i) => i.week === selectedWeek)
   const visiblePlatforms: PlatformEntry[] =
@@ -164,10 +167,10 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
           allItems={items}
           platforms={visiblePlatforms}
           week={selectedWeek}
-          onWrite={setWriteItem}
+          onWrite={openWrite}
         />
       ) : (
-        <MonthGrid items={items} onWrite={setWriteItem} />
+        <MonthGrid items={items} onWrite={openWrite} />
       )}
 
       {writeItem && (
@@ -175,7 +178,8 @@ export function ContentCalendar({ items, projectId }: ContentCalendarProps) {
           open={true}
           onClose={() => setWriteItem(null)}
           projectId={projectId}
-          item={writeItem}
+          item={writeItem.item}
+          itemIndex={writeItem.index}
         />
       )}
 
@@ -220,7 +224,7 @@ function WeekGrid({
   allItems: CalendarItem[]
   platforms: readonly PlatformEntry[]
   week: Week
-  onWrite: (item: CalendarItem) => void
+  onWrite: (item: CalendarItem, index: number) => void
 }) {
   const startDay = (week - 1) * 7 + 1
   const days = Array.from({ length: 7 }, (_, i) => startDay + i)
@@ -324,7 +328,7 @@ function WeekGrid({
                                   {format}
                                 </span>
                                 <button
-                                  onClick={() => onWrite(item)}
+                                  onClick={() => onWrite(item, allItems.indexOf(item))}
                                   className="hidden group-hover:flex items-center gap-0.5 rounded bg-foreground px-1.5 py-0.5 text-[10px] font-medium text-background"
                                 >
                                   <Sparkles className="size-2.5" />
@@ -347,7 +351,13 @@ function WeekGrid({
   )
 }
 
-function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: CalendarItem) => void }) {
+function MonthGrid({
+  items,
+  onWrite,
+}: {
+  items: CalendarItem[]
+  onWrite: (item: CalendarItem, index: number) => void
+}) {
   const byDay = new Map<number, CalendarItem[]>()
   for (const item of items) {
     if (item.day >= 1 && item.day <= 28) {
@@ -409,7 +419,7 @@ function MonthGrid({ items, onWrite }: { items: CalendarItem[]; onWrite: (item: 
                         <button
                           key={i}
                           title={item.title}
-                          onClick={() => onWrite(item)}
+                          onClick={() => onWrite(item, items.indexOf(item))}
                           className={cn(
                             "truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight text-left hover:opacity-80 transition-opacity",
                             cls
