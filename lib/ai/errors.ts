@@ -1,7 +1,7 @@
 /**
- * Classifies provider errors as fallback-eligible (transient — rate limits,
- * timeouts, outages) or not (config/code bugs — bad key, bad schema, bad
- * model name). Used by the Router to decide whether to retry on Gemini or
+ * Classifies provider errors as fallback-eligible (transient outages, or a
+ * missing API key — absent config, not a code bug) or not (schema/model/
+ * prompt bugs). Used by the Router to decide whether to retry on Gemini or
  * surface the error as-is to the developer.
  */
 export interface ErrorClassification {
@@ -29,6 +29,14 @@ const FALLBACK_PATTERNS = [
   /internal server error/i,
   /overloaded/i,
   /retry-after/i,
+  // Missing/absent config, not a code bug: the key simply isn't set in this
+  // environment (e.g. a preview deploy without secrets configured yet), so
+  // the Router falls back instead of failing the whole task. See router.ts
+  // for the console.warn emitted specifically for this case.
+  /missing environment variable/i,
+  /missing api key/i,
+  /is not set/i, // our own "X_API_KEY is not set" errors
+  /is undefined/i, // e.g. "process.env.OPENAI_API_KEY is undefined"
 ]
 
 const NON_FALLBACK_STATUS = new Set([400, 401, 403, 404])
@@ -44,9 +52,6 @@ const NON_FALLBACK_PATTERNS = [
   /invalid api key/i,
   /unauthorized/i,
   /forbidden/i,
-  /missing environment variable/i,
-  /missing api key/i,
-  /is not set/i, // our own "X_API_KEY is not set" errors
   /syntax error/i,
   /parsing error/i,
   /validation error/i,
