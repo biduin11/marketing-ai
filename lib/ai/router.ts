@@ -91,9 +91,10 @@ async function callProvider<T extends z.ZodType>(
  * fails with a transient error (rate limit, timeout, outage). Tasks with
  * useWebSearch (COMPETITORS/REPUTATION/MARKET) never fall back: Gemini has
  * no web_search equivalent, so a failure there surfaces as a clear error
- * instead of silently switching providers. Config/code errors (bad key,
- * bad schema, bad model name) never trigger a fallback either — see
- * lib/ai/errors.ts for the classification.
+ * instead of silently switching providers. Schema/model/prompt bugs never
+ * trigger a fallback either — see lib/ai/errors.ts for the classification.
+ * A missing API key IS fallback-eligible (absent config, not a code bug),
+ * but still logs a console.warn below so it doesn't go unnoticed.
  */
 export async function routeAI<T extends z.ZodType>(
   request: RouterRequest<T>
@@ -164,6 +165,12 @@ export async function routeAI<T extends z.ZodType>(
       fallbackProvider: "gemini",
       executionTime,
     })
+
+    if (/missing (environment variable|api key)|is not set|is undefined/i.test(reason)) {
+      console.warn(
+        `[AI Router] ${task.provider} key missing for task ${request.task} — falling back to Gemini. Reason: ${reason}`
+      )
+    }
 
     // Max one retry, on Gemini, no loop.
     try {
