@@ -91,5 +91,13 @@ export async function generateTextWithGemini({
   })
 
   const result = await model.generateContent(user)
+
+  const finishReason = result.response.candidates?.[0]?.finishReason
+  if (finishReason === "MAX_TOKENS") {
+    throw new Error(
+      `Ответ Gemini обрезан лимитом токенов (maxTokens=${maxTokens}) до завершения текста — увеличьте maxTokens`
+    )
+  }
+
   return result.response.text()
 }
