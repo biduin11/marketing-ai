@@ -1,6 +1,6 @@
 import type { Project, AiArtifact, Metric } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
+import { routeAI } from "@/lib/ai/router"
 import { directorAnalysisSchema } from "@/lib/ai/schemas/directorAnalysis"
 import {
   directorAnalysisSystem,
@@ -168,9 +168,10 @@ export async function generateDirectorAnalysis(
 
   const ctx = buildDirectorContext(project, artifacts, metrics)
 
-  const { data, model } = await generateStructuredWithGemini({
+  const { data, model } = await routeAI({
+    task: "DIRECTOR",
     system: directorAnalysisSystem,
-    user: buildDirectorInput(ctx),
+    prompt: buildDirectorInput(ctx),
     schema: directorAnalysisSchema,
     maxTokens: 8000,
   })

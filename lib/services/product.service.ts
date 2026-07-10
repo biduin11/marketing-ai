@@ -1,7 +1,7 @@
 import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
+import { routeAI } from "@/lib/ai/router"
 import { productAnalysisSchema } from "@/lib/ai/schemas/product"
 import {
   productAnalysisSystem,
@@ -59,9 +59,10 @@ export async function generateProductAnalysis(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithOpenAI({
+  const { data, model } = await routeAI({
+    task: "PRODUCT",
     system: productAnalysisSystem,
-    user: buildProductAnalysisInput(context),
+    prompt: buildProductAnalysisInput(context),
     schema: productAnalysisSchema,
     maxTokens: 16000,
   })

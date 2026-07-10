@@ -1,6 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
+import { routeAI } from "@/lib/ai/router"
 import { offerSchema } from "@/lib/ai/schemas/offer"
 import {
   offerSystem,
@@ -36,11 +36,11 @@ export async function generateOffer(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithOpenAI({
+  const { data, model } = await routeAI({
+    task: "OFFERS",
     system: offerSystem,
-    user: buildOfferInput(card),
+    prompt: buildOfferInput(card),
     schema: offerSchema,
-    model: "gpt-4o-mini",
   })
 
   const version = await getNextVersion(project.id, "OFFER")

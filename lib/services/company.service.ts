@@ -1,7 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
-import { AI_MODELS } from "@/lib/ai/client"
+import { routeAI } from "@/lib/ai/router"
 import { companyAnalysisSchema } from "@/lib/ai/schemas/companyAnalysis"
 import {
   companyAnalysisSystem,
@@ -45,14 +44,11 @@ export async function generateCompanyAnalysis(
     }
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await routeAI({
+    task: "COMPANY_ANALYSIS",
     system: companyAnalysisSystem,
-    user: buildCompanyAnalysisInput(card),
+    prompt: buildCompanyAnalysisInput(card),
     schema: companyAnalysisSchema,
-    toolName: "save_company_analysis",
-    toolDescription:
-      "Сохранить структурированный маркетинговый анализ компании",
-    model: AI_MODELS.ANALYSIS,
   })
 
   const version = await getNextVersion(project.id, "COMPANY_ANALYSIS")

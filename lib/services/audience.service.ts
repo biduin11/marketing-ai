@@ -1,6 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
+import { routeAI } from "@/lib/ai/router"
 import {
   audienceSegmentsSchema,
   buyerPersonaSchema,
@@ -44,9 +44,10 @@ export async function generateAudienceSegments(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithOpenAI({
+  const { data, model } = await routeAI({
+    task: "AUDIENCE",
     system: audienceSegmentsSystem,
-    user: buildAudienceSegmentsInput(card),
+    prompt: buildAudienceSegmentsInput(card),
     schema: audienceSegmentsSchema,
   })
 
@@ -68,9 +69,10 @@ export async function generateBuyerPersona(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithOpenAI({
+  const { data, model } = await routeAI({
+    task: "AUDIENCE",
     system: buyerPersonaSystem,
-    user: buildBuyerPersonaInput(card),
+    prompt: buildBuyerPersonaInput(card),
     schema: buyerPersonaSchema,
   })
 
@@ -92,9 +94,10 @@ export async function generateJtbd(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithOpenAI({
+  const { data, model } = await routeAI({
+    task: "AUDIENCE",
     system: jtbdSystem,
-    user: buildJtbdInput(card),
+    prompt: buildJtbdInput(card),
     schema: jtbdSchema,
   })
 

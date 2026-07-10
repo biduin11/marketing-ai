@@ -1,15 +1,15 @@
 /**
- * Task → provider/model routing. Constants only, no dispatch logic — not
- * currently wired into generate.ts (which switches provider globally via
- * AI_PROVIDER, not per-task) or any service.
+ * Task → provider/model routing, consumed by lib/ai/router.ts.
  *
- * One deviation from the spec, flagged before applying: `gemini-1.5-flash`
- * (DIRECTOR, REPORT) → `gemini-2.5-flash`. 1.5-flash is retired — 404s on
- * v1beta generateContent — this is the exact bug already fixed once in the
- * Gemini-fallback work; kept it fixed here rather than reintroducing it.
+ * OpenAI and Anthropic are the two primary providers — Gemini is never
+ * assigned here as a primary `provider`, only used as the Router's
+ * automatic fallback (see router.ts) when a primary call fails with a
+ * transient error. COMPETITORS/REPUTATION/MARKET use Anthropic's
+ * web_search tool and are explicitly excluded from fallback — Gemini has
+ * no equivalent, so the Router surfaces a clear error instead of switching.
  */
 export const AI_TASKS = {
-  // ═══ ANTHROPIC — web_search + стратегический анализ ═══
+  // ═══ ANTHROPIC — web_search (no fallback) + стратегический анализ ═══
   COMPANY_ANALYSIS: {
     provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
@@ -58,35 +58,32 @@ export const AI_TASKS = {
     useWebSearch: false,
   },
 
-  // ═══ OPENAI GPT-4o-mini — копирайтинг ═══
+  // ═══ OPENAI GPT-4o-mini — копирайтинг и частые/лёгкие генерации ═══
+  // CONTENT_PLAN/POSITIONING/DIRECTOR/REPORT were Gemini-primary before this
+  // rework — moved to OpenAI since Gemini is fallback-only now.
   OFFERS: {
     provider: "openai" as const,
     model: "gpt-4o-mini",
     useWebSearch: false,
   },
-
-  // ═══ GEMINI 2.5 Flash — контент и творческие задачи ═══
   CONTENT_PLAN: {
-    provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    provider: "openai" as const,
+    model: "gpt-4o-mini",
     useWebSearch: false,
   },
   POSITIONING: {
-    provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    provider: "openai" as const,
+    model: "gpt-4o-mini",
     useWebSearch: false,
   },
-
-  // ═══ GEMINI 2.5 Flash — рутинные частые генерации ═══
-  // (было gemini-1.5-flash в спеке — retired, см. комментарий выше файла)
   DIRECTOR: {
-    provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    provider: "openai" as const,
+    model: "gpt-4o-mini",
     useWebSearch: false,
   },
   REPORT: {
-    provider: "gemini" as const,
-    model: "gemini-2.5-flash",
+    provider: "openai" as const,
+    model: "gpt-4o-mini",
     useWebSearch: false,
   },
 } as const

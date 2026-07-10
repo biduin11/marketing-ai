@@ -1,6 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
+import { routeAI } from "@/lib/ai/router"
 import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
 import {
   contentPlanSystem,
@@ -44,9 +44,10 @@ export async function generateContentPlan(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithGemini({
+  const { data, model } = await routeAI({
+    task: "CONTENT_PLAN",
     system: contentPlanSystem,
-    user: buildContentPlanInput(card, platforms),
+    prompt: buildContentPlanInput(card, platforms),
     schema: contentPlanSchema,
     maxTokens: 16000,
   })

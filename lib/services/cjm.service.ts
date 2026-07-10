@@ -1,6 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
+import { routeAI } from "@/lib/ai/router"
 import { cjmSchema } from "@/lib/ai/schemas/cjm"
 import {
   cjmSystem,
@@ -36,9 +36,10 @@ export async function generateCjm(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructuredWithOpenAI({
+  const { data, model } = await routeAI({
+    task: "CJM",
     system: cjmSystem,
-    user: buildCjmInput(card),
+    prompt: buildCjmInput(card),
     schema: cjmSchema,
     maxTokens: 8000,
   })
