@@ -67,6 +67,8 @@ export default async function AnalyticsPage() {
       contentPlan={contentPlanResult?.success ? contentPlanResult.data : null}
       audienceSegments={audienceResult?.success ? audienceResult.data : null}
       buyerPersona={personaResult?.success ? personaResult.data : null}
+      conversionRate={project.conversionRate ?? null}
+      avgCheck={project.avgCheck ?? null}
     />
   )
 }
