@@ -1,7 +1,6 @@
 import type { Project, AiArtifact, Metric } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
-import { AI_MODELS } from "@/lib/ai/client"
+import { routeAI } from "@/lib/ai/router"
 import { directorAnalysisSchema } from "@/lib/ai/schemas/directorAnalysis"
 import {
   directorAnalysisSystem,
@@ -169,14 +168,12 @@ export async function generateDirectorAnalysis(
 
   const ctx = buildDirectorContext(project, artifacts, metrics)
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await routeAI({
+    task: "DIRECTOR",
     system: directorAnalysisSystem,
-    user: buildDirectorInput(ctx),
+    prompt: buildDirectorInput(ctx),
     schema: directorAnalysisSchema,
-    toolName: "save_director_analysis",
-    toolDescription: "Сохранить ежедневный анализ AI-директора",
     maxTokens: 8000,
-    model: AI_MODELS.DIRECTOR,
   })
 
   const version = await getNextVersion(project.id, "DIRECTOR_DAILY")

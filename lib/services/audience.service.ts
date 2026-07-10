@@ -1,7 +1,6 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
-import { AI_MODELS } from "@/lib/ai/client"
+import { routeAI } from "@/lib/ai/router"
 import {
   audienceSegmentsSchema,
   buyerPersonaSchema,
@@ -45,13 +44,11 @@ export async function generateAudienceSegments(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await routeAI({
+    task: "AUDIENCE",
     system: audienceSegmentsSystem,
-    user: buildAudienceSegmentsInput(card),
+    prompt: buildAudienceSegmentsInput(card),
     schema: audienceSegmentsSchema,
-    toolName: "save_audience_segments",
-    toolDescription: "Сохранить структурированные сегменты аудитории",
-    model: AI_MODELS.AUDIENCE,
   })
 
   const version = await getNextVersion(project.id, "AUDIENCE_SEGMENTS")
@@ -72,13 +69,11 @@ export async function generateBuyerPersona(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await routeAI({
+    task: "AUDIENCE",
     system: buyerPersonaSystem,
-    user: buildBuyerPersonaInput(card),
+    prompt: buildBuyerPersonaInput(card),
     schema: buyerPersonaSchema,
-    toolName: "save_buyer_persona",
-    toolDescription: "Сохранить структурированные Buyer Persona",
-    model: AI_MODELS.AUDIENCE,
   })
 
   const version = await getNextVersion(project.id, "BUYER_PERSONA")
@@ -99,13 +94,11 @@ export async function generateJtbd(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const { data, model } = await generateStructured({
+  const { data, model } = await routeAI({
+    task: "AUDIENCE",
     system: jtbdSystem,
-    user: buildJtbdInput(card),
+    prompt: buildJtbdInput(card),
     schema: jtbdSchema,
-    toolName: "save_jtbd",
-    toolDescription: "Сохранить структурированный анализ Jobs To Be Done",
-    model: AI_MODELS.AUDIENCE,
   })
 
   const version = await getNextVersion(project.id, "JTBD")

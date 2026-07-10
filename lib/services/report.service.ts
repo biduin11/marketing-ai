@@ -1,6 +1,6 @@
 import type { Project, AiArtifact, Metric } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
-import { generateStructured } from "@/lib/ai/generate"
+import { routeAI } from "@/lib/ai/router"
 import { executiveReportSchema } from "@/lib/ai/schemas/executiveReport"
 import {
   executiveReportSystem,
@@ -45,9 +45,10 @@ export async function generateExecutiveReport(
   }
 
   const periodType = periodTypeMap[artifactType]
-  const { data, model } = await generateStructured({
+  const { data, model } = await routeAI({
+    task: "REPORT",
     system: executiveReportSystem,
-    user: buildExecutiveReportInput({
+    prompt: buildExecutiveReportInput({
       period,
       periodType,
       summary,
@@ -56,8 +57,6 @@ export async function generateExecutiveReport(
       niche: project.niche,
     }),
     schema: executiveReportSchema,
-    toolName: "save_executive_report",
-    toolDescription: "Сохранить исполнительный отчёт за период",
     maxTokens: 4000,
   })
 
