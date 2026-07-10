@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LogOut, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react"
+import { LogOut, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react"
 import { navGroups } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -14,11 +14,20 @@ const COLLAPSED_KEY = "sidebar-collapsed"
 interface AppSidebarProps {
   userEmail?: string | null
   userName?: string | null
+  mobileOpen?: boolean
+  onMobileClose?: () => void
 }
 
-export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
+export function AppSidebar({
+  userEmail,
+  userName,
+  mobileOpen = false,
+  onMobileClose,
+}: AppSidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  // На мобильном overlay всегда показывает полный список — collapsed влияет только на десктоп-ширину
+  const hideLabels = collapsed && !mobileOpen
 
   useEffect(() => {
     const saved = localStorage.getItem(COLLAPSED_KEY)
@@ -35,8 +44,10 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen shrink-0 flex-col border-r border-border bg-sidebar transition-all duration-200",
-        collapsed ? "w-14" : "w-60"
+        "fixed inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col border-r border-border bg-sidebar shadow-xl transition-transform duration-300",
+        "md:static md:z-auto md:w-60 md:shadow-none md:transition-[width] md:duration-200 md:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full",
+        collapsed ? "md:w-14" : "md:w-60"
       )}
     >
       {/* Logo */}
@@ -44,7 +55,7 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
         <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent-foreground/10 ring-1 ring-sidebar-accent-foreground/20">
           <Zap className="size-4 text-sidebar-accent-foreground" />
         </div>
-        {!collapsed && (
+        {!hideLabels && (
           <span className="truncate text-sm font-semibold text-sidebar-accent-foreground">
             AI Marketing OS
           </span>
@@ -52,7 +63,7 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
         <button
           onClick={toggle}
           className={cn(
-            "ml-auto flex size-6 items-center justify-center rounded text-sidebar-primary hover:text-sidebar-accent-foreground",
+            "ml-auto hidden size-6 items-center justify-center rounded text-sidebar-primary hover:text-sidebar-accent-foreground md:flex",
             collapsed && "mx-auto"
           )}
           title={collapsed ? "Развернуть" : "Свернуть"}
@@ -63,18 +74,25 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
             <PanelLeftClose className="size-4" />
           )}
         </button>
+        <button
+          onClick={onMobileClose}
+          className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-sidebar-primary hover:text-sidebar-accent-foreground md:hidden"
+          aria-label="Закрыть меню"
+        >
+          <X className="size-5" />
+        </button>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-2">
         {navGroups.map((group, gi) => (
           <div key={gi} className={cn(gi > 0 && "mt-3")}>
-            {group.label && !collapsed && (
+            {group.label && !hideLabels && (
               <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-sidebar-primary/50">
                 {group.label}
               </p>
             )}
-            {group.label && collapsed && gi > 0 && (
+            {group.label && hideLabels && gi > 0 && (
               <div className="mx-3 mb-2 mt-1 border-t border-sidebar-border" />
             )}
             <ul className="space-y-0.5">
@@ -87,18 +105,19 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      title={collapsed ? item.label : undefined}
+                      title={hideLabels ? item.label : undefined}
+                      onClick={onMobileClose}
                       className={cn(
-                        "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
-                        collapsed && "justify-center",
+                        "flex min-h-[44px] items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors md:min-h-0",
+                        hideLabels && "justify-center",
                         isActive
                           ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
                           : "text-sidebar-primary hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       )}
                     >
                       <item.icon className="size-4 shrink-0" />
-                      {!collapsed && <span className="truncate">{item.label}</span>}
-                      {!collapsed && item.badge && (
+                      {!hideLabels && <span className="truncate">{item.label}</span>}
+                      {!hideLabels && item.badge && (
                         <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-sidebar-accent-foreground/15 px-1 text-[10px] font-semibold text-sidebar-accent-foreground">
                           {item.badge}
                         </span>
@@ -117,13 +136,13 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
         <div
           className={cn(
             "flex items-center gap-2 rounded-lg px-2 py-1.5",
-            collapsed && "justify-center px-0"
+            hideLabels && "justify-center px-0"
           )}
         >
           <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sidebar-accent-foreground/10 text-xs font-medium text-sidebar-accent-foreground">
             {(userName ?? userEmail ?? "U").charAt(0).toUpperCase()}
           </div>
-          {!collapsed && (
+          {!hideLabels && (
             <div className="min-w-0 flex-1">
               {userName && (
                 <p className="truncate text-xs font-medium text-sidebar-accent-foreground">
@@ -135,7 +154,7 @@ export function AppSidebar({ userEmail, userName }: AppSidebarProps) {
               </p>
             </div>
           )}
-          {!collapsed && (
+          {!hideLabels && (
             <Button
               variant="ghost"
               size="icon-sm"

@@ -234,14 +234,16 @@ export function CompanyView({
 
       {!loading && analysis && (
         <Tabs defaultValue="overview">
-          <TabsList>
-            <TabsTrigger value="overview">Обзор</TabsTrigger>
-            <TabsTrigger value="swot">SWOT</TabsTrigger>
-            <TabsTrigger value="positioning">Позиционирование</TabsTrigger>
-            <TabsTrigger value="product">Продукт</TabsTrigger>
-            <TabsTrigger value="market">Рынок</TabsTrigger>
-            <TabsTrigger value="audit">Аудит</TabsTrigger>
-          </TabsList>
+          <div className="-mx-4 overflow-x-auto px-4 scrollbar-hide md:mx-0 md:overflow-visible md:px-0">
+            <TabsList>
+              <TabsTrigger value="overview">Обзор</TabsTrigger>
+              <TabsTrigger value="swot">SWOT</TabsTrigger>
+              <TabsTrigger value="positioning">Позиционирование</TabsTrigger>
+              <TabsTrigger value="product">Продукт</TabsTrigger>
+              <TabsTrigger value="market">Рынок</TabsTrigger>
+              <TabsTrigger value="audit">Аудит</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview */}
           <TabsContent value="overview" className="mt-6 space-y-6">
