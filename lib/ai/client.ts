@@ -23,6 +23,11 @@ export const DEEPSEEK_MODEL = "deepseek-chat"
  */
 let deepseekClient: OpenAI | null = null
 
+// DeepSeek — заготовка для будущего подключения
+// Для активации: назначить задачи в lib/ai/models.ts
+// Документация: https://api-docs.deepseek.com
+// Модели: deepseek-chat (V3), deepseek-reasoner (R1)
+// JSON mode поддерживается только в deepseek-chat
 export function getDeepSeekClient(): OpenAI {
   if (!deepseekClient) {
     const apiKey = process.env.DEEPSEEK_API_KEY
