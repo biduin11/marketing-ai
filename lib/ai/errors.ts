@@ -37,6 +37,13 @@ const FALLBACK_PATTERNS = [
   /missing api key/i,
   /is not set/i, // our own "X_API_KEY is not set" errors
   /is undefined/i, // e.g. "process.env.OPENAI_API_KEY is undefined"
+  // Anthropic returns HTTP 400 for balance exhaustion, not a real client-error
+  // (bad request) — same "absent config, not a code bug" reasoning as the
+  // missing-key patterns above.
+  /credit balance is too low/i,
+  /insufficient_funds/i,
+  /upgrade or purchase credits/i,
+  /plans & billing/i,
 ]
 
 const NON_FALLBACK_STATUS = new Set([400, 401, 403, 404])
@@ -79,17 +86,21 @@ export function classifyError(error: unknown): ErrorClassification {
   const status = getStatus(error)
   const message = getMessage(error)
 
-  if (status !== undefined && NON_FALLBACK_STATUS.has(status)) {
-    return { fallbackEligible: false, reason: `HTTP ${status}: ${message}` }
-  }
+  // Message content takes priority over HTTP status: Anthropic returns HTTP
+  // 400 for "credit balance is too low", which is balance exhaustion, not a
+  // client-error (bad request) — a status-only check would misclassify it
+  // as NON_FALLBACK.
   if (NON_FALLBACK_PATTERNS.some((p) => p.test(message))) {
     return { fallbackEligible: false, reason: message }
   }
-  if (status !== undefined && FALLBACK_STATUS.has(status)) {
-    return { fallbackEligible: true, reason: `HTTP ${status}: ${message}` }
-  }
   if (FALLBACK_PATTERNS.some((p) => p.test(message))) {
     return { fallbackEligible: true, reason: message }
+  }
+  if (status !== undefined && NON_FALLBACK_STATUS.has(status)) {
+    return { fallbackEligible: false, reason: `HTTP ${status}: ${message}` }
+  }
+  if (status !== undefined && FALLBACK_STATUS.has(status)) {
+    return { fallbackEligible: true, reason: `HTTP ${status}: ${message}` }
   }
 
   // Unclassified error shape — default to NOT falling back, so an unexpected
