@@ -114,6 +114,11 @@ prisma/
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
 
+> Hypothesis — страница «Гипотезы» (`/hypotheses`, группа STRATEGY в сайдбаре). Ручной трекер
+  экспериментов: черновик → тест → результат, без AI-генерации. Заменил прежнюю заглушку
+  `/experiments` (удалена). `HypothesisStatus`: DRAFT | RUNNING | COMPLETED | ARCHIVED.
+  `HypothesisResult` (поле `conclusion`): CONFIRMED | REJECTED | INCONCLUSIVE.
+
 **Enum ProjectStatus:** DRAFT | ACTIVE | PAUSED | ARCHIVED
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
