@@ -25,6 +25,9 @@ import { horizonInputSchema } from "@/lib/validations/ai"
 import { canGenerateAi } from "@/lib/gates"
 import { z } from "zod"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
+import { routeAI } from "@/lib/ai/router"
+import { periodComparisonCommentSchema } from "@/lib/ai/schemas/periodComparison"
+import { periodComparisonSystem, buildPeriodComparisonPrompt } from "@/lib/ai/prompts/periodComparison"
 
 const reportInputSchema = z.object({
   type: z.enum(["REPORT_WEEKLY", "REPORT_MONTHLY", "REPORT_QUARTERLY"]),
@@ -45,7 +48,7 @@ async function ownedProject(projectId: string) {
   })
 }
 
-async function checkAiGate(userId: string): Promise<ActionResult | null> {
+async function checkAiGate(userId: string): Promise<{ success: false; error: string } | null> {
   const gate = await canGenerateAi(userId)
   if (!gate.allowed) return { success: false, error: gate.reason ?? "Лимит генераций исчерпан" }
   return null
@@ -365,6 +368,56 @@ export async function runReputationAnalysis(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Не удалось проанализировать репутацию"
+    return { success: false, error: message }
+  }
+}
+
+const periodComparisonMetricsSchema = z.object({
+  spend: z.number(),
+  revenue: z.number(),
+  leads: z.number(),
+  clicks: z.number(),
+  impressions: z.number(),
+  roi: z.number(),
+  cac: z.number(),
+  cpl: z.number(),
+})
+
+const periodCommentInputSchema = z.object({
+  periodLabel: z.string().min(1),
+  current: periodComparisonMetricsSchema,
+  previous: periodComparisonMetricsSchema,
+})
+
+type PeriodCommentResult =
+  | { success: true; comment: string }
+  | { success: false; error: string }
+
+export async function generatePeriodComment(
+  projectId: string,
+  raw: unknown
+): Promise<PeriodCommentResult> {
+  const parsed = periodCommentInputSchema.safeParse(raw)
+  if (!parsed.success) return { success: false, error: "Неверные данные для анализа" }
+
+  const project = await ownedProject(projectId)
+  if (!project) return { success: false, error: "Нет доступа" }
+
+  const limit = await checkAiGate(project.userId)
+  if (limit) return limit
+
+  try {
+    const result = await routeAI({
+      task: "PERIOD_COMPARISON",
+      system: periodComparisonSystem,
+      prompt: buildPeriodComparisonPrompt(parsed.data),
+      schema: periodComparisonCommentSchema,
+      maxTokens: 500,
+    })
+    return { success: true, comment: result.data.comment }
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Не удалось получить AI-комментарий"
     return { success: false, error: message }
   }
 }
