@@ -23,6 +23,7 @@ import { ConversionsTab } from "@/components/analytics/tabs/conversions-tab"
 import { AttributionTab } from "@/components/analytics/tabs/attribution-tab"
 import { AiInsightsTab } from "@/components/analytics/tabs/ai-insights-tab"
 import { ComparisonDashboard } from "@/components/analytics/comparison-dashboard"
+import { RoiCalculator } from "@/components/analytics/roi-calculator"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
 import type { AudienceSegments, BuyerPersona } from "@/lib/ai/schemas/audience"
 import {
@@ -48,10 +49,12 @@ interface AnalyticsViewProps {
   contentPlan: ContentPlan | null
   audienceSegments: AudienceSegments | null
   buyerPersona: BuyerPersona | null
+  conversionRate: number | null
+  avgCheck: number | null
 }
 
 type Range = "7d" | "30d" | "90d"
-type Tab = "overview" | "content" | "audience" | "channels" | "campaigns" | "conversions" | "attribution" | "comparison" | "ai"
+type Tab = "overview" | "content" | "audience" | "channels" | "campaigns" | "conversions" | "attribution" | "comparison" | "ai" | "roi"
 
 const RANGES: { label: string; value: Range; days: number }[] = [
   { label: "7 дней", value: "7d", days: 7 },
@@ -69,6 +72,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "attribution", label: "Атрибуция" },
   { id: "comparison", label: "Сравнение" },
   { id: "ai", label: "AI Insights" },
+  { id: "roi", label: "Калькулятор ROI" },
 ]
 
 function getRangeDates(days: number): { from: Date; to: Date } {
@@ -92,6 +96,8 @@ export function AnalyticsView({
   contentPlan,
   audienceSegments,
   buyerPersona,
+  conversionRate,
+  avgCheck,
 }: AnalyticsViewProps) {
   const [range, setRange] = useState<Range>("30d")
   const [tab, setTab] = useState<Tab>("overview")
@@ -133,6 +139,28 @@ export function AnalyticsView({
       .reduce((s, m) => s + m.spend, 0)
   }, [metrics])
 
+  // ROI-калькулятор всегда считает по фиксированным последним 30 дням,
+  // независимо от выбранного диапазона в шапке страницы.
+  const last30 = useMemo(() => {
+    const rangeTo = new Date()
+    rangeTo.setHours(23, 59, 59, 999)
+    const rangeFrom = new Date()
+    rangeFrom.setDate(rangeFrom.getDate() - 29)
+    rangeFrom.setHours(0, 0, 0, 0)
+    return filterByRange(metrics, rangeFrom, rangeTo)
+  }, [metrics])
+  const last30Summary = useMemo(() => computeSummary(last30), [last30])
+  const last30ChannelBreakdown = useMemo(() => computeChannelBreakdown(last30), [last30])
+  const roiChannelMetrics = useMemo(
+    () =>
+      last30ChannelBreakdown.map((c) => ({
+        channel: c.channel,
+        cpl: c.cpl,
+        conversion: conversionRate ?? 10,
+      })),
+    [last30ChannelBreakdown, conversionRate]
+  )
+
   const deltas = useMemo(() => {
     const keys = [
       "totalSpend",
@@ -168,7 +196,7 @@ export function AnalyticsView({
     summary.totalImpressions > 0
       ? `${((totalSales / summary.totalImpressions) * 100).toFixed(2)}%`
       : "—"
-  const avgCheck =
+  const avgCheckLabel =
     totalSales > 0
       ? `${Math.round(summary.totalRevenue / totalSales).toLocaleString("ru-RU")} ₽`
       : "—"
@@ -265,7 +293,7 @@ export function AnalyticsView({
             <div className="grid gap-5 lg:grid-cols-[1fr_420px]">
               <div className="space-y-5">
                 <AnalyticsChart data={timeSeries} />
-                <AnalyticsFunnel steps={funnelSteps} conversionRate={convRate} avgCheck={avgCheck} />
+                <AnalyticsFunnel steps={funnelSteps} conversionRate={convRate} avgCheck={avgCheckLabel} />
               </div>
               <AnalyticsTable channels={channelBreakdown} />
             </div>
@@ -312,6 +340,16 @@ export function AnalyticsView({
 
       {tab === "ai" && (
         <AiInsightsTab summary={summary} channels={channelBreakdown} healthScore={healthScore} />
+      )}
+
+      {tab === "roi" && (
+        <RoiCalculator
+          avgCpl={last30Summary.cpl}
+          conversionRate={conversionRate ?? 10}
+          avgCheck={avgCheck ?? 0}
+          channelMetrics={roiChannelMetrics}
+          hasRealMetrics={last30.length > 0}
+        />
       )}
 
     </div>
