@@ -2,6 +2,7 @@ import {
   BarChart3,
   Bell,
   Building2,
+  CalendarDays,
   ChartLine,
   ClipboardList,
   Crosshair,
@@ -45,6 +46,7 @@ export const navGroups: NavGroup[] = [
     label: "STRATEGY",
     items: [
       { label: "Стратегия", href: "/strategy", icon: ChartLine },
+      { label: "Спринт", href: "/sprint", icon: CalendarDays },
     ],
   },
   {
