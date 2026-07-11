@@ -93,6 +93,14 @@ prisma/
   Результат AI-анализа репутации через Anthropic web_search (без интеграций и парсинга).
   Каждый запуск («Обновить» на странице «Репутация») создаёт новый снапшот; версий/кэша по
   inputHash нет — генерация запускается только вручную, т.к. использует дорогой web_search.
+- `Hypothesis` — id, projectId, title, description, channel, budget, status (HypothesisStatus),
+  startDate, endDate, result, roi, conclusion (HypothesisResult), tags, timestamps
+- `Sprint` — id, projectId, weekStart, weekEnd, aiSummary, timestamps
+- `SprintTask` — id, sprintId, title, description, priority, category, estimatedHours,
+  completed, dueDay, timestamps
+- `Brief` — id, projectId, type (BriefType), title, content (Json), timestamps
+- `Objection` — id, projectId, text, category, timestamps
+- `ObjectionResponse` — id, objectionId, psychotype, response, timestamps
 
 > MARKET_ANALYSIS — вкладка «Рынок» на странице «Анализ компании» (`/company`). Размер и рост
   рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — через Anthropic
@@ -224,6 +232,7 @@ CRON_SECRET=              # случайная строка для защиты 
 | 4 | Analytics + Reports | ✅ Завершена |
 | 5 | AI Marketing Director | ✅ Завершена |
 | 6 | SaaS (биллинг, лимиты) | ✅ Завершена |
+| 7 | Дополнительные модули (спринт, гипотезы, брифы, возражения, УТП) | ✅ Завершена |
 
 ---
 
