@@ -52,6 +52,7 @@ enum ArtifactType {
   REPUTATION_ANALYSIS
   MARKET_ANALYSIS
   PRODUCT_ANALYSIS
+  PLATFORM_UTP
 }
 
 enum Plan {

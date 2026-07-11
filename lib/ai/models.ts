@@ -62,6 +62,11 @@ export const AI_TASKS = {
     model: "gpt-4o",
     useWebSearch: false,
   },
+  PLATFORM_UTP: {
+    provider: "openai" as const,
+    model: "gpt-4o",
+    useWebSearch: false,
+  },
 
   // ═══ OPENAI GPT-4o-mini — копирайтинг и частые/лёгкие генерации ═══
   // CONTENT_PLAN/POSITIONING/DIRECTOR/REPORT were Gemini-primary before this
