@@ -116,6 +116,7 @@ model Project {
   contentPlatforms ContentPlatform[]
   inboxSignals   InboxSignal[]
   reputationSnapshots ReputationSnapshot[]
+  objectionRecords Objection[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -220,4 +221,27 @@ model ReputationSnapshot {
   createdAt DateTime @default(now())
 
   @@index([projectId, createdAt])
+}
+
+model Objection {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  text      String
+  category  String?
+  responses ObjectionResponse[]
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model ObjectionResponse {
+  id          String    @id @default(cuid())
+  objectionId String
+  objection   Objection @relation(fields: [objectionId], references: [id], onDelete: Cascade)
+  psychotype  String
+  response    String
+  createdAt   DateTime  @default(now())
+
+  @@index([objectionId])
 }

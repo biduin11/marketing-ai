@@ -6,6 +6,7 @@ import {
   Crosshair,
   Home,
   LayoutList,
+  MessageSquareX,
   Settings,
   Star,
   Users,
@@ -49,6 +50,7 @@ export const navGroups: NavGroup[] = [
     label: "EXECUTION",
     items: [
       { label: "Контент", href: "/content", icon: LayoutList },
+      { label: "Возражения", href: "/objections", icon: MessageSquareX },
     ],
   },
   {
