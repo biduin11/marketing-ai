@@ -150,10 +150,27 @@ model Project {
   sprints        Sprint[]
   hypotheses     Hypothesis[]
   expressAudits  ExpressAudit[]
+  clientAccesses ClientAccess[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
   @@index([userId])
+}
+
+model ClientAccess {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  token       String    @unique @default(cuid())
+  clientName  String?
+  clientEmail String?
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  lastVisitAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([token])
+  @@index([projectId])
 }
 
 model Metric {
