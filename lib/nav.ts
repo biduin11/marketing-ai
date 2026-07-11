@@ -3,6 +3,7 @@ import {
   Bell,
   Building2,
   ChartLine,
+  ClipboardList,
   Crosshair,
   Home,
   LayoutList,
@@ -51,6 +52,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Контент", href: "/content", icon: LayoutList },
       { label: "Возражения", href: "/objections", icon: MessageSquareX },
+      { label: "Брифы", href: "/briefs", icon: ClipboardList },
     ],
   },
   {
