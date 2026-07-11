@@ -52,6 +52,16 @@ enum ArtifactType {
   REPUTATION_ANALYSIS
   MARKET_ANALYSIS
   PRODUCT_ANALYSIS
+  PLATFORM_UTP
+}
+
+enum BriefType {
+  VIDEO
+  DESIGN_POST
+  DESIGN_STORY
+  LANDING
+  PHOTO
+  COPYWRITING
 }
 
 enum Plan {
@@ -116,6 +126,8 @@ model Project {
   contentPlatforms ContentPlatform[]
   inboxSignals   InboxSignal[]
   reputationSnapshots ReputationSnapshot[]
+  objectionRecords Objection[]
+  briefs         Brief[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -220,4 +232,39 @@ model ReputationSnapshot {
   createdAt DateTime @default(now())
 
   @@index([projectId, createdAt])
+}
+
+model Objection {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  text      String
+  category  String?
+  responses ObjectionResponse[]
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model ObjectionResponse {
+  id          String    @id @default(cuid())
+  objectionId String
+  objection   Objection @relation(fields: [objectionId], references: [id], onDelete: Cascade)
+  psychotype  String
+  response    String
+  createdAt   DateTime  @default(now())
+
+  @@index([objectionId])
+}
+
+model Brief {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      BriefType
+  title     String
+  content   Json
+  createdAt DateTime  @default(now())
+
+  @@index([projectId, type])
 }
