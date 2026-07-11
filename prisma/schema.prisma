@@ -69,6 +69,12 @@ enum Plan {
   PRO
 }
 
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
 model User {
   id                   String    @id @default(cuid())
   email                String    @unique
@@ -128,6 +134,7 @@ model Project {
   reputationSnapshots ReputationSnapshot[]
   objectionRecords Objection[]
   briefs         Brief[]
+  sprints        Sprint[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -267,4 +274,34 @@ model Brief {
   createdAt DateTime  @default(now())
 
   @@index([projectId, type])
+}
+
+model Sprint {
+  id        String       @id @default(cuid())
+  projectId String
+  project   Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  weekStart DateTime     @db.Date
+  weekEnd   DateTime     @db.Date
+  tasks     SprintTask[]
+  aiSummary String?
+  createdAt DateTime     @default(now())
+
+  @@unique([projectId, weekStart])
+  @@index([projectId, weekStart])
+}
+
+model SprintTask {
+  id             String   @id @default(cuid())
+  sprintId       String
+  sprint         Sprint   @relation(fields: [sprintId], references: [id], onDelete: Cascade)
+  title          String
+  description    String?
+  priority       Priority @default(MEDIUM)
+  category       String
+  estimatedHours Int?
+  completed      Boolean  @default(false)
+  dueDay         String?
+  createdAt      DateTime @default(now())
+
+  @@index([sprintId])
 }
