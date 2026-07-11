@@ -22,6 +22,7 @@ import { CampaignsTab } from "@/components/analytics/tabs/campaigns-tab"
 import { ConversionsTab } from "@/components/analytics/tabs/conversions-tab"
 import { AttributionTab } from "@/components/analytics/tabs/attribution-tab"
 import { AiInsightsTab } from "@/components/analytics/tabs/ai-insights-tab"
+import { ComparisonDashboard } from "@/components/analytics/comparison-dashboard"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
 import type { AudienceSegments, BuyerPersona } from "@/lib/ai/schemas/audience"
 import {
@@ -50,7 +51,7 @@ interface AnalyticsViewProps {
 }
 
 type Range = "7d" | "30d" | "90d"
-type Tab = "overview" | "content" | "audience" | "channels" | "campaigns" | "conversions" | "attribution" | "ai"
+type Tab = "overview" | "content" | "audience" | "channels" | "campaigns" | "conversions" | "attribution" | "comparison" | "ai"
 
 const RANGES: { label: string; value: Range; days: number }[] = [
   { label: "7 дней", value: "7d", days: 7 },
@@ -66,6 +67,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "campaigns", label: "Кампании" },
   { id: "conversions", label: "Конверсии" },
   { id: "attribution", label: "Атрибуция" },
+  { id: "comparison", label: "Сравнение" },
   { id: "ai", label: "AI Insights" },
 ]
 
@@ -302,6 +304,10 @@ export function AnalyticsView({
 
       {tab === "attribution" && (
         <AttributionTab attribution={attribution} channels={channelBreakdown} />
+      )}
+
+      {tab === "comparison" && (
+        <ComparisonDashboard projectId={projectId} metrics={metrics} />
       )}
 
       {tab === "ai" && (

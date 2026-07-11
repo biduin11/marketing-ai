@@ -335,3 +335,84 @@ export function getPreviousRange(from: Date, to: Date): { from: Date; to: Date }
     to: new Date(from.getTime()),
   }
 }
+
+export type ComparisonPeriod = "month" | "week" | "quarter" | "year"
+
+function startOfWeekMonday(d: Date): Date {
+  const day = d.getDay()
+  const diff = (day + 6) % 7
+  const result = new Date(d)
+  result.setDate(d.getDate() - diff)
+  result.setHours(0, 0, 0, 0)
+  return result
+}
+
+function endOfDay(d: Date): Date {
+  const result = new Date(d)
+  result.setHours(23, 59, 59, 999)
+  return result
+}
+
+function monthRange(year: number, month: number): { from: Date; to: Date } {
+  return {
+    from: new Date(year, month, 1),
+    to: endOfDay(new Date(year, month + 1, 0)),
+  }
+}
+
+/** Returns the [from, to] range for `period` anchored on `now`, plus the equivalent immediately-preceding period. */
+export function getComparisonRanges(
+  period: ComparisonPeriod,
+  now: Date = new Date()
+): { current: { from: Date; to: Date }; previous: { from: Date; to: Date } } {
+  switch (period) {
+    case "week": {
+      const from = startOfWeekMonday(now)
+      const to = endOfDay(new Date(from.getFullYear(), from.getMonth(), from.getDate() + 6))
+      const prevFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate() - 7)
+      const prevTo = endOfDay(new Date(from.getFullYear(), from.getMonth(), from.getDate() - 1))
+      return { current: { from, to }, previous: { from: prevFrom, to: prevTo } }
+    }
+    case "quarter": {
+      const q = Math.floor(now.getMonth() / 3)
+      const from = new Date(now.getFullYear(), q * 3, 1)
+      const to = endOfDay(new Date(now.getFullYear(), q * 3 + 3, 0))
+      const prevFrom = new Date(now.getFullYear(), q * 3 - 3, 1)
+      const prevTo = endOfDay(new Date(from.getTime() - 1))
+      return { current: { from, to }, previous: { from: prevFrom, to: prevTo } }
+    }
+    case "year": {
+      const from = new Date(now.getFullYear(), 0, 1)
+      const to = endOfDay(new Date(now.getFullYear(), 11, 31))
+      const prevFrom = new Date(now.getFullYear() - 1, 0, 1)
+      const prevTo = endOfDay(new Date(now.getFullYear() - 1, 11, 31))
+      return { current: { from, to }, previous: { from: prevFrom, to: prevTo } }
+    }
+    case "month":
+    default: {
+      const current = monthRange(now.getFullYear(), now.getMonth())
+      const previous = monthRange(now.getFullYear(), now.getMonth() - 1)
+      return { current, previous }
+    }
+  }
+}
+
+export interface ChannelComparisonItem {
+  channel: string
+  currRoi: number
+  prevRoi: number
+}
+
+export function computeChannelComparison(
+  current: ChannelMetrics[],
+  previous: ChannelMetrics[]
+): ChannelComparisonItem[] {
+  const prevMap = new Map(previous.map((c) => [c.channel, c.roi]))
+  return current
+    .map((c) => ({
+      channel: c.channel,
+      currRoi: Math.round(c.roi),
+      prevRoi: Math.round(prevMap.get(c.channel) ?? 0),
+    }))
+    .sort((a, b) => b.currRoi - a.currRoi)
+}

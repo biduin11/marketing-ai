@@ -101,6 +101,11 @@ export const AI_TASKS = {
     model: "gpt-4o-mini",
     useWebSearch: false,
   },
+  PERIOD_COMPARISON: {
+    provider: "openai" as const,
+    model: "gpt-4o-mini",
+    useWebSearch: false,
+  },
 } as const
 
 export type AITask = keyof typeof AI_TASKS
