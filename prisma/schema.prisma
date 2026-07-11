@@ -149,6 +149,7 @@ model Project {
   briefs         Brief[]
   sprints        Sprint[]
   hypotheses     Hypothesis[]
+  expressAudits  ExpressAudit[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -340,4 +341,20 @@ model Hypothesis {
 
   @@index([projectId])
   @@index([projectId, status])
+}
+
+model ExpressAudit {
+  id             String   @id @default(cuid())
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  answers        Json
+  score          Int
+  level          String
+  summary        String
+  growthPoints   Json
+  quickWins      Json
+  categoryScores Json
+  createdAt      DateTime @default(now())
+
+  @@index([projectId])
 }

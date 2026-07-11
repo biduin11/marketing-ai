@@ -4,6 +4,7 @@ import {
   Building2,
   CalendarDays,
   ChartLine,
+  ClipboardCheck,
   ClipboardList,
   Crosshair,
   FlaskConical,
@@ -38,6 +39,7 @@ export const navGroups: NavGroup[] = [
   {
     label: "INTELLIGENCE",
     items: [
+      { label: "Аудит", href: "/audit", icon: ClipboardCheck },
       { label: "Бренд", href: "/company", icon: Building2 },
       { label: "Рынок", href: "/competitors", icon: Crosshair },
       { label: "Клиент", href: "/audience", icon: Users },
