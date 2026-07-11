@@ -75,6 +75,19 @@ enum Priority {
   LOW
 }
 
+enum HypothesisStatus {
+  DRAFT
+  RUNNING
+  COMPLETED
+  ARCHIVED
+}
+
+enum HypothesisResult {
+  CONFIRMED
+  REJECTED
+  INCONCLUSIVE
+}
+
 model User {
   id                   String    @id @default(cuid())
   email                String    @unique
@@ -135,6 +148,7 @@ model Project {
   objectionRecords Objection[]
   briefs         Brief[]
   sprints        Sprint[]
+  hypotheses     Hypothesis[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 
@@ -304,4 +318,26 @@ model SprintTask {
   createdAt      DateTime @default(now())
 
   @@index([sprintId])
+}
+
+model Hypothesis {
+  id          String            @id @default(cuid())
+  projectId   String
+  project     Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  channel     String
+  budget      Int?
+  status      HypothesisStatus  @default(DRAFT)
+  startDate   DateTime?         @db.Date
+  endDate     DateTime?         @db.Date
+  result      String?
+  roi         Float?
+  conclusion  HypothesisResult?
+  tags        String[]          @default([])
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([projectId])
+  @@index([projectId, status])
 }
