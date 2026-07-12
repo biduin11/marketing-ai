@@ -101,6 +101,10 @@ prisma/
 - `Brief` — id, projectId, type (BriefType), title, content (Json), timestamps
 - `Objection` — id, projectId, text, category, timestamps
 - `ObjectionResponse` — id, objectionId, psychotype, response, timestamps
+- `ClientAccess` — id, projectId, token (unique), clientName, clientEmail, isActive,
+  expiresAt, lastVisitAt, createdAt
+- `ExpressAudit` — id, projectId, answers (Json), score, level, growthPoints (Json),
+  quickWins (Json), createdAt
 
 > MARKET_ANALYSIS — вкладка «Рынок» на странице «Анализ компании» (`/company`). Размер и рост
   рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — через Anthropic
@@ -238,6 +242,17 @@ CRON_SECRET=              # случайная строка для защиты 
 | 5 | AI Marketing Director | ✅ Завершена |
 | 6 | SaaS (биллинг, лимиты) | ✅ Завершена |
 | 7 | Дополнительные модули (спринт, гипотезы, брифы, возражения, УТП) | ✅ Завершена |
+
+Все 9 дополнительных модулей реализованы и задеплоены:
+✅ Калькулятор окупаемости
+✅ База возражений
+✅ Генератор УТП под площадку
+✅ Шаблоны брифов
+✅ Дашборд сравнения периодов
+✅ Спринт-планировщик
+✅ Трекер гипотез
+✅ Экспресс-аудит
+✅ Кабинет клиента (read-only)
 
 ---
 
