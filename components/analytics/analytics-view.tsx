@@ -1,8 +1,9 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useTransition } from "react"
+import { toast } from "sonner"
 import type { Metric } from "@prisma/client"
-import { BarChart3, Download, Settings2 } from "lucide-react"
+import { BarChart3, Download, RefreshCw, Settings2 } from "lucide-react"
 import { MetricsList } from "@/components/analytics/metrics-list"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/empty-state"
@@ -24,6 +25,7 @@ import { AttributionTab } from "@/components/analytics/tabs/attribution-tab"
 import { AiInsightsTab } from "@/components/analytics/tabs/ai-insights-tab"
 import { ComparisonDashboard } from "@/components/analytics/comparison-dashboard"
 import { RoiCalculator } from "@/components/analytics/roi-calculator"
+import { syncNow, type YandexMetrikaIntegrationItem } from "@/lib/actions/yandex-metrika"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
 import type { AudienceSegments, BuyerPersona } from "@/lib/ai/schemas/audience"
 import {
@@ -51,6 +53,7 @@ interface AnalyticsViewProps {
   buyerPersona: BuyerPersona | null
   conversionRate: number | null
   avgCheck: number | null
+  yandexMetrikaIntegration: YandexMetrikaIntegrationItem | null
 }
 
 type Range = "7d" | "30d" | "90d"
@@ -98,10 +101,27 @@ export function AnalyticsView({
   buyerPersona,
   conversionRate,
   avgCheck,
+  yandexMetrikaIntegration,
 }: AnalyticsViewProps) {
   const [range, setRange] = useState<Range>("30d")
   const [tab, setTab] = useState<Tab>("overview")
   const [editingMetric, setEditingMetric] = useState<Metric | null>(null)
+  const [metrikaIntegration, setMetrikaIntegration] = useState(yandexMetrikaIntegration)
+  const [isSyncPending, startSyncTransition] = useTransition()
+
+  function handleMetrikaSync() {
+    startSyncTransition(async () => {
+      const result = await syncNow(projectId)
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+      setMetrikaIntegration((prev) =>
+        prev ? { ...prev, lastSyncAt: new Date().toISOString(), syncError: null } : prev
+      )
+      toast.success(`Синхронизировано метрик: ${result.data.synced}`)
+    })
+  }
 
   const { current, previous, from, to, prevFrom, prevTo } = useMemo(() => {
     const days = RANGES.find((r) => r.value === range)!.days
@@ -250,6 +270,28 @@ export function AnalyticsView({
           />
         </div>
       </div>
+
+      {metrikaIntegration?.isActive && (
+        <div className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 p-3">
+          <div className="flex size-6 shrink-0 items-center justify-center rounded bg-[#FC3F1D]">
+            <span className="text-xs font-bold text-white">Я</span>
+          </div>
+          <p className="flex-1 text-xs text-muted-foreground">
+            Данные автоматически импортируются из Яндекс.Метрики
+            {metrikaIntegration.lastSyncAt &&
+              ` · Обновлено ${new Date(metrikaIntegration.lastSyncAt).toLocaleDateString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`}
+            {" · Расходы и выручка вносятся вручную."}
+          </p>
+          <button
+            onClick={handleMetrikaSync}
+            disabled={isSyncPending}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+          >
+            <RefreshCw className={cn("size-3", isSyncPending && "animate-spin")} />
+            Обновить
+          </button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-5 overflow-x-auto border-b border-border">

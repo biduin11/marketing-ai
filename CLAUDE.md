@@ -105,6 +105,12 @@ prisma/
   expiresAt, lastVisitAt, createdAt
 - `ExpressAudit` — id, projectId, answers (Json), score, level, growthPoints (Json),
   quickWins (Json), createdAt
+- `YandexMetrikaIntegration` — id, projectId (unique), counterId, accessToken (зашифрован
+  AES-256-GCM, `lib/security/token-crypto.ts`), isActive, lastSyncAt, syncError, timestamps.
+  Настраивается на странице «Настройки». Автосинхронизация — `/api/cron/sync-yandex-metrika`
+  каждый день в 06:00 UTC (vercel.json), плюс ручная кнопка «Синхронизировать сейчас».
+  Импортирует визиты/пользователей/достижения целей по источникам трафика в `Metric`
+  (clicks/impressions/leads); spend/revenue не трогает — вносятся вручную.
 
 > MARKET_ANALYSIS — вкладка «Рынок» на странице «Анализ компании» (`/company`). Размер и рост
   рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — через Anthropic
@@ -225,7 +231,8 @@ STRIPE_SECRET_KEY=        # (нужен с Итерации 6)
 STRIPE_WEBHOOK_SECRET=    # (нужен с Итерации 6)
 STRIPE_PRO_PRICE_ID=      # price_xxx из Stripe Dashboard (нужен с Итерации 6)
 NEXT_PUBLIC_APP_URL=      # https://твой-домен.vercel.app (нужен с Итерации 6)
-CRON_SECRET=              # случайная строка для защиты /api/cron/director
+CRON_SECRET=              # случайная строка для защиты /api/cron/director и /api/cron/sync-yandex-metrika
+ENCRYPTION_KEY=           # случайная строка (openssl rand -hex 32) — шифрование OAuth-токена Яндекс.Метрики
 ```
 
 ---

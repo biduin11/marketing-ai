@@ -5,6 +5,7 @@ import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getProject } from "@/lib/actions/projects"
 import { listMetrics } from "@/lib/actions/metrics"
 import { getChannels } from "@/lib/actions/channels"
+import { getYandexMetrikaIntegration } from "@/lib/actions/yandex-metrika"
 import { getLatestArtifact } from "@/lib/services/artifacts"
 import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
 import { audienceSegmentsSchema, buyerPersonaSchema } from "@/lib/ai/schemas/audience"
@@ -37,13 +38,14 @@ export default async function AnalyticsPage() {
     )
   }
 
-  const [metrics, channelItems, contentArtifact, audienceArtifact, personaArtifact] =
+  const [metrics, channelItems, contentArtifact, audienceArtifact, personaArtifact, yandexMetrikaIntegration] =
     await Promise.all([
       listMetrics(projectId),
       getChannels(projectId),
       getLatestArtifact(projectId, "CONTENT_PLAN"),
       getLatestArtifact(projectId, "AUDIENCE_SEGMENTS"),
       getLatestArtifact(projectId, "BUYER_PERSONA"),
+      getYandexMetrikaIntegration(projectId),
     ])
 
   const channels = channelItems.map((c) => c.name)
@@ -69,6 +71,7 @@ export default async function AnalyticsPage() {
       buyerPersona={personaResult?.success ? personaResult.data : null}
       conversionRate={project.conversionRate ?? null}
       avgCheck={project.avgCheck ?? null}
+      yandexMetrikaIntegration={yandexMetrikaIntegration}
     />
   )
 }
