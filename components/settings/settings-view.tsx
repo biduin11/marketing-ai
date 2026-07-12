@@ -4,10 +4,12 @@ import { User } from "lucide-react"
 import { PlanCard } from "@/components/settings/plan-card"
 import { UsageBar } from "@/components/settings/usage-bar"
 import { ChannelsSection } from "@/components/settings/channels-section"
+import { ClientAccessSection } from "@/components/settings/client-access-section"
 import { DeleteProjectSection } from "@/components/settings/delete-project-section"
 import type { UsageInfo } from "@/lib/services/usage.service"
 import type { ProjectListItem } from "@/lib/actions/projects"
 import type { ChannelItem } from "@/lib/actions/channels"
+import type { ClientAccessItem } from "@/lib/actions/clientAccess"
 
 interface SettingsViewProps {
   name: string | null
@@ -18,9 +20,11 @@ interface SettingsViewProps {
   projects: ProjectListItem[]
   activeProjectId: string | null
   channels: ChannelItem[]
+  clientAccesses: ClientAccessItem[]
+  appUrl: string
 }
 
-export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels }: SettingsViewProps) {
+export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels, clientAccesses, appUrl }: SettingsViewProps) {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null
 
   return (
@@ -51,6 +55,14 @@ export function SettingsView({ name, email, usage, projectCount, maxProjects, pr
 
       {activeProject && (
         <ChannelsSection projectId={activeProject.id} initialChannels={channels} />
+      )}
+
+      {activeProject && (
+        <ClientAccessSection
+          projectId={activeProject.id}
+          initialAccesses={clientAccesses}
+          appUrl={appUrl}
+        />
       )}
 
       {/* Danger zone */}
