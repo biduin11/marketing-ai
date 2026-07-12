@@ -5,11 +5,13 @@ import { PlanCard } from "@/components/settings/plan-card"
 import { UsageBar } from "@/components/settings/usage-bar"
 import { ChannelsSection } from "@/components/settings/channels-section"
 import { ClientAccessSection } from "@/components/settings/client-access-section"
+import { YandexMetrikaSection } from "@/components/settings/yandex-metrika-section"
 import { DeleteProjectSection } from "@/components/settings/delete-project-section"
 import type { UsageInfo } from "@/lib/services/usage.service"
 import type { ProjectListItem } from "@/lib/actions/projects"
 import type { ChannelItem } from "@/lib/actions/channels"
 import type { ClientAccessItem } from "@/lib/actions/clientAccess"
+import type { YandexMetrikaIntegrationItem } from "@/lib/actions/yandex-metrika"
 
 interface SettingsViewProps {
   name: string | null
@@ -21,10 +23,11 @@ interface SettingsViewProps {
   activeProjectId: string | null
   channels: ChannelItem[]
   clientAccesses: ClientAccessItem[]
+  yandexMetrikaIntegration: YandexMetrikaIntegrationItem | null
   appUrl: string
 }
 
-export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels, clientAccesses, appUrl }: SettingsViewProps) {
+export function SettingsView({ name, email, usage, projectCount, maxProjects, projects, activeProjectId, channels, clientAccesses, yandexMetrikaIntegration, appUrl }: SettingsViewProps) {
   const activeProject = projects.find((p) => p.id === activeProjectId) ?? projects[0] ?? null
 
   return (
@@ -62,6 +65,13 @@ export function SettingsView({ name, email, usage, projectCount, maxProjects, pr
           projectId={activeProject.id}
           initialAccesses={clientAccesses}
           appUrl={appUrl}
+        />
+      )}
+
+      {activeProject && (
+        <YandexMetrikaSection
+          projectId={activeProject.id}
+          initialIntegration={yandexMetrikaIntegration}
         />
       )}
 

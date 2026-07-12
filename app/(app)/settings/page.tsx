@@ -5,6 +5,7 @@ import { listProjects } from "@/lib/actions/projects"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getChannels } from "@/lib/actions/channels"
 import { getClientAccesses } from "@/lib/actions/clientAccess"
+import { getYandexMetrikaIntegration } from "@/lib/actions/yandex-metrika"
 import { getAppUrl } from "@/lib/stripe"
 import { SettingsView } from "@/components/settings/settings-view"
 
@@ -23,6 +24,9 @@ export default async function SettingsPage() {
 
   const channels = activeProjectId ? await getChannels(activeProjectId) : []
   const clientAccesses = activeProjectId ? await getClientAccesses(activeProjectId) : []
+  const yandexMetrikaIntegration = activeProjectId
+    ? await getYandexMetrikaIntegration(activeProjectId)
+    : null
 
   return (
     <SettingsView
@@ -35,6 +39,7 @@ export default async function SettingsPage() {
       activeProjectId={activeProjectId}
       channels={channels}
       clientAccesses={clientAccesses}
+      yandexMetrikaIntegration={yandexMetrikaIntegration}
       appUrl={getAppUrl()}
     />
   )

@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/generate-sprints",
       "schedule": "0 18 * * 0"
+    },
+    {
+      "path": "/api/cron/sync-yandex-metrika",
+      "schedule": "0 6 * * *"
     }
   ]
 }
