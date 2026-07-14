@@ -8,15 +8,31 @@ async function analyzeReputation(
   project: Project
 ): Promise<{ payload: Reputation; model: string }> {
   const city = project.regions[0] ?? ""
+  const socials =
+    project.socials && typeof project.socials === "object" && !Array.isArray(project.socials)
+      ? (project.socials as Record<string, unknown>)
+      : {}
+  const yandexMaps = typeof socials.yandexMaps === "string" ? socials.yandexMaps : undefined
+  const twogis = typeof socials.twogis === "string" ? socials.twogis : undefined
+
+  const companyContext = `
+ПРЯМЫЕ ССЫЛКИ НА КАРТОЧКИ КОМПАНИИ:
+Яндекс.Карты: ${yandexMaps ?? "не указана"}
+2ГИС: ${twogis ?? "не указана"}
+
+ВАЖНО: Используй эти прямые ссылки для поиска отзывов.
+Не ищи компанию по названию — сразу переходи по ссылкам выше.
+`
 
   const { data, model } = await routeAI({
     task: "REPUTATION",
     system: reputationSystem,
-    prompt: buildReputationInput({
-      name: project.name,
-      city,
-      website: project.website,
-    }),
+    prompt:
+      buildReputationInput({
+        name: project.name,
+        city,
+        website: project.website,
+      }) + companyContext,
     schema: reputationSchema,
     maxTokens: 8000,
   })
