@@ -1047,7 +1047,10 @@ export function CompanyWizard({ project }: { project: Project }) {
     }
     setLoading(true)
     try {
-      const result = await updateProject(project.id, buildPayload(form))
+      const payload = buildPayload(form)
+      console.log('DEBUG handleSave socials:', JSON.stringify(payload.socials))
+      console.log('DEBUG handleSave socialLinks:', payload.socialLinks)
+      const result = await updateProject(project.id, payload)
       if (!result.success) {
         toast.error(result.error)
         return
