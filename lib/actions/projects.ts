@@ -158,6 +158,9 @@ export async function updateProject(
     competitorsDetailed, productsDetailed,
   } = parsed.data
 
+  console.log('updateProject received socials:', JSON.stringify(socials))
+  console.log('updateProject received socialLinks:', socialLinks)
+
   // Keep competitors[] in sync with detailed list for AI prompts backward compat
   const competitorNames =
     competitorsDetailed && competitorsDetailed.length > 0
