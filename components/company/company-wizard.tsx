@@ -257,6 +257,18 @@ function buildPayload(f: FormState) {
       }
       return Object.keys(obj).length > 0 ? JSON.stringify(obj) : undefined
     })(),
+    socials: (() => {
+      const obj: Record<string, string> = {}
+      if (f.instagram)   obj.instagram   = f.instagram
+      if (f.vk)          obj.vk          = f.vk
+      if (f.telegram)    obj.telegram    = f.telegram
+      if (f.youtube)     obj.youtube     = f.youtube
+      if (f.tiktok)      obj.tiktok      = f.tiktok
+      if (f.otherSocials) obj.otherSocials = f.otherSocials
+      if (f.yandexMaps)  obj.yandexMaps  = f.yandexMaps
+      if (f.twogis)      obj.twogis      = f.twogis
+      return obj
+    })(),
     proofFacts: f.proofFacts || undefined,
     margin: f.margin ? Number(f.margin) : undefined,
     conversionRate: f.conversionRate ? Number(f.conversionRate) : undefined,
