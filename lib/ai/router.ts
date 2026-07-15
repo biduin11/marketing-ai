@@ -139,8 +139,11 @@ export async function routeAI<T extends z.ZodType>(
         reason,
         executionTime,
       })
+      const isFormatError = /не прошёл валидацию схемы|структурированный ответ/i.test(reason)
       throw new Error(
-        `Модуль ${request.task} требует Anthropic (web_search) и временно недоступен: ${reason}`
+        isFormatError
+          ? `Модуль ${request.task} получил ответ, но не смог привести его к формату экрана. Повторите запуск; детали: ${reason}`
+          : `Модуль ${request.task} требует Anthropic (web_search) и временно недоступен: ${reason}`
       )
     }
 
