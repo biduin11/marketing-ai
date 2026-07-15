@@ -220,6 +220,22 @@ function detectAnomalies(
   return anomalies
 }
 
+function getDataQualityIssues(summary: MetricSummary | null): string[] {
+  if (!summary) return ["За текущий месяц пока нет маркетинговых метрик."]
+
+  const issues: string[] = []
+  if (summary.totalLeads > 0 && summary.totalRevenue <= 0) {
+    issues.push("Есть лиды, но нет выручки — ROI и CAC показывают неполную картину.")
+  }
+  if (summary.totalSpend > 0 && summary.totalLeads <= 0) {
+    issues.push("Есть расходы, но нет лидов — проверьте цели, формы и импорт данных.")
+  }
+  if (summary.totalRevenue > 0 && summary.totalSpend <= 0) {
+    issues.push("Есть выручка, но нет расходов — эффективность каналов нельзя корректно оценить.")
+  }
+  return issues
+}
+
 export function DashboardView({
   projectId,
   projectName,
@@ -301,6 +317,7 @@ export function DashboardView({
   const anomalies =
     summary && prevSummary ? detectAnomalies(summary, prevSummary) : []
   const badAnomalies = anomalies.filter((a) => a.bad)
+  const dataQualityIssues = getDataQualityIssues(summary)
 
   if (!projectId) {
     return (
@@ -436,6 +453,10 @@ export function DashboardView({
               {topPriority ? (
                 <div className="rounded-lg bg-muted px-2.5 py-2">
                   <p className="text-xs text-foreground leading-relaxed">{topPriority.action}</p>
+                  <Link href="/director" className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-foreground hover:text-muted-foreground">
+                    Обоснование и следующий шаг
+                    <ChevronRight className="size-3" />
+                  </Link>
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground italic">
@@ -471,6 +492,23 @@ export function DashboardView({
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {dataQualityIssues.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-warning/30 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="mt-0.5 size-4 shrink-0 text-warning" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Сначала проверьте данные</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                {dataQualityIssues[0]}
+              </p>
+            </div>
+          </div>
+          <Link href="/analytics" className="shrink-0">
+            <Button variant="outline" size="sm">Проверить метрики</Button>
+          </Link>
         </div>
       )}
 

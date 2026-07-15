@@ -5,6 +5,7 @@ import {
   Clock3,
   DatabaseZap,
 } from "lucide-react"
+import Link from "next/link"
 import { getActiveProjectId } from "@/lib/actions/active-project"
 import { prisma } from "@/lib/prisma"
 import {
@@ -15,6 +16,22 @@ import { EmptyState } from "@/components/empty-state"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
+
+const ANALYSIS_ROUTES: Record<string, string> = {
+  COMPANY_ANALYSIS: "/company",
+  MARKET_ANALYSIS: "/company?tab=market",
+  PRODUCT_ANALYSIS: "/company?tab=product",
+  COMPETITOR_ANALYSIS: "/competitors",
+  AUDIENCE_SEGMENTS: "/audience?tab=segments",
+  BUYER_PERSONA: "/audience?tab=personas",
+  JTBD: "/audience?tab=jtbd",
+  OFFER: "/offers",
+  CJM: "/journey",
+  STRATEGY_30: "/strategy",
+  CONTENT_PLAN: "/content",
+  DIRECTOR_DAILY: "/director",
+}
 
 const STATE_VIEW: Record<
   AiArtifactFreshness,
@@ -69,6 +86,9 @@ export default async function AiContextPage() {
   if (!project) return null
   const diagnostics = await getAiContextDiagnostics(project)
   const currentCount = diagnostics.items.filter((item) => item.state === "current").length
+  const nextUpdates = diagnostics.items
+    .filter((item) => item.state === "missing" || item.state === "legacy" || item.state === "stale")
+    .slice(0, 3)
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -122,6 +142,30 @@ export default async function AiContextPage() {
           </CardContent>
         </Card>
       </div>
+
+      {nextUpdates.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Что сделать сейчас</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Обновляйте анализы сверху вниз: каждый следующий использует результаты предыдущих.
+            </p>
+            <div className="grid gap-2 md:grid-cols-3">
+              {nextUpdates.map((item, index) => (
+                <div key={item.type} className="rounded-xl border border-border p-3">
+                  <p className="text-xs text-muted-foreground">Шаг {index + 1}</p>
+                  <p className="mt-1 text-sm font-medium text-foreground">{item.label}</p>
+                  <Link href={ANALYSIS_ROUTES[item.type] ?? "/"} className="mt-3 inline-block">
+                    <Button variant="outline" size="sm">Открыть раздел</Button>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {diagnostics.missingFields.length > 0 && (
         <Card>

@@ -89,6 +89,7 @@ const COMPANY_STEPS = [
 
 interface CompanyViewProps {
   project: Project
+  defaultTab?: string
   analysis: CompanyAnalysis | null
   version: number | null
   marketAnalysis: MarketAnalysis | null
@@ -131,6 +132,7 @@ function Card({
 
 export function CompanyView({
   project,
+  defaultTab = "overview",
   analysis,
   version,
   marketAnalysis,
@@ -233,7 +235,7 @@ export function CompanyView({
       )}
 
       {!loading && analysis && (
-        <Tabs defaultValue="overview">
+        <Tabs defaultValue={defaultTab}>
           <div className="-mx-4 overflow-x-auto px-4 scrollbar-hide md:mx-0 md:overflow-visible md:px-0">
             <TabsList>
               <TabsTrigger value="overview">Обзор</TabsTrigger>
@@ -353,11 +355,37 @@ export function CompanyView({
 
           {/* Positioning */}
           <TabsContent value="positioning" className="mt-6">
-            <Card title="Позиционирование">
-              <p className="whitespace-pre-line text-sm text-muted-foreground">
-                {analysis.positioning}
+            <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+              <Card title="Рабочая формулировка позиционирования">
+                <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                  {analysis.positioning}
+                </p>
+              </Card>
+              <Card title="Как использовать">
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
+                    Первый экран сайта и карточки в картах.
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
+                    Скрипт первого сообщения менеджера.
+                  </li>
+                  <li className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
+                    Рекламные объявления и контент о преимуществах.
+                  </li>
+                </ul>
+              </Card>
+            </div>
+            <div className="mt-6 rounded-2xl border border-warning/30 bg-warning/10 p-4">
+              <p className="text-sm font-medium text-foreground">Статус: рабочая гипотеза AI</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Проверьте формулировку на 5–10 реальных клиентах и в переписках менеджеров. Если она не
+                объясняет выбор в пользу компании вместо более дешёвого конкурента — уточните карточку компании
+                и перегенерируйте анализ.
               </p>
-            </Card>
+            </div>
           </TabsContent>
 
           {/* Product */}

@@ -192,6 +192,13 @@ export function AudienceView({
             </div>
           ) : (
             <>
+              <div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3">
+                <AlertCircle className="mt-0.5 size-4 shrink-0 text-warning" />
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Сегменты, объём аудитории и ICP ниже — рабочие гипотезы AI. Сверьте их с CRM, продажами,
+                  опросами или статистикой рекламных кабинетов перед тем, как закладывать бюджет.
+                </p>
+              </div>
               {/* СЕКЦИЯ 1 — Сводка по аудитории */}
               <div className="rounded-2xl border border-border bg-card p-6">
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -262,6 +269,9 @@ export function AudienceView({
                                   {m.sub}
                                 </p>
                               )}
+                              <span className="mt-1 inline-flex rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                                Оценка AI
+                              </span>
                             </div>
                             {m.icon}
                           </div>
