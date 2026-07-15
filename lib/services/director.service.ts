@@ -10,10 +10,14 @@ import {
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
 import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
+import {
   computeSummary,
   computeChannelBreakdown,
   filterByRange,
-  getPreviousRange,
 } from "@/lib/services/analytics.service"
 
 function safeStr(payload: unknown, extractor: (p: Record<string, unknown>) => string): string | undefined {
@@ -72,10 +76,16 @@ function buildDirectorContext(
 
   const offer = safeStr(offerArtifact?.payload, (p) => {
     const parts: string[] = []
-    if (p.name) parts.push(`Оффер: ${String(p.name)}`)
-    if (p.valueProposition) parts.push(`УТП: ${String(p.valueProposition)}`)
-    if (p.price) parts.push(`Цена: ${String(p.price)}`)
-    return parts.join(" | ")
+    if (p.usp) parts.push(`УТП: ${String(p.usp)}`)
+    if (p.tagline) parts.push(`Слоган: ${String(p.tagline)}`)
+    if (Array.isArray(p.offers)) {
+      const offers = (p.offers as Array<Record<string, unknown>>)
+        .slice(0, 3)
+        .map((item) => `${String(item.title ?? "")}: ${String(item.description ?? "")}`)
+        .filter(Boolean)
+      if (offers.length) parts.push(`Офферы: ${offers.join("; ")}`)
+    }
+    return parts.join("\n")
   })
 
   const cjm = safeStr(cjmArtifact?.payload, (p) => {
@@ -149,11 +159,11 @@ export async function generateDirectorAnalysis(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const today = new Date().toISOString().slice(0, 10)
+  const aiContext = await loadAiGenerationContext(project, "DIRECTOR_DAILY")
   const inputHash = computeInputHash({
     type: "DIRECTOR_DAILY",
-    projectId: project.id,
     date: today,
-    metricsCount: metrics.length,
+    context: aiContext.contextFingerprint,
   })
 
   if (!options.force) {
@@ -171,7 +181,7 @@ export async function generateDirectorAnalysis(
   const { data, model } = await routeAI({
     task: "DIRECTOR",
     system: directorAnalysisSystem,
-    prompt: buildDirectorInput(ctx),
+    prompt: appendAiContext(buildDirectorInput(ctx), aiContext),
     schema: directorAnalysisSchema,
     maxTokens: 8000,
   })
@@ -182,7 +192,7 @@ export async function generateDirectorAnalysis(
       projectId: project.id,
       type: "DIRECTOR_DAILY",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, aiContext),
       model,
       inputHash,
     },

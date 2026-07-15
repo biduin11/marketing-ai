@@ -11,6 +11,11 @@ import {
 } from "@/lib/ai/prompts/competitorAnalysis"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -69,7 +74,11 @@ export async function generateCompetitorAnalysis(
 ): Promise<AiArtifact> {
   const card = toCard(project)
   const detailed = parseCompetitorsDetailed(project.competitorsDetailed)
-  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card, detailed })
+  const context = await loadAiGenerationContext(project, "COMPETITOR_ANALYSIS")
+  const inputHash = computeInputHash({
+    type: "COMPETITOR_ANALYSIS",
+    context: context.contextFingerprint,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPETITOR_ANALYSIS")
@@ -79,7 +88,7 @@ export async function generateCompetitorAnalysis(
   const { data, model } = await routeAI({
     task: "COMPETITORS",
     system: competitorAnalysisSystem,
-    prompt: buildCompetitorAnalysisInput(card, detailed),
+    prompt: appendAiContext(buildCompetitorAnalysisInput(card, detailed), context),
     schema: competitorAnalysisSchema,
     maxTokens: 16000,
   })
@@ -90,7 +99,7 @@ export async function generateCompetitorAnalysis(
       projectId: project.id,
       type: "COMPETITOR_ANALYSIS",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, context),
       model,
       inputHash,
     },

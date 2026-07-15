@@ -9,6 +9,11 @@ import {
 } from "@/lib/ai/prompts/offer"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -29,7 +34,8 @@ export async function generateOffer(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "OFFER", card })
+  const context = await loadAiGenerationContext(project, "OFFER")
+  const inputHash = computeInputHash({ type: "OFFER", context: context.contextFingerprint })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "OFFER")
@@ -39,12 +45,19 @@ export async function generateOffer(
   const { data, model } = await routeAI({
     task: "OFFERS",
     system: offerSystem,
-    prompt: buildOfferInput(card),
+    prompt: appendAiContext(buildOfferInput(card), context),
     schema: offerSchema,
   })
 
   const version = await getNextVersion(project.id, "OFFER")
   return prisma.aiArtifact.create({
-    data: { projectId: project.id, type: "OFFER", version, payload: data, model, inputHash },
+    data: {
+      projectId: project.id,
+      type: "OFFER",
+      version,
+      payload: attachAiContextMetadata(data, context),
+      model,
+      inputHash,
+    },
   })
 }

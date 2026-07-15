@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
 import { reputationSchema, type Reputation } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
+import {
+  appendAiContext,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 async function analyzeReputation(
   project: Project
@@ -23,16 +27,19 @@ async function analyzeReputation(
 ВАЖНО: Используй эти прямые ссылки для поиска отзывов.
 Не ищи компанию по названию — сразу переходи по ссылкам выше.
 `
+  const context = await loadAiGenerationContext(project, "COMPETITOR_ANALYSIS")
 
   const { data, model } = await routeAI({
     task: "REPUTATION",
     system: reputationSystem,
-    prompt:
+    prompt: appendAiContext(
       buildReputationInput({
         name: project.name,
         city,
         website: project.website,
       }) + companyContext,
+      context
+    ),
     schema: reputationSchema,
     maxTokens: 8000,
   })

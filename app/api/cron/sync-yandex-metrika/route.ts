@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { syncYandexMetrika } from "@/lib/services/yandex-metrika.service"
+import { authorizeCronRequest } from "@/lib/security/cron-auth"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
 
 export async function GET(request: Request): Promise<NextResponse> {
-  const authHeader = request.headers.get("Authorization")
-  const cronSecret = process.env.CRON_SECRET
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const authorization = authorizeCronRequest(
+    request.headers.get("Authorization"),
+    process.env.CRON_SECRET
+  )
+  if (!authorization.authorized) {
+    return NextResponse.json(
+      { error: authorization.error },
+      { status: authorization.status }
+    )
   }
 
   const integrations = await prisma.yandexMetrikaIntegration.findMany({

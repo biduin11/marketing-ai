@@ -75,7 +75,7 @@ function AuditResult({
   onRestart: () => void
 }) {
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl">
       <div className="mb-6 rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div>
@@ -117,7 +117,8 @@ function AuditResult({
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
           <Target className="size-4" />
           Топ-3 точки роста
@@ -166,6 +167,7 @@ function AuditResult({
             </div>
           ))}
         </div>
+      </div>
       </div>
     </div>
   )
@@ -217,7 +219,7 @@ export function AuditView({ projectId, initialAudits }: AuditViewProps) {
       <div>
         <AuditResult audit={activeAudit} onRestart={startForm} />
         {audits.length > 1 && (
-          <div className="mx-auto mt-6 max-w-3xl">
+          <div className="mx-auto mt-6 max-w-5xl">
             <h3 className="mb-3 text-sm font-semibold text-foreground">История аудитов</h3>
             <div className="space-y-2">
               {audits.map((a) => (

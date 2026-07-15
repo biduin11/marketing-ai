@@ -2,6 +2,10 @@ import type { Project } from "@prisma/client"
 import { routeAI } from "@/lib/ai/router"
 import { expressAuditSchema, type ExpressAuditResult } from "@/lib/ai/schemas/express-audit"
 import { expressAuditSystem, buildExpressAuditInput, type CompanyCard } from "@/lib/ai/prompts/express-audit"
+import {
+  appendAiContext,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -22,11 +26,12 @@ export async function generateExpressAudit(
   answers: Record<string, number>
 ): Promise<{ payload: ExpressAuditResult; model: string }> {
   const card = toCard(project)
+  const context = await loadAiGenerationContext(project, "DIRECTOR_DAILY")
 
   const { data, model } = await routeAI({
     task: "EXPRESS_AUDIT",
     system: expressAuditSystem,
-    prompt: buildExpressAuditInput(card, answers),
+    prompt: appendAiContext(buildExpressAuditInput(card, answers), context),
     schema: expressAuditSchema,
   })
 

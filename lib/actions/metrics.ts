@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { listProjectMetrics } from "@/lib/services/metric.service"
 import { createMetricSchema, updateMetricSchema } from "@/lib/validations/metric"
 
 type ActionResult = { success: true } | { success: false; error: string }
@@ -99,8 +100,5 @@ export async function listMetrics(projectId: string) {
   const project = await ownedProject(projectId)
   if (!project) return []
 
-  return prisma.metric.findMany({
-    where: { projectId },
-    orderBy: { date: "asc" },
-  })
+  return listProjectMetrics(projectId)
 }

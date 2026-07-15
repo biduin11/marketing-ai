@@ -5,6 +5,10 @@ import { sprintSchema } from "@/lib/ai/schemas/sprint"
 import { sprintSystem, buildSprintInput, type CompanyCard } from "@/lib/ai/prompts/sprint"
 import { computeSummary } from "@/lib/services/analytics.service"
 import { getLatestArtifact } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 export type SprintWithTasks = Sprint & { tasks: SprintTask[] }
 
@@ -90,11 +94,12 @@ export async function generateSprint(project: Project, now: Date = new Date()): 
   const weekStart = startOfWeekMonday(now)
   const weekEnd = endOfWeekSunday(weekStart)
 
-  const [strategyContext, unfinishedTasks, metricsContext, contentContext] = await Promise.all([
+  const [strategyContext, unfinishedTasks, metricsContext, contentContext, aiContext] = await Promise.all([
     buildStrategyContext(project.id),
     buildUnfinishedTasksContext(project.id, weekStart),
     buildMetricsContext(project.id),
     buildContentContext(project.id),
+    loadAiGenerationContext(project, "DIRECTOR_DAILY"),
   ])
 
   const weekDates = `${RU_DATE.format(weekStart)} — ${RU_DATE.format(weekEnd)}`
@@ -102,14 +107,17 @@ export async function generateSprint(project: Project, now: Date = new Date()): 
   const { data } = await routeAI({
     task: "SPRINT",
     system: sprintSystem,
-    prompt: buildSprintInput({
-      card: toCard(project),
-      weekDates,
-      strategyContext,
-      unfinishedTasks,
-      metricsContext,
-      contentContext,
-    }),
+    prompt: appendAiContext(
+      buildSprintInput({
+        card: toCard(project),
+        weekDates,
+        strategyContext,
+        unfinishedTasks,
+        metricsContext,
+        contentContext,
+      }),
+      aiContext
+    ),
     schema: sprintSchema,
   })
 

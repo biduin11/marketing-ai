@@ -1,12 +1,12 @@
 import {
   BarChart3,
-  Bell,
   Building2,
   CalendarDays,
   ChartLine,
   ClipboardCheck,
   ClipboardList,
   Crosshair,
+  DatabaseZap,
   FlaskConical,
   Home,
   LayoutList,
@@ -41,8 +41,9 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Аудит", href: "/audit", icon: ClipboardCheck },
       { label: "Бренд", href: "/company", icon: Building2 },
-      { label: "Рынок", href: "/competitors", icon: Crosshair },
+      { label: "Конкуренты", href: "/competitors", icon: Crosshair },
       { label: "Клиент", href: "/audience", icon: Users },
+      { label: "Данные AI", href: "/context", icon: DatabaseZap },
     ],
   },
   {

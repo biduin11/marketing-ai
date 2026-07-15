@@ -11,8 +11,13 @@ import type { MarketAnalysis } from "@/lib/ai/schemas/market"
 import { productAnalysisSchema } from "@/lib/ai/schemas/product"
 import type { ProductAnalysis } from "@/lib/ai/schemas/product"
 
-export default async function CompanyPage() {
+export default async function CompanyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
   const projectId = await getActiveProjectId()
+  const { tab } = await searchParams
 
   if (!projectId) {
     return (
@@ -66,6 +71,7 @@ export default async function CompanyPage() {
   return (
     <CompanyView
       project={project}
+      defaultTab={tab ?? "overview"}
       analysis={analysis}
       version={artifact?.version ?? null}
       marketAnalysis={marketAnalysis}

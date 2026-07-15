@@ -10,6 +10,11 @@ import {
 } from "@/lib/ai/prompts/product"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 const productDetailedRawSchema = z.array(
   z.object({
@@ -52,7 +57,11 @@ export async function generateProductAnalysis(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const context = toContext(project)
-  const inputHash = computeInputHash({ type: "PRODUCT_ANALYSIS", context })
+  const aiContext = await loadAiGenerationContext(project, "PRODUCT_ANALYSIS")
+  const inputHash = computeInputHash({
+    type: "PRODUCT_ANALYSIS",
+    context: aiContext.contextFingerprint,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "PRODUCT_ANALYSIS")
@@ -62,7 +71,7 @@ export async function generateProductAnalysis(
   const { data, model } = await routeAI({
     task: "PRODUCT",
     system: productAnalysisSystem,
-    prompt: buildProductAnalysisInput(context),
+    prompt: appendAiContext(buildProductAnalysisInput(context), aiContext),
     schema: productAnalysisSchema,
     maxTokens: 16000,
   })
@@ -73,7 +82,7 @@ export async function generateProductAnalysis(
       projectId: project.id,
       type: "PRODUCT_ANALYSIS",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, aiContext),
       model,
       inputHash,
     },

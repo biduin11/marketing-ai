@@ -44,7 +44,11 @@ export async function countUnreadSignals(projectId: string): Promise<number> {
   if (!session?.user?.id) return 0
 
   return prisma.inboxSignal.count({
-    where: { projectId, read: false },
+    where: {
+      projectId,
+      read: false,
+      project: { userId: session.user.id },
+    },
   })
 }
 

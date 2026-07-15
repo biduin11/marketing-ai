@@ -9,6 +9,10 @@ import {
   buildObjectionInput,
   type CompanyCard,
 } from "@/lib/ai/prompts/objections"
+import {
+  appendAiContext,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -29,11 +33,12 @@ export async function generateObjectionResponses(
   objectionText: string
 ): Promise<{ payload: ObjectionResponses; model: string }> {
   const card = toCard(project)
+  const context = await loadAiGenerationContext(project, "PLATFORM_UTP")
 
   const { data, model } = await routeAI({
     task: "OBJECTIONS",
     system: objectionsSystem,
-    prompt: buildObjectionInput(card, objectionText),
+    prompt: appendAiContext(buildObjectionInput(card, objectionText), context),
     schema: objectionResponseSchema,
   })
 

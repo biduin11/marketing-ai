@@ -3,6 +3,10 @@ import { routeAI } from "@/lib/ai/router"
 import { briefContentSchema, type BriefContent } from "@/lib/ai/schemas/brief"
 import { briefsSystem, buildBriefInput, type CompanyCard } from "@/lib/ai/prompts/briefs"
 import type { PsychotypeKey } from "@/lib/ai/schemas/objections"
+import {
+  appendAiContext,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -25,11 +29,12 @@ export async function generateBriefContent(
   psychotype: PsychotypeKey
 ): Promise<{ content: BriefContent; model: string }> {
   const card = toCard(project)
+  const context = await loadAiGenerationContext(project, "PLATFORM_UTP")
 
   const { data, model } = await routeAI({
     task: "BRIEFS",
     system: briefsSystem,
-    prompt: buildBriefInput(card, type, task, psychotype),
+    prompt: appendAiContext(buildBriefInput(card, type, task, psychotype), context),
     schema: briefContentSchema,
   })
 

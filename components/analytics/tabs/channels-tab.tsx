@@ -160,7 +160,7 @@ export function ChannelsTab({ channels, channelTimeSeries }: ChannelsTabProps) {
           const maxRomi = Math.max(...channels.map((c) => c.romi), 1)
           return (
             <div className="space-y-3">
-              {[...channels].sort((a, b) => b.romi - a.romi).map((c, i) => {
+              {[...channels].sort((a, b) => b.romi - a.romi).map((c) => {
                 const pct = (c.romi / maxRomi) * 100
                 const color = CHANNEL_COLORS[channels.indexOf(c) % CHANNEL_COLORS.length]
                 return (

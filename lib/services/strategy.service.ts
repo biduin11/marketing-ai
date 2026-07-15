@@ -9,6 +9,11 @@ import {
 import { type CompanyCard } from "@/lib/ai/prompts/companyAnalysis"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 const horizonToType: Record<Horizon, ArtifactType> = {
   30: "STRATEGY_30",
@@ -46,7 +51,12 @@ export async function generateStrategy(
 ): Promise<AiArtifact> {
   const card = toCard(project)
   const type = horizonToType[horizon]
-  const inputHash = computeInputHash({ type, horizon, card })
+  const context = await loadAiGenerationContext(project, type)
+  const inputHash = computeInputHash({
+    type,
+    horizon,
+    context: context.contextFingerprint,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, type)
@@ -58,7 +68,7 @@ export async function generateStrategy(
   const { data, model } = await routeAI({
     task: "STRATEGY",
     system: strategySystem,
-    prompt: buildStrategyInput(card, horizon),
+    prompt: appendAiContext(buildStrategyInput(card, horizon), context),
     schema: strategySchema,
   })
 
@@ -69,7 +79,7 @@ export async function generateStrategy(
       projectId: project.id,
       type,
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, context),
       model,
       inputHash,
     },

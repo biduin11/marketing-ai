@@ -37,9 +37,10 @@ export async function generateStructuredWithGemini<T extends z.ZodType>({
   schema,
   maxTokens = 8000,
 }: GenerateStructuredWithGeminiArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
-  const { $schema: _unused, ...jsonSchema } = z.toJSONSchema(schema, {
+  const jsonSchema = z.toJSONSchema(schema, {
     target: "draft-7",
   }) as Record<string, unknown>
+  delete jsonSchema.$schema
   const responseSchema = zodJsonSchemaToGeminiSchema(jsonSchema)
 
   const model = getGeminiClient().getGenerativeModel({

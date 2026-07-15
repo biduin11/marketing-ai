@@ -1,4 +1,5 @@
-import { AlertTriangle, Info, Flame } from "lucide-react"
+import Link from "next/link"
+import { AlertTriangle, ArrowRight, Info, Flame } from "lucide-react"
 import type { Severity } from "@/lib/ai/schemas/companyAnalysis"
 import { cn } from "@/lib/utils"
 
@@ -52,6 +53,13 @@ export function RecommendationCard({
           </span>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+        <Link
+          href="/sprint"
+          className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-foreground hover:text-muted-foreground"
+        >
+          Открыть спринт для планирования
+          <ArrowRight className="size-3" />
+        </Link>
       </div>
     </div>
   )

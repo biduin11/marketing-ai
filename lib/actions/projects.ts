@@ -135,12 +135,8 @@ export async function updateProject(
     return { success: false, error: "Нет доступа" }
   }
 
-  console.log('updateProject RAW input socials:', JSON.stringify(input?.socials))
   const parsed = updateProjectSchema.safeParse(input)
-  console.log('updateProject parse success:', parsed.success)
   if (!parsed.success) {
-    console.log('updateProject parse errors:', JSON.stringify(parsed.error.errors))
-    console.error("[updateProject] validation error", parsed.error.flatten())
     return { success: false, error: "Ошибка валидации" }
   }
 
@@ -160,9 +156,6 @@ export async function updateProject(
     margin, conversionRate, currentCpl, leadsPerMonth, salesPerMonth, avgCheck,
     competitorsDetailed, productsDetailed,
   } = parsed.data
-
-  console.log('updateProject PARSED socials:', JSON.stringify(socials))
-  console.log('updateProject received socialLinks:', socialLinks)
 
   // Keep competitors[] in sync with detailed list for AI prompts backward compat
   const competitorNames =

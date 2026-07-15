@@ -9,6 +9,11 @@ import {
 } from "@/lib/ai/prompts/cjm"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -29,7 +34,8 @@ export async function generateCjm(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "CJM", card })
+  const context = await loadAiGenerationContext(project, "CJM")
+  const inputHash = computeInputHash({ type: "CJM", context: context.contextFingerprint })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CJM")
@@ -39,7 +45,7 @@ export async function generateCjm(
   const { data, model } = await routeAI({
     task: "CJM",
     system: cjmSystem,
-    prompt: buildCjmInput(card),
+    prompt: appendAiContext(buildCjmInput(card), context),
     schema: cjmSchema,
     maxTokens: 8000,
   })
@@ -50,7 +56,7 @@ export async function generateCjm(
       projectId: project.id,
       type: "CJM",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, context),
       model,
       inputHash,
     },
