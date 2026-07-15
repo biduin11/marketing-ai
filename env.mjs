@@ -12,7 +12,8 @@ export const env = createEnv({
     DEEPSEEK_API_KEY: z.string().min(1).optional(),
     AI_PROVIDER: z.enum(["anthropic", "gemini"]).optional(),
     CRON_SECRET: z.string().min(32).optional(),
-    ENCRYPTION_KEY: z.string().min(32).optional(),
+    // scrypt derives the 32-byte AES key; keep existing non-empty secrets valid.
+    ENCRYPTION_KEY: z.string().min(1).optional(),
     STRIPE_SECRET_KEY: z.string().min(1).optional(),
     STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
     STRIPE_PRO_PRICE_ID: z.string().min(1).optional(),
