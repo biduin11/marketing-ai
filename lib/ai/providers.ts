@@ -78,9 +78,10 @@ export async function generateAI(options: GenerateOptions): Promise<string> {
     }
 
     case "gemini": {
-      const { $schema: _unused, ...jsonSchema } = schema
+      const jsonSchema = schema
         ? (z.toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>)
-        : { $schema: undefined }
+        : {}
+      delete jsonSchema.$schema
 
       const geminiModel = getGeminiClient().getGenerativeModel({
         model,

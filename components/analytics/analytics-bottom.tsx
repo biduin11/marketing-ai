@@ -1,11 +1,10 @@
-import { TrendingUp, Sparkles } from "lucide-react"
-import type { ChannelMetrics, MetricSummary } from "@/lib/services/analytics.service"
+import { Sparkles } from "lucide-react"
+import type { ChannelMetrics } from "@/lib/services/analytics.service"
 import { cn } from "@/lib/utils"
 import { Progress } from "@/components/ui/progress"
 
 interface AnalyticsBottomProps {
   channels: ChannelMetrics[]
-  summary: MetricSummary
 }
 
 function fmt(v: number, dec = 0): string {
@@ -133,7 +132,7 @@ function RecentConversions({ channels }: { channels: ChannelMetrics[] }) {
 }
 
 // --- AI Recommendations (computed from data) ---
-function AiRecommendations({ channels, summary }: { channels: ChannelMetrics[]; summary: MetricSummary }) {
+function AiRecommendations({ channels }: { channels: ChannelMetrics[] }) {
   const recs: { text: string; type: "up" | "down" | "info" }[] = []
 
   // Best ROMI channel
@@ -207,14 +206,14 @@ function AiRecommendations({ channels, summary }: { channels: ChannelMetrics[]; 
   )
 }
 
-export function AnalyticsBottom({ channels, summary }: AnalyticsBottomProps) {
+export function AnalyticsBottom({ channels }: AnalyticsBottomProps) {
   if (!channels.length) return null
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <TopCampaigns channels={channels} />
       <BestCtr channels={channels} />
       <RecentConversions channels={channels} />
-      <AiRecommendations channels={channels} summary={summary} />
+      <AiRecommendations channels={channels} />
     </div>
   )
 }

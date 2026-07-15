@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  Bell,
   Building2,
   CalendarDays,
   ChartLine,

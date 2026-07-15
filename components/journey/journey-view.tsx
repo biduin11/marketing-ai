@@ -211,6 +211,7 @@ export function JourneyView({
           <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground">
             <Calendar size={15} />
             {fmtDate(cjmCreatedAt)}
+            {version != null && <span>v{version}</span>}
             <ChevronDown size={14} />
           </button>
           {cjm ? (

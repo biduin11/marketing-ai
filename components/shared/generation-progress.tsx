@@ -35,6 +35,11 @@ export function GenerationProgress({
   )
   const currentRef = useRef(0)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const visibleStates = completed || error
+    ? steps.map((_, i) => ({
+        status: i === steps.length - 1 && error ? "error" : "done",
+      }) satisfies StepState)
+    : states
 
   // Auto-advance through steps until second-to-last (hold there until resolved)
   useEffect(() => {
@@ -60,24 +65,16 @@ export function GenerationProgress({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // When completed or error, resolve final step
+  // Stop auto-advance once the caller resolves the generation.
   useEffect(() => {
     if (!completed && !error) return
     if (timerRef.current) clearTimeout(timerRef.current)
-
-    setStates((prev) =>
-      prev.map((s, i) => {
-        if (i < steps.length - 1 && s.status !== "done") return { status: "done" }
-        if (i === steps.length - 1) return { status: error ? "error" : "done" }
-        return s
-      })
-    )
-  }, [completed, error, steps.length])
+  }, [completed, error])
 
   return (
     <div className="space-y-2.5 rounded-2xl border border-border bg-card p-5 shadow-sm">
       {steps.map((step, i) => {
-        const { status } = states[i] ?? { status: "pending" }
+        const { status } = visibleStates[i] ?? { status: "pending" }
         return (
           <div key={step.id} className="flex items-center gap-3">
             <StepIcon status={status} />
