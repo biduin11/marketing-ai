@@ -9,6 +9,11 @@ import {
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
 import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
+import {
   computeSummary,
   computeChannelBreakdown,
 } from "@/lib/services/analytics.service"
@@ -30,13 +35,20 @@ export async function generateExecutiveReport(
 ): Promise<AiArtifact> {
   const summary = computeSummary(metrics)
   const channels = computeChannelBreakdown(metrics)
+  const context = await loadAiGenerationContext(project, artifactType)
   const inputHash = computeInputHash({
     type: artifactType,
-    projectId: project.id,
     period,
-    metricsCount: metrics.length,
-    totalSpend: summary.totalSpend,
-    totalRevenue: summary.totalRevenue,
+    metrics: metrics.map((metric) => ({
+      date: metric.date.toISOString().slice(0, 10),
+      channel: metric.channel,
+      spend: metric.spend,
+      revenue: metric.revenue,
+      leads: metric.leads,
+      clicks: metric.clicks,
+      impressions: metric.impressions,
+    })),
+    context: context.contextFingerprint,
   })
 
   if (!options.force) {
@@ -48,14 +60,17 @@ export async function generateExecutiveReport(
   const { data, model } = await routeAI({
     task: "REPORT",
     system: executiveReportSystem,
-    prompt: buildExecutiveReportInput({
-      period,
-      periodType,
-      summary,
-      channels,
-      projectName: project.name,
-      niche: project.niche,
-    }),
+    prompt: appendAiContext(
+      buildExecutiveReportInput({
+        period,
+        periodType,
+        summary,
+        channels,
+        projectName: project.name,
+        niche: project.niche,
+      }),
+      context
+    ),
     schema: executiveReportSchema,
     maxTokens: 4000,
   })
@@ -66,7 +81,7 @@ export async function generateExecutiveReport(
       projectId: project.id,
       type: artifactType,
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, context),
       model,
       inputHash,
     },

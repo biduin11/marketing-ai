@@ -9,6 +9,11 @@ import {
 } from "@/lib/ai/prompts/companyAnalysis"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -35,7 +40,11 @@ export async function generateCompanyAnalysis(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "COMPANY_ANALYSIS", card })
+  const context = await loadAiGenerationContext(project, "COMPANY_ANALYSIS")
+  const inputHash = computeInputHash({
+    type: "COMPANY_ANALYSIS",
+    context: context.contextFingerprint,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPANY_ANALYSIS")
@@ -47,7 +56,7 @@ export async function generateCompanyAnalysis(
   const { data, model } = await routeAI({
     task: "COMPANY_ANALYSIS",
     system: companyAnalysisSystem,
-    prompt: buildCompanyAnalysisInput(card),
+    prompt: appendAiContext(buildCompanyAnalysisInput(card), context),
     schema: companyAnalysisSchema,
   })
 
@@ -58,7 +67,7 @@ export async function generateCompanyAnalysis(
       projectId: project.id,
       type: "COMPANY_ANALYSIS",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, context),
       model,
       inputHash,
     },

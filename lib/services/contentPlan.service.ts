@@ -9,6 +9,11 @@ import {
 } from "@/lib/ai/prompts/contentPlan"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -36,8 +41,13 @@ export async function generateContentPlan(
     select: { name: true, share: true },
   })
   const platforms = platformRows.map((p) => ({ name: p.name, share: p.share }))
+  const context = await loadAiGenerationContext(project, "CONTENT_PLAN")
 
-  const inputHash = computeInputHash({ type: "CONTENT_PLAN", card, platforms })
+  const inputHash = computeInputHash({
+    type: "CONTENT_PLAN",
+    platforms,
+    context: context.contextFingerprint,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CONTENT_PLAN")
@@ -47,7 +57,7 @@ export async function generateContentPlan(
   const { data, model } = await routeAI({
     task: "CONTENT_PLAN",
     system: contentPlanSystem,
-    prompt: buildContentPlanInput(card, platforms),
+    prompt: appendAiContext(buildContentPlanInput(card, platforms), context),
     schema: contentPlanSchema,
     maxTokens: 16000,
   })
@@ -58,7 +68,7 @@ export async function generateContentPlan(
       projectId: project.id,
       type: "CONTENT_PLAN",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, context),
       model,
       inputHash,
     },

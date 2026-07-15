@@ -9,6 +9,12 @@ import {
   type CompanyCard,
 } from "@/lib/ai/prompts/platform-utp"
 import { getNextVersion } from "@/lib/services/artifacts"
+import { computeInputHash } from "@/lib/services/hash"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -45,17 +51,18 @@ export async function generatePlatformUtp(
   platform: PlatformKey
 ): Promise<AiArtifact> {
   const card = toCard(project)
+  const context = await loadAiGenerationContext(project, "PLATFORM_UTP")
 
   const { data, model } = await routeAI({
     task: "PLATFORM_UTP",
     system: platformUtpSystem,
-    prompt: buildPlatformUtpInput(card, platform),
+    prompt: appendAiContext(buildPlatformUtpInput(card, platform), context),
     schema: platformUtpSchema,
   })
 
   // Overwrite the AI's free-text platform name with our canonical key —
   // getLatestPlatformUtp() filters on this exact value.
-  const payload = { ...data, platform }
+  const payload = attachAiContextMetadata({ ...data, platform }, context)
   const version = await getNextVersion(project.id, "PLATFORM_UTP")
   return prisma.aiArtifact.create({
     data: {
@@ -64,7 +71,11 @@ export async function generatePlatformUtp(
       version,
       payload,
       model,
-      inputHash: "manual",
+      inputHash: computeInputHash({
+        type: "PLATFORM_UTP",
+        platform,
+        context: context.contextFingerprint,
+      }),
     },
   })
 }

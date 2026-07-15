@@ -6,6 +6,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   Crosshair,
+  DatabaseZap,
   FlaskConical,
   Home,
   LayoutList,
@@ -42,6 +43,7 @@ export const navGroups: NavGroup[] = [
       { label: "Бренд", href: "/company", icon: Building2 },
       { label: "Рынок", href: "/competitors", icon: Crosshair },
       { label: "Клиент", href: "/audience", icon: Users },
+      { label: "Данные AI", href: "/context", icon: DatabaseZap },
     ],
   },
   {

@@ -9,6 +9,11 @@ import {
 } from "@/lib/ai/prompts/market"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import {
+  appendAiContext,
+  attachAiContextMetadata,
+  loadAiGenerationContext,
+} from "@/lib/services/ai-context.service"
 
 function toContext(project: Project): MarketCompanyContext {
   return {
@@ -27,7 +32,11 @@ export async function generateMarketAnalysis(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const context = toContext(project)
-  const inputHash = computeInputHash({ type: "MARKET_ANALYSIS", context })
+  const aiContext = await loadAiGenerationContext(project, "MARKET_ANALYSIS")
+  const inputHash = computeInputHash({
+    type: "MARKET_ANALYSIS",
+    context: aiContext.contextFingerprint,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "MARKET_ANALYSIS")
@@ -37,7 +46,7 @@ export async function generateMarketAnalysis(
   const { data, model } = await routeAI({
     task: "MARKET",
     system: marketAnalysisSystem,
-    prompt: buildMarketAnalysisInput(context),
+    prompt: appendAiContext(buildMarketAnalysisInput(context), aiContext),
     schema: marketAnalysisSchema,
     maxTokens: 16000,
   })
@@ -48,7 +57,7 @@ export async function generateMarketAnalysis(
       projectId: project.id,
       type: "MARKET_ANALYSIS",
       version,
-      payload: data,
+      payload: attachAiContextMetadata(data, aiContext),
       model,
       inputHash,
     },
