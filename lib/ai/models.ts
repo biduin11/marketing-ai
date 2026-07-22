@@ -1,51 +1,50 @@
 /**
  * Task → provider/model routing, consumed by lib/ai/router.ts.
  *
- * Everything routes through the "openai" provider — i.e. the OpenAI-
- * compatible client in lib/ai/client.ts, pointed at router.cheap via
- * OPENAI_API_KEY + OPENAI_BASE_URL (a single router.cheap key covers every
- * task below, including the "claude-sonnet-4-6" ones — router.cheap proxies
- * both model families through one OpenAI-shaped API). Gemini is never
- * assigned here as a primary `provider`, only used as the Router's
- * automatic fallback (see router.ts) when a primary call fails with a
- * transient error.
- *
- * useWebSearch is false everywhere now: MARKET/COMPETITORS/REPUTATION used
- * to run through Anthropic's native web_search tool directly, which has no
- * equivalent on router.cheap's OpenAI-compatible surface — those 3 tasks
- * lost real web search as part of this consolidation (accepted trade-off).
+ * Both "anthropic" and "openai" providers below point at router.cheap — a
+ * single router.cheap key (in both ANTHROPIC_API_KEY and OPENAI_API_KEY,
+ * with ANTHROPIC_BASE_URL/OPENAI_BASE_URL pointed at router.cheap's
+ * respective compatible endpoints — see lib/ai/client.ts) covers every task
+ * here. "anthropic" tasks get native tool-forced structured output and (for
+ * COMPETITORS/REPUTATION/MARKET) the real web_search_20250305 tool; "openai"
+ * tasks use response_format: json_object with the JSON Schema embedded in
+ * the prompt (see generate-with-openai.ts) since that surface has no native
+ * schema enforcement. Gemini is never assigned here as a primary `provider`,
+ * only used as the Router's automatic fallback (see router.ts) when a
+ * primary call fails with a transient error — COMPETITORS/REPUTATION/MARKET
+ * are excluded from that fallback since Gemini has no web_search equivalent.
  */
 export const AI_TASKS = {
-  // ═══ CLAUDE (via router.cheap) — стратегический анализ ═══
+  // ═══ ANTHROPIC (via router.cheap) — web_search + стратегический анализ ═══
   COMPANY_ANALYSIS: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   SWOT: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   STRATEGY: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   COMPETITORS: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
-    useWebSearch: false,
+    useWebSearch: true,
   },
   REPUTATION: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
-    useWebSearch: false,
+    useWebSearch: true,
   },
   MARKET: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
-    useWebSearch: false,
+    useWebSearch: true,
   },
 
   // ═══ OPENAI GPT-4o — структурированный анализ ═══
@@ -91,8 +90,6 @@ export const AI_TASKS = {
   },
 
   // ═══ OPENAI GPT-4o-mini — копирайтинг и частые/лёгкие генерации ═══
-  // CONTENT_PLAN/POSITIONING/DIRECTOR/REPORT were Gemini-primary before this
-  // rework — moved to OpenAI since Gemini is fallback-only now.
   OFFERS: {
     provider: "openai" as const,
     model: "gpt-5.4-mini",
@@ -104,7 +101,7 @@ export const AI_TASKS = {
     useWebSearch: false,
   },
   POSITIONING: {
-    provider: "openai" as const,
+    provider: "anthropic" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },

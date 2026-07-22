@@ -6,9 +6,19 @@ const globalForAnthropic = globalThis as unknown as {
   anthropic: Anthropic | undefined
 }
 
+/**
+ * ANTHROPIC_BASE_URL lets this point at an Anthropic-API-compatible router
+ * instead of api.anthropic.com — e.g. router.cheap, which proxies Anthropic's
+ * native request/tool format (including the web_search_20250305 tool) under
+ * its own base URL, with an ANTHROPIC_API_KEY issued by router.cheap rather
+ * than Anthropic directly.
+ */
 export const anthropic =
   globalForAnthropic.anthropic ??
-  new Anthropic({ apiKey: env.ANTHROPIC_API_KEY ?? "" })
+  new Anthropic({
+    apiKey: env.ANTHROPIC_API_KEY ?? "",
+    baseURL: process.env.ANTHROPIC_BASE_URL || undefined,
+  })
 
 if (process.env.NODE_ENV !== "production")
   globalForAnthropic.anthropic = anthropic
@@ -43,13 +53,11 @@ export function getDeepSeekClient(): OpenAI {
 // not duplicated here to avoid two separate lazy-init implementations drifting apart.
 
 /**
- * Model used for all OpenAI-backed generations, see generate-with-openai.ts.
- * Provider-prefixed ("openai/...") to match OpenRouter's model id format —
- * see getOpenAIClient() below. If OPENAI_BASE_URL is unset (talking to
- * OpenAI directly instead of OpenRouter), drop the "openai/" prefix here
- * and in lib/ai/models.ts.
+ * Fallback model for generateStructuredWithOpenAI() when a caller doesn't
+ * specify one — in practice every task in lib/ai/models.ts passes its own
+ * `model` explicitly via routeAI, so this default is rarely hit.
  */
-export const OPENAI_MODEL = "openai/gpt-4o"
+export const OPENAI_MODEL = "gpt-5.4"
 
 /**
  * OpenAI-compatible client. Lazily instantiated (same reasoning as
@@ -57,10 +65,9 @@ export const OPENAI_MODEL = "openai/gpt-4o"
  * OPENAI_API_KEY is unset and no task routes to OpenAI yet.
  *
  * OPENAI_BASE_URL lets this point at an OpenAI-compatible router instead of
- * api.openai.com — e.g. OpenRouter (https://openrouter.ai/api/v1) with an
- * OpenRouter API key in OPENAI_API_KEY. Model ids must then use OpenRouter's
- * provider-prefixed format (openai/gpt-4o, openai/gpt-4o-mini — see
- * OPENAI_MODEL above and lib/ai/models.ts).
+ * api.openai.com — currently router.cheap, with a router.cheap API key in
+ * OPENAI_API_KEY. Model ids must match whatever that router exposes (see
+ * lib/ai/models.ts).
  */
 let openaiClient: OpenAI | null = null
 
