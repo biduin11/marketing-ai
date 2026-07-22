@@ -23,6 +23,21 @@ interface GenerateStructuredWithAnthropicArgs<T extends z.ZodType> {
 const SAVE_TOOL_NAME = "save_result"
 const SAVE_TOOL_DESCRIPTION = "Сохранить структурированный результат анализа"
 
+/**
+ * Anthropic's SDK has no request timeout by default (up to ~10min), so a
+ * slow/hanging call just runs until Vercel force-kills the whole function at
+ * its maxDuration (300s on the routes that call into this) — routeAI's
+ * catch-and-fallback-to-Gemini never gets a chance to run, since the await
+ * never resolves or rejects in time. These timeouts make the request fail
+ * fast enough for that fallback to actually happen, with margin under 300s.
+ * The web_search path can run two calls back to back (search, then a forced
+ * follow-up if Claude didn't call the save tool itself) — WEB_SEARCH +
+ * FORCED_FOLLOWUP together must still leave headroom under 300s.
+ */
+const NON_WEB_SEARCH_TIMEOUT_MS = 90_000
+const WEB_SEARCH_TIMEOUT_MS = 200_000
+const FORCED_FOLLOWUP_TIMEOUT_MS = 80_000
+
 export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   system,
   user,
@@ -42,14 +57,17 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   }
 
   if (!useWebSearch) {
-    const response = await anthropic.messages.create({
-      model,
-      max_tokens: maxTokens,
-      system,
-      tools: [saveToolDef],
-      tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
-      messages: [{ role: "user", content: user }],
-    })
+    const response = await anthropic.messages.create(
+      {
+        model,
+        max_tokens: maxTokens,
+        system,
+        tools: [saveToolDef],
+        tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
+        messages: [{ role: "user", content: user }],
+      },
+      { timeout: NON_WEB_SEARCH_TIMEOUT_MS }
+    )
 
     const toolUse = response.content.find((block) => block.type === "tool_use")
     if (!toolUse || toolUse.type !== "tool_use") {
@@ -65,18 +83,21 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   }
 
   // web_search_20250305 is a server-side tool — Anthropic executes searches inline
-  const response = await anthropic.beta.messages.create({
-    model,
-    max_tokens: maxTokens,
-    system,
-    tools: [
-      { type: "web_search_20250305", name: "web_search", max_uses: 15 } as never,
-      saveToolDef,
-    ] as never,
-    tool_choice: { type: "auto" },
-    messages: [{ role: "user", content: user }],
-    betas: ["web-search-2025-03-05"] as never,
-  })
+  const response = await anthropic.beta.messages.create(
+    {
+      model,
+      max_tokens: maxTokens,
+      system,
+      tools: [
+        { type: "web_search_20250305", name: "web_search", max_uses: 15 } as never,
+        saveToolDef,
+      ] as never,
+      tool_choice: { type: "auto" },
+      messages: [{ role: "user", content: user }],
+      betas: ["web-search-2025-03-05"] as never,
+    },
+    { timeout: WEB_SEARCH_TIMEOUT_MS }
+  )
 
   for (const block of response.content) {
     if (
@@ -94,21 +115,24 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
     .filter((b) => b.type === "text")
     .map((b) => ({ type: "text" as const, text: (b as { text: string }).text }))
 
-  const forcedResponse = await anthropic.messages.create({
-    model,
-    max_tokens: Math.min(maxTokens, 8000),
-    system,
-    tools: [saveToolDef],
-    tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
-    messages: [
-      { role: "user", content: user },
-      {
-        role: "assistant",
-        content: textBlocks.length ? textBlocks : [{ type: "text", text: "Анализ завершён." }],
-      },
-      { role: "user", content: `Сохрани результаты анализа используя инструмент ${SAVE_TOOL_NAME}.` },
-    ],
-  })
+  const forcedResponse = await anthropic.messages.create(
+    {
+      model,
+      max_tokens: Math.min(maxTokens, 8000),
+      system,
+      tools: [saveToolDef],
+      tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
+      messages: [
+        { role: "user", content: user },
+        {
+          role: "assistant",
+          content: textBlocks.length ? textBlocks : [{ type: "text", text: "Анализ завершён." }],
+        },
+        { role: "user", content: `Сохрани результаты анализа используя инструмент ${SAVE_TOOL_NAME}.` },
+      ],
+    },
+    { timeout: FORCED_FOLLOWUP_TIMEOUT_MS }
+  )
 
   const forcedBlock = forcedResponse.content.find((b) => b.type === "tool_use")
   if (!forcedBlock || forcedBlock.type !== "tool_use") {

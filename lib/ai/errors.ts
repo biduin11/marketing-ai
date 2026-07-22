@@ -23,6 +23,7 @@ const FALLBACK_PATTERNS = [
   /gateway timeout/i,
   /\btimeout\b/i,
   /connection timeout/i,
+  /timed out/i, // Anthropic SDK's default timeout error message ("Request timed out.")
   /ECONNRESET/,
   /ETIMEDOUT/,
   /temporary network/i,
