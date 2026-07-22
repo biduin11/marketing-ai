@@ -29,12 +29,15 @@ interface GenerateStructuredWithOpenAIArgs<T extends z.ZodType> {
  * (e.g. openai/gpt-4o-mini). Not used as generateStructured()'s automatic AI_PROVIDER
  * fallback path with the caller's Anthropic-shaped `model` (that default
  * would be an invalid OpenAI model id) — services that want OpenAI call
- * this directly instead. response_format: json_object guarantees a valid
- * JSON object
- * (not an exact shape, same caveat as DeepSeek — no schema enforcement
- * like Gemini's responseSchema). Carries over the same two protections:
- * explicit truncation detection (finish_reason "length") and a clear
- * error instead of a raw JSON.parse crash.
+ * this directly instead. response_format: json_object only guarantees valid
+ * JSON, not a specific shape — unlike Anthropic's forced tool_choice or
+ * Gemini's responseSchema, the model never otherwise sees the actual field
+ * names/types, only whatever prose happens to be in `system`. So the zod
+ * schema is converted to JSON Schema (same z.toJSONSchema() used by the
+ * Gemini path) and appended to the system prompt here, giving the model the
+ * real shape to fill instead of making it guess. Carries over the same two
+ * protections: explicit truncation detection (finish_reason "length") and a
+ * clear error instead of a raw JSON.parse crash.
  */
 export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   system,
@@ -43,13 +46,18 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   maxTokens = 8000,
   model = OPENAI_MODEL,
 }: GenerateStructuredWithOpenAIArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
+  const { $schema: _unused, ...jsonSchema } = z.toJSONSchema(schema, {
+    target: "draft-7",
+  }) as Record<string, unknown>
+  const systemWithSchema = `${system}\n\nВерни ТОЛЬКО валидный JSON-объект без markdown-разметки, строго соответствующий следующей JSON Schema (заполни все поля, которые она требует):\n${JSON.stringify(jsonSchema)}`
+
   const response = await getOpenAIClient().chat.completions.create({
     model,
     max_tokens: maxTokens,
     temperature: 0.3,
     response_format: { type: "json_object" },
     messages: [
-      { role: "system", content: system },
+      { role: "system", content: systemWithSchema },
       { role: "user", content: user },
     ],
   })
