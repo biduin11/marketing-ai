@@ -8,6 +8,10 @@ import { cn } from "@/lib/utils"
  *
  * Анатомия: компактная карточка (rounded-2xl border bg-card p-4 shadow-sm),
  * label сверху, крупное tabular-nums значение, sub снизу, приглушённая иконка справа.
+ *
+ * Опционально кликабельна: передай `onClick`, чтобы отрендерить как `<button>`
+ * (hover/focus-состояние + `active` для подсветки выбранной карточки) — без
+ * него ведёт себя как раньше, обычный `<div>`.
  */
 interface StatCardProps {
   label: string
@@ -17,6 +21,9 @@ interface StatCardProps {
   /** Тон значения — по умолчанию foreground. Используется для семантической подсветки. */
   tone?: "default" | "success" | "warning" | "danger"
   className?: string
+  onClick?: () => void
+  /** Подсветить как выбранную — имеет смысл только вместе с onClick. */
+  active?: boolean
 }
 
 const TONE_TEXT: Record<NonNullable<StatCardProps["tone"]>, string> = {
@@ -33,14 +40,11 @@ export function StatCard({
   icon: Icon,
   tone = "default",
   className,
+  onClick,
+  active = false,
 }: StatCardProps) {
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border border-border bg-card p-4 shadow-sm",
-        className
-      )}
-    >
+  const content = (
+    <>
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="text-xs leading-snug text-muted-foreground">{label}</p>
         {Icon && <Icon className="size-4 shrink-0 text-muted-foreground/50" />}
@@ -49,8 +53,32 @@ export function StatCard({
         {value}
       </p>
       {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
-    </div>
+    </>
   )
+
+  const sharedCls = cn(
+    "rounded-2xl border p-4 shadow-sm",
+    active ? "border-foreground bg-card" : "border-border bg-card",
+    className
+  )
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={active}
+        className={cn(
+          sharedCls,
+          "text-left transition-colors hover:border-foreground/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        )}
+      >
+        {content}
+      </button>
+    )
+  }
+
+  return <div className={sharedCls}>{content}</div>
 }
 
 /**

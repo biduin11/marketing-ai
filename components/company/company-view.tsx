@@ -87,6 +87,15 @@ const COMPANY_STEPS = [
   { id: "save", label: "Сохраняю результат" },
 ]
 
+type StatKey = "strengths" | "weaknesses" | "growthPoints" | "recommendations"
+
+const STAT_LABELS: Record<StatKey, string> = {
+  strengths: "Сильные стороны",
+  weaknesses: "Слабые стороны",
+  growthPoints: "Точки роста",
+  recommendations: "Рекомендации",
+}
+
 interface CompanyViewProps {
   project: Project
   analysis: CompanyAnalysis | null
@@ -144,6 +153,11 @@ export function CompanyView({
   const [loading, setLoading] = useState(false)
   const [genCompleted, setGenCompleted] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
+  const [expandedStat, setExpandedStat] = useState<StatKey | null>(null)
+
+  function toggleStat(key: StatKey) {
+    setExpandedStat((prev) => (prev === key ? null : key))
+  }
 
   async function generate(force: boolean) {
     setLoading(true)
@@ -270,7 +284,7 @@ export function CompanyView({
               </div>
             </div>
 
-            {/* Метрик-строка — фирменный приём эталона (#1) */}
+            {/* Метрик-строка — фирменный приём эталона (#1). Кликабельна — раскрывает список ниже. */}
             <StatRow cols={4}>
               <StatCard
                 label="Сильные стороны"
@@ -278,6 +292,8 @@ export function CompanyView({
                 sub="преимуществ"
                 icon={CheckCircle2}
                 tone="success"
+                onClick={() => toggleStat("strengths")}
+                active={expandedStat === "strengths"}
               />
               <StatCard
                 label="Слабые стороны"
@@ -285,12 +301,16 @@ export function CompanyView({
                 sub="зон риска"
                 icon={TrendingDown}
                 tone="danger"
+                onClick={() => toggleStat("weaknesses")}
+                active={expandedStat === "weaknesses"}
               />
               <StatCard
                 label="Точки роста"
                 value={analysis.growthPoints.length}
                 sub="направлений"
                 icon={Target}
+                onClick={() => toggleStat("growthPoints")}
+                active={expandedStat === "growthPoints"}
               />
               <StatCard
                 label="Рекомендации"
@@ -298,27 +318,43 @@ export function CompanyView({
                 sub="от AI"
                 icon={Lightbulb}
                 tone="warning"
+                onClick={() => toggleStat("recommendations")}
+                active={expandedStat === "recommendations"}
               />
             </StatRow>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card title="Сильные стороны">
-                <ListBlock items={analysis.strengths} />
+            {expandedStat && (
+              <Card title={STAT_LABELS[expandedStat]}>
+                {expandedStat === "strengths" && (
+                  <ListBlock items={analysis.strengths} />
+                )}
+                {expandedStat === "weaknesses" && (
+                  <ListBlock items={analysis.weaknesses} />
+                )}
+                {expandedStat === "growthPoints" && (
+                  <ul className="space-y-2">
+                    {analysis.growthPoints.map((p, i) => (
+                      <li key={i} className="flex gap-2 text-sm text-foreground">
+                        <TrendingUp className="mt-0.5 size-4 shrink-0 text-success" />
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {expandedStat === "recommendations" && (
+                  <div className="space-y-3">
+                    {analysis.recommendations.map((rec, i) => (
+                      <RecommendationCard
+                        key={i}
+                        title={rec.title}
+                        body={rec.body}
+                        severity={rec.severity}
+                      />
+                    ))}
+                  </div>
+                )}
               </Card>
-              <Card title="Точки роста">
-                <ul className="space-y-2">
-                  {analysis.growthPoints.map((p, i) => (
-                    <li
-                      key={i}
-                      className="flex gap-2 text-sm text-foreground"
-                    >
-                      <TrendingUp className="mt-0.5 size-4 shrink-0 text-success" />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            </div>
+            )}
           </TabsContent>
 
           {/* SWOT — цветовая кодировка квадрантов (#5) */}
