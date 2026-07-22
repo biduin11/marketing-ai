@@ -19,14 +19,14 @@ interface GenerateStructuredWithOpenAIArgs<T extends z.ZodType> {
   user: string
   schema: T
   maxTokens?: number
-  /** Overrides OPENAI_MODEL (gpt-4o) — e.g. gpt-4o-mini for lighter copywriting tasks. */
+  /** Overrides OPENAI_MODEL (openai/gpt-4o) — e.g. openai/gpt-4o-mini for lighter copywriting tasks. */
   model?: string
 }
 
 /**
  * OpenAI provider for structured generation. Defaults to OPENAI_MODEL
- * (gpt-4o) — callers can override with `model` for lighter tasks (e.g.
- * gpt-4o-mini). Not used as generateStructured()'s automatic AI_PROVIDER
+ * (openai/gpt-4o) — callers can override with `model` for lighter tasks
+ * (e.g. openai/gpt-4o-mini). Not used as generateStructured()'s automatic AI_PROVIDER
  * fallback path with the caller's Anthropic-shaped `model` (that default
  * would be an invalid OpenAI model id) — services that want OpenAI call
  * this directly instead. response_format: json_object guarantees a valid
@@ -77,7 +77,7 @@ interface GenerateTextWithOpenAIArgs {
   system?: string
   messages: { role: "user" | "assistant"; content: string }[]
   maxTokens?: number
-  /** Overrides OPENAI_MODEL (gpt-4o) — e.g. gpt-4o-mini for lighter conversational tasks. */
+  /** Overrides OPENAI_MODEL (openai/gpt-4o) — e.g. openai/gpt-4o-mini for lighter conversational tasks. */
   model?: string
 }
 
@@ -86,7 +86,7 @@ export async function generateTextWithOpenAI({
   system,
   messages,
   maxTokens = 2048,
-  model = "gpt-4o-mini",
+  model = "openai/gpt-4o-mini",
 }: GenerateTextWithOpenAIArgs): Promise<string> {
   const response = await getOpenAIClient().chat.completions.create({
     model,

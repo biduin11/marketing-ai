@@ -219,6 +219,14 @@ DATABASE_URL=          # Neon connection string
 AUTH_SECRET=           # openssl rand -base64 32
 AUTH_URL=              # https://твой-домен.vercel.app (на проде)
 ANTHROPIC_API_KEY=     # sk-ant-...  (нужен с Итерации 1)
+OPENAI_API_KEY=        # ключ для задач на OpenAI (CJM/Audience/Product/Sprint/чат-ассистент и др.,
+                       # см. lib/ai/models.ts). Может быть ключом OpenRouter (openrouter.ai) —
+                       # тогда обязательно задать и OPENAI_BASE_URL, см. ниже.
+OPENAI_BASE_URL=       # опционально. https://openrouter.ai/api/v1 — если OPENAI_API_KEY это ключ
+                       # OpenRouter, а не родной ключ OpenAI. Не задан = обращение к api.openai.com
+                       # напрямую. Модели в lib/ai/models.ts/client.ts (OPENAI_MODEL) уже названы
+                       # в формате OpenRouter (openai/gpt-4o, openai/gpt-4o-mini) — при возврате на
+                       # прямой OpenAI нужно убрать префикс "openai/" из этих же мест.
 GEMINI_API_KEY=        # aistudio.google.com (бесплатно) — временный fallback, см. AI_PROVIDER
 AI_PROVIDER=           # "gemini" — временно переключает ВСЕ AI-генерации на Gemini 2.5 Flash,
                        # пока не пополнен баланс Anthropic. Пусто/не задано = Anthropic (по умолчанию).

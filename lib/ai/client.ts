@@ -42,13 +42,25 @@ export function getDeepSeekClient(): OpenAI {
 // Gemini client lives in lib/ai/gemini-client.ts (getGeminiClient() + GEMINI_MODEL) —
 // not duplicated here to avoid two separate lazy-init implementations drifting apart.
 
-/** Model used for all OpenAI-backed generations, see generate-with-openai.ts. */
-export const OPENAI_MODEL = "gpt-4o"
+/**
+ * Model used for all OpenAI-backed generations, see generate-with-openai.ts.
+ * Provider-prefixed ("openai/...") to match OpenRouter's model id format —
+ * see getOpenAIClient() below. If OPENAI_BASE_URL is unset (talking to
+ * OpenAI directly instead of OpenRouter), drop the "openai/" prefix here
+ * and in lib/ai/models.ts.
+ */
+export const OPENAI_MODEL = "openai/gpt-4o"
 
 /**
- * OpenAI. Lazily instantiated (same reasoning as getDeepSeekClient) so
- * importing this module doesn't throw when OPENAI_API_KEY is unset and no
- * task routes to OpenAI yet.
+ * OpenAI-compatible client. Lazily instantiated (same reasoning as
+ * getDeepSeekClient) so importing this module doesn't throw when
+ * OPENAI_API_KEY is unset and no task routes to OpenAI yet.
+ *
+ * OPENAI_BASE_URL lets this point at an OpenAI-compatible router instead of
+ * api.openai.com — e.g. OpenRouter (https://openrouter.ai/api/v1) with an
+ * OpenRouter API key in OPENAI_API_KEY. Model ids must then use OpenRouter's
+ * provider-prefixed format (openai/gpt-4o, openai/gpt-4o-mini — see
+ * OPENAI_MODEL above and lib/ai/models.ts).
  */
 let openaiClient: OpenAI | null = null
 
@@ -58,7 +70,10 @@ export function getOpenAIClient(): OpenAI {
     if (!apiKey) {
       throw new Error("OPENAI_API_KEY is not set")
     }
-    openaiClient = new OpenAI({ apiKey })
+    openaiClient = new OpenAI({
+      apiKey,
+      baseURL: process.env.OPENAI_BASE_URL || undefined,
+    })
   }
   return openaiClient
 }
