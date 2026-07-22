@@ -44,42 +44,42 @@ export const AI_TASKS = {
   // ═══ OPENAI GPT-4o — структурированный анализ ═══
   CJM: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4",
     useWebSearch: false,
   },
   AUDIENCE: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4",
     useWebSearch: false,
   },
   PRODUCT: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4",
     useWebSearch: false,
   },
   OBJECTIONS: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4",
     useWebSearch: false,
   },
   PLATFORM_UTP: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
   BRIEFS: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4",
     useWebSearch: false,
   },
   SPRINT: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
   EXPRESS_AUDIT: {
     provider: "openai" as const,
-    model: "gpt-4o",
+    model: "gpt-5.4",
     useWebSearch: false,
   },
 
@@ -88,32 +88,32 @@ export const AI_TASKS = {
   // rework — moved to OpenAI since Gemini is fallback-only now.
   OFFERS: {
     provider: "openai" as const,
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
   CONTENT_PLAN: {
     provider: "openai" as const,
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
   POSITIONING: {
     provider: "openai" as const,
-    model: "gpt-4o-mini",
+    model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   DIRECTOR: {
     provider: "openai" as const,
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
   REPORT: {
     provider: "openai" as const,
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
   PERIOD_COMPARISON: {
     provider: "openai" as const,
-    model: "gpt-4o-mini",
+    model: "openai/gpt-4o-mini",
     useWebSearch: false,
   },
 } as const
