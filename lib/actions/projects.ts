@@ -139,7 +139,7 @@ export async function updateProject(
   const parsed = updateProjectSchema.safeParse(input)
   console.log('updateProject parse success:', parsed.success)
   if (!parsed.success) {
-    console.log('updateProject parse errors:', JSON.stringify(parsed.error.errors))
+    console.log('updateProject parse errors:', JSON.stringify(parsed.error.issues))
     console.error("[updateProject] validation error", parsed.error.flatten())
     return { success: false, error: "Ошибка валидации" }
   }
