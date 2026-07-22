@@ -156,14 +156,14 @@ ${context}
       const reply = await generateTextWithGemini({
         system: systemPrompt,
         user: transcript ? `${transcript}\nПользователь: ${message}` : message,
-        maxTokens: 1024,
+        maxTokens: 2048,
       })
       return { success: true, reply }
     }
 
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
+      max_tokens: 2048,
       system: systemPrompt,
       messages: [
         ...history.map((m) => ({ role: m.role, content: m.content })),
