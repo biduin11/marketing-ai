@@ -3,6 +3,15 @@ import { getGeminiClient, GEMINI_MODEL } from "@/lib/ai/gemini-client"
 import { zodJsonSchemaToGeminiSchema } from "@/lib/ai/zod-to-gemini-schema"
 
 /**
+ * Like Anthropic's SDK, Gemini's has no default request timeout — this is
+ * usually the fallback attempt after Anthropic already timed out (see
+ * generate-with-anthropic.ts), so without its own cap a hung Gemini call
+ * would extend that same indefinite-hang problem to the fallback leg
+ * instead of actually fixing it.
+ */
+const GEMINI_TIMEOUT_MS = 90_000
+
+/**
  * Scans forward from `start` (an opening '{') for its matching '}', tracking
  * string literals so braces inside string values don't throw off the depth
  * count. Returns null if the braces never balance out.
@@ -109,7 +118,7 @@ export async function generateStructuredWithGemini<T extends z.ZodType>({
     },
   })
 
-  const result = await model.generateContent(user)
+  const result = await model.generateContent(user, { timeout: GEMINI_TIMEOUT_MS })
 
   const finishReason = result.response.candidates?.[0]?.finishReason
   if (finishReason === "MAX_TOKENS") {
@@ -150,7 +159,7 @@ export async function generateTextWithGemini({
     generationConfig: { maxOutputTokens: maxTokens },
   })
 
-  const result = await model.generateContent(user)
+  const result = await model.generateContent(user, { timeout: GEMINI_TIMEOUT_MS })
 
   const finishReason = result.response.candidates?.[0]?.finishReason
   if (finishReason === "MAX_TOKENS") {
