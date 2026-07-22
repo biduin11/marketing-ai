@@ -67,7 +67,11 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
 
   const parsed = schema.safeParse(extractJson(text))
   if (!parsed.success) {
-    throw new Error("AI-ответ не прошёл валидацию схемы")
+    const issue = parsed.error.issues[0]
+    const path = issue?.path.join(".") || "(root)"
+    throw new Error(
+      `AI-ответ не прошёл валидацию схемы: ${issue?.message ?? "неизвестная ошибка"} (поле: ${path})`
+    )
   }
 
   return { data: parsed.data, model }

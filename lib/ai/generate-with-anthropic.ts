@@ -1,6 +1,14 @@
 import { z } from "zod"
 import { anthropic } from "@/lib/ai/client"
 
+function schemaValidationError(error: z.ZodError): Error {
+  const issue = error.issues[0]
+  const path = issue?.path.join(".") || "(root)"
+  return new Error(
+    `AI-ответ не прошёл валидацию схемы: ${issue?.message ?? "неизвестная ошибка"} (поле: ${path})`
+  )
+}
+
 interface GenerateStructuredWithAnthropicArgs<T extends z.ZodType> {
   system: string
   user: string
@@ -76,7 +84,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
 
     const parsed = schema.safeParse(toolUse.input)
     if (!parsed.success) {
-      throw new Error("AI-ответ не прошёл валидацию схемы")
+      throw schemaValidationError(parsed.error)
     }
 
     return { data: parsed.data, model }
@@ -106,7 +114,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
     ) {
       const parsed = schema.safeParse((block as { input: unknown }).input)
       if (parsed.success) return { data: parsed.data, model }
-      throw new Error("AI-ответ не прошёл валидацию схемы")
+      throw schemaValidationError(parsed.error)
     }
   }
 
@@ -141,7 +149,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
 
   const parsed = schema.safeParse(forcedBlock.input)
   if (!parsed.success) {
-    throw new Error("AI-ответ не прошёл валидацию схемы")
+    throw schemaValidationError(parsed.error)
   }
 
   return { data: parsed.data, model }
