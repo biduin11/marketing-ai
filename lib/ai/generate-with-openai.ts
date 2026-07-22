@@ -72,3 +72,38 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
 
   return { data: parsed.data, model }
 }
+
+interface GenerateTextWithOpenAIArgs {
+  system?: string
+  messages: { role: "user" | "assistant"; content: string }[]
+  maxTokens?: number
+  /** Overrides OPENAI_MODEL (gpt-4o) — e.g. gpt-4o-mini for lighter conversational tasks. */
+  model?: string
+}
+
+/** Plain-text OpenAI generation (chat replies, post copy) — no JSON/schema involved. */
+export async function generateTextWithOpenAI({
+  system,
+  messages,
+  maxTokens = 2048,
+  model = "gpt-4o-mini",
+}: GenerateTextWithOpenAIArgs): Promise<string> {
+  const response = await getOpenAIClient().chat.completions.create({
+    model,
+    max_tokens: maxTokens,
+    messages: [
+      ...(system ? [{ role: "system" as const, content: system }] : []),
+      ...messages,
+    ],
+  })
+
+  const choice = response.choices[0]
+
+  if (choice?.finish_reason === "length") {
+    throw new Error(
+      `Ответ OpenAI обрезан лимитом токенов (maxTokens=${maxTokens}) до завершения текста — увеличьте maxTokens`
+    )
+  }
+
+  return choice?.message?.content ?? ""
+}

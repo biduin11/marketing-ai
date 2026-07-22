@@ -2,8 +2,8 @@
 
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { anthropic } from "@/lib/ai/client"
 import { generateTextWithGemini } from "@/lib/ai/generate-with-gemini"
+import { generateTextWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { getLatestArtifact } from "@/lib/services/artifacts"
 import { listMetrics } from "@/lib/actions/metrics"
 import { computeSummary, computeChannelBreakdown, filterByRange } from "@/lib/services/analytics.service"
@@ -161,18 +161,14 @@ ${context}
       return { success: true, reply }
     }
 
-    const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 2048,
+    const reply = await generateTextWithOpenAI({
       system: systemPrompt,
       messages: [
         ...history.map((m) => ({ role: m.role, content: m.content })),
-        { role: "user", content: message },
+        { role: "user" as const, content: message },
       ],
+      maxTokens: 2048,
     })
-
-    const reply =
-      response.content[0]?.type === "text" ? response.content[0].text : "Не удалось получить ответ"
 
     return { success: true, reply }
   } catch (error) {
