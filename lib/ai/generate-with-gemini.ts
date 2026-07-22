@@ -2,17 +2,73 @@ import { z } from "zod"
 import { getGeminiClient, GEMINI_MODEL } from "@/lib/ai/gemini-client"
 import { zodJsonSchemaToGeminiSchema } from "@/lib/ai/zod-to-gemini-schema"
 
-function extractJson(text: string): unknown {
-  const fenced = text.match(/```json\s*([\s\S]*?)```/)
-  const raw = fenced?.[1] ?? text.match(/\{[\s\S]*\}/)?.[0]
-  if (!raw) throw new Error("Gemini не вернул JSON")
-  try {
-    return JSON.parse(raw)
-  } catch {
-    throw new Error(
-      "Gemini вернул невалидный JSON (похоже на обрыв ответа лимитом токенов — увеличьте maxTokens)"
-    )
+/**
+ * Scans forward from `start` (an opening '{') for its matching '}', tracking
+ * string literals so braces inside string values don't throw off the depth
+ * count. Returns null if the braces never balance out.
+ */
+function findBalancedJsonObject(text: string, start: number): string | null {
+  let depth = 0
+  let inString = false
+  let escaped = false
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (ch === "\\") escaped = true
+      else if (ch === '"') inString = false
+      continue
+    }
+    if (ch === '"') inString = true
+    else if (ch === "{") depth++
+    else if (ch === "}") {
+      depth--
+      if (depth === 0) return text.slice(start, i + 1)
+    }
   }
+  return null
+}
+
+/**
+ * Extracts the model's JSON object from raw completion text. Tries, in
+ * order: the whole trimmed text as-is (the expected shape given
+ * responseSchema), a ```json fenced block, then a balanced-brace scan from
+ * the first '{' — not a greedy first-'{'-to-last-'}' regex, which would
+ * swallow trailing prose after the object.
+ */
+function extractJson(text: string): unknown {
+  const trimmed = text.trim()
+
+  try {
+    return JSON.parse(trimmed)
+  } catch {
+    // fall through to more lenient extraction below
+  }
+
+  const fenced = trimmed.match(/```json\s*([\s\S]*?)```/)
+  if (fenced?.[1]) {
+    try {
+      return JSON.parse(fenced[1])
+    } catch {
+      // fall through
+    }
+  }
+
+  const start = trimmed.indexOf("{")
+  if (start === -1) throw new Error("Gemini не вернул JSON")
+
+  const candidate = findBalancedJsonObject(trimmed, start)
+  if (candidate) {
+    try {
+      return JSON.parse(candidate)
+    } catch {
+      // fall through to final error
+    }
+  }
+
+  throw new Error(
+    "Gemini вернул невалидный JSON (похоже на обрыв ответа лимитом токенов — увеличьте maxTokens)"
+  )
 }
 
 interface GenerateStructuredWithGeminiArgs<T extends z.ZodType> {
