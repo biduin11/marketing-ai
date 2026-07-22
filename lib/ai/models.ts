@@ -1,44 +1,51 @@
 /**
  * Task → provider/model routing, consumed by lib/ai/router.ts.
  *
- * OpenAI and Anthropic are the two primary providers — Gemini is never
+ * Everything routes through the "openai" provider — i.e. the OpenAI-
+ * compatible client in lib/ai/client.ts, pointed at router.cheap via
+ * OPENAI_API_KEY + OPENAI_BASE_URL (a single router.cheap key covers every
+ * task below, including the "claude-sonnet-4-6" ones — router.cheap proxies
+ * both model families through one OpenAI-shaped API). Gemini is never
  * assigned here as a primary `provider`, only used as the Router's
  * automatic fallback (see router.ts) when a primary call fails with a
- * transient error. COMPETITORS/REPUTATION/MARKET use Anthropic's
- * web_search tool and are explicitly excluded from fallback — Gemini has
- * no equivalent, so the Router surfaces a clear error instead of switching.
+ * transient error.
+ *
+ * useWebSearch is false everywhere now: MARKET/COMPETITORS/REPUTATION used
+ * to run through Anthropic's native web_search tool directly, which has no
+ * equivalent on router.cheap's OpenAI-compatible surface — those 3 tasks
+ * lost real web search as part of this consolidation (accepted trade-off).
  */
 export const AI_TASKS = {
-  // ═══ ANTHROPIC — web_search (no fallback) + стратегический анализ ═══
+  // ═══ CLAUDE (via router.cheap) — стратегический анализ ═══
   COMPANY_ANALYSIS: {
-    provider: "anthropic" as const,
+    provider: "openai" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   SWOT: {
-    provider: "anthropic" as const,
+    provider: "openai" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   STRATEGY: {
-    provider: "anthropic" as const,
+    provider: "openai" as const,
     model: "claude-sonnet-4-6",
     useWebSearch: false,
   },
   COMPETITORS: {
-    provider: "anthropic" as const,
+    provider: "openai" as const,
     model: "claude-sonnet-4-6",
-    useWebSearch: true,
+    useWebSearch: false,
   },
   REPUTATION: {
-    provider: "anthropic" as const,
+    provider: "openai" as const,
     model: "claude-sonnet-4-6",
-    useWebSearch: true,
+    useWebSearch: false,
   },
   MARKET: {
-    provider: "anthropic" as const,
+    provider: "openai" as const,
     model: "claude-sonnet-4-6",
-    useWebSearch: true,
+    useWebSearch: false,
   },
 
   // ═══ OPENAI GPT-4o — структурированный анализ ═══
@@ -113,7 +120,7 @@ export const AI_TASKS = {
   },
   PERIOD_COMPARISON: {
     provider: "openai" as const,
-    model: "openai/gpt-4o-mini",
+    model: "gpt-5.4-mini",
     useWebSearch: false,
   },
 } as const

@@ -2,8 +2,8 @@
 
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { anthropic } from "@/lib/ai/client"
 import { generateTextWithGemini } from "@/lib/ai/generate-with-gemini"
+import { generateTextWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { getLatestArtifact } from "@/lib/services/artifacts"
 import { canGenerateAi } from "@/lib/gates"
 import { z } from "zod"
@@ -103,16 +103,10 @@ ${type === "email" ? `- Тема письма: дай вариант темы в
       return { success: true, text }
     }
 
-    const response = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 2000,
+    const text = await generateTextWithOpenAI({
       messages: [{ role: "user", content: prompt }],
+      maxTokens: 2000,
     })
-
-    const text =
-      response.content[0]?.type === "text"
-        ? response.content[0].text
-        : "Не удалось сгенерировать текст"
 
     return { success: true, text }
   } catch (error) {

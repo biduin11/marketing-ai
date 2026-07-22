@@ -218,22 +218,25 @@ Sidebar: 240px, активный пункт — `bg-neutral-100 rounded-lg`
 DATABASE_URL=          # Neon connection string
 AUTH_SECRET=           # openssl rand -base64 32
 AUTH_URL=              # https://твой-домен.vercel.app (на проде)
-ANTHROPIC_API_KEY=     # sk-ant-...  (нужен с Итерации 1)
-OPENAI_API_KEY=        # ключ для задач на OpenAI (CJM/Audience/Product/Sprint/чат-ассистент и др.,
-                       # см. lib/ai/models.ts). Может быть ключом OpenRouter (openrouter.ai) —
-                       # тогда обязательно задать и OPENAI_BASE_URL, см. ниже.
-OPENAI_BASE_URL=       # опционально. https://openrouter.ai/api/v1 — если OPENAI_API_KEY это ключ
-                       # OpenRouter, а не родной ключ OpenAI. Не задан = обращение к api.openai.com
-                       # напрямую. Модели в lib/ai/models.ts/client.ts (OPENAI_MODEL) уже названы
-                       # в формате OpenRouter (openai/gpt-4o, openai/gpt-4o-mini) — при возврате на
-                       # прямой OpenAI нужно убрать префикс "openai/" из этих же мест.
-GEMINI_API_KEY=        # aistudio.google.com (бесплатно) — временный fallback, см. AI_PROVIDER
-AI_PROVIDER=           # "gemini" — временно переключает ВСЕ AI-генерации на Gemini 2.5 Flash,
-                       # пока не пополнен баланс Anthropic. Пусто/не задано = Anthropic (по умолчанию).
-                       # Ограничение: web_search-зависимые модули (Рынок/Конкуренты) деградируют
-                       # до анализа без реального поиска; Репутация полностью недоступна (у неё
-                       # нет смысла без реального поиска — модуль скорее выдаст ошибку, чем начнёт
-                       # выдумывать отзывы). Верни в пустое значение, как только баланс пополнен.
+OPENAI_API_KEY=        # ЕДИНСТВЕННЫЙ ключ, нужный для всех AI-задач (см. lib/ai/models.ts) —
+                       # ключ router.cheap (router.cheap выдаёт доступ и к GPT-, и к Claude-моделям
+                       # через один OpenAI-совместимый API). Обязательно задать вместе с
+                       # OPENAI_BASE_URL ниже.
+OPENAI_BASE_URL=       # https://router.cheap/... (см. кабинет router.cheap за точным URL).
+                       # Без него OPENAI_API_KEY трактуется как ключ прямого OpenAI и все запросы
+                       # идут на api.openai.com — модели в lib/ai/models.ts (gpt-5.4, gpt-5.4-mini,
+                       # claude-sonnet-4-6) существуют только на стороне router.cheap, поэтому
+                       # без OPENAI_BASE_URL всё сломается.
+ANTHROPIC_API_KEY=     # опционально, больше не используется ни одной задачей в lib/ai/models.ts —
+                       # весь AI-слой переведён на router.cheap (OPENAI_API_KEY/OPENAI_BASE_URL
+                       # выше). Код в lib/ai/generate-with-anthropic.ts остался в репозитории, но
+                       # не вызывается. Market/Competitors/Reputation при этом лишились нативного
+                       # web_search-инструмента Anthropic — реального веб-поиска у них больше нет.
+GEMINI_API_KEY=        # опционально — используется только как аварийный автофолбэк роутера
+                       # (lib/ai/router.ts), если основной вызов через router.cheap упадёт.
+AI_PROVIDER=           # "gemini" — принудительно переключает чат-ассистент и генерацию текста
+                       # постов на Gemini вместо router.cheap (см. lib/actions/chat.ts,
+                       # lib/actions/content-write.ts). Пусто/не задано = router.cheap (по умолчанию).
 BLOB_READ_WRITE_TOKEN=    # (нужен с Итерации 4)
 STRIPE_SECRET_KEY=        # (нужен с Итерации 6)
 STRIPE_WEBHOOK_SECRET=    # (нужен с Итерации 6)

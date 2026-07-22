@@ -6,7 +6,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     AUTH_SECRET: z.string().min(1),
     AUTH_URL: z.string().url().optional(),
-    ANTHROPIC_API_KEY: z.string().min(1),
+    ANTHROPIC_API_KEY: z.string().min(1).optional(),
   },
   // No client env vars yet.
   experimental__runtimeEnv: {},
