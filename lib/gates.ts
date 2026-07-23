@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { PLAN_LIMITS, type PlanName } from "@/lib/config/plans"
+import { PLAN_LIMITS, getEffectivePlan, type PlanName } from "@/lib/config/plans"
 import { getUsageThisMonth } from "@/lib/services/usage.service"
 import { AI_TASKS, type AITask } from "@/lib/ai/models"
 
@@ -11,10 +11,10 @@ export interface GateResult {
 export async function canCreateProject(userId: string): Promise<GateResult> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { plan: true },
+    select: { plan: true, planExpiresAt: true },
   })
 
-  const planName = (user?.plan ?? "FREE") as PlanName
+  const planName = getEffectivePlan((user?.plan ?? "FREE") as PlanName, user?.planExpiresAt ?? null)
   const limits = PLAN_LIMITS[planName]
 
   if (limits.maxProjects === Infinity) return { allowed: true }

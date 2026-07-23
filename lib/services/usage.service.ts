@@ -1,20 +1,21 @@
 import { prisma } from "@/lib/prisma"
-import { PLAN_LIMITS, type PlanName } from "@/lib/config/plans"
+import { PLAN_LIMITS, getEffectivePlan, type PlanName } from "@/lib/config/plans"
 
 export interface UsageInfo {
   generationsUsed: number
   generationsLimit: number
   planName: PlanName
   isUnlimited: boolean
+  planExpiresAt: Date | null
 }
 
 export async function getUsageThisMonth(userId: string): Promise<UsageInfo> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { plan: true },
+    select: { plan: true, planExpiresAt: true },
   })
 
-  const planName = (user?.plan ?? "FREE") as PlanName
+  const planName = getEffectivePlan((user?.plan ?? "FREE") as PlanName, user?.planExpiresAt ?? null)
   const limits = PLAN_LIMITS[planName]
 
   const now = new Date()
@@ -41,5 +42,6 @@ export async function getUsageThisMonth(userId: string): Promise<UsageInfo> {
     generationsLimit: limits.maxGenerationsPerMonth,
     planName,
     isUnlimited: limits.maxGenerationsPerMonth === Infinity,
+    planExpiresAt: user?.planExpiresAt ?? null,
   }
 }

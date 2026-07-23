@@ -6,7 +6,7 @@ import { getActiveProjectId } from "@/lib/actions/active-project"
 import { getChannels } from "@/lib/actions/channels"
 import { getClientAccesses } from "@/lib/actions/clientAccess"
 import { getYandexMetrikaIntegration } from "@/lib/actions/yandex-metrika"
-import { getAppUrl } from "@/lib/stripe"
+import { getAppUrl } from "@/lib/yookassa"
 import { SettingsView } from "@/components/settings/settings-view"
 
 export default async function SettingsPage() {

@@ -53,7 +53,7 @@ export function SettingsView({ name, email, usage, projectCount, maxProjects, pr
         </p>
       </div>
 
-      <PlanCard planName={usage.planName} />
+      <PlanCard planName={usage.planName} planExpiresAt={usage.planExpiresAt} />
       <UsageBar usage={usage} projectCount={projectCount} maxProjects={maxProjects} />
 
       {activeProject && (

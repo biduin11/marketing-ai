@@ -1,17 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { Zap, Check, Loader2, CreditCard } from "lucide-react"
+import { Zap, Check, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { createCheckoutSession, createBillingPortalSession } from "@/lib/actions/billing"
+import { createPayment, checkPaymentStatus } from "@/lib/actions/billing"
 import { PLAN_LIMITS, PLAN_LABELS, type PlanName } from "@/lib/config/plans"
 
 interface PlanCardProps {
   planName: PlanName
+  planExpiresAt: Date | null
 }
 
 const TIER_ORDER: PlanName[] = ["FREE", "PRO", "MAX"]
+const PAYABLE_TIERS: PlanName[] = ["PRO", "MAX"]
 
 const TIER_FEATURES: Record<PlanName, string[]> = {
   FREE: ["15 генераций в месяц", "1 проект", "Базовые AI-модули"],
@@ -30,65 +33,93 @@ const TIER_FEATURES: Record<PlanName, string[]> = {
 }
 
 function formatPrice(price: number): string {
-  return price === 0 ? "Бесплатно" : `${price.toLocaleString("ru-RU")} ₽/мес`
+  return price === 0 ? "Бесплатно" : `${price.toLocaleString("ru-RU")} ₽ / 30 дней`
 }
 
-export function PlanCard({ planName }: PlanCardProps) {
-  const [loading, setLoading] = useState(false)
+function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date)
+}
 
-  async function handleUpgrade() {
-    setLoading(true)
+export function PlanCard({ planName, planExpiresAt }: PlanCardProps) {
+  const [loadingTier, setLoadingTier] = useState<PlanName | null>(null)
+  const router = useRouter()
+
+  // planExpiresAt reflects the raw DB value, which can briefly lag behind the
+  // effective plan (already downgraded to FREE by getEffectivePlan/gates.ts)
+  // until the backup cron runs — only show the renewal banner while the paid
+  // period is still genuinely active.
+  const renewableTier =
+    planName !== "FREE" && planExpiresAt && planExpiresAt > new Date() ? planName : null
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (new URLSearchParams(window.location.search).get("payment") !== "success") return
+
+    checkPaymentStatus().then((result) => {
+      if (result.success) {
+        toast.success(`Тариф ${PLAN_LABELS[result.plan]} активирован на 30 дней`)
+        router.refresh()
+      } else {
+        toast.error("Платёж пока не подтверждён — обновите страницу через минуту")
+      }
+    })
+
+    router.replace("/settings")
+  }, [router])
+
+  async function handlePayment(tier: "PRO" | "MAX") {
+    setLoadingTier(tier)
     try {
-      const result = await createCheckoutSession()
+      const result = await createPayment(tier)
       if (!result.success) {
         toast.error(result.error)
         return
       }
-      window.location.href = result.url
+      window.location.href = result.confirmationUrl
     } catch {
       toast.error("Не удалось открыть страницу оплаты")
     } finally {
-      setLoading(false)
+      setLoadingTier(null)
     }
   }
 
-  async function handleManage() {
-    setLoading(true)
-    try {
-      const result = await createBillingPortalSession()
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      window.location.href = result.url
-    } catch {
-      toast.error("Не удалось открыть портал управления")
-    } finally {
-      setLoading(false)
-    }
+  function handlePaymentClick(event: React.MouseEvent<HTMLButtonElement>) {
+    const tier = event.currentTarget.dataset.tier as "PRO" | "MAX"
+    void handlePayment(tier)
   }
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Тариф
-        </p>
-        {planName !== "FREE" && (
-          <Button variant="outline" size="sm" onClick={handleManage} disabled={loading}>
-            {loading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <CreditCard className="size-3.5" />
-            )}
-            Управление подпиской
+      <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Тариф
+      </p>
+
+      {renewableTier && (
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-muted/30 px-4 py-3">
+          <p className="text-sm text-foreground">
+            Активен до {formatDate(planExpiresAt!)}
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            data-tier={renewableTier}
+            onClick={handlePaymentClick}
+            disabled={loadingTier !== null}
+          >
+            {loadingTier === renewableTier && <Loader2 className="size-3.5 animate-spin" />}
+            Продлить
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {TIER_ORDER.map((tier) => {
           const isCurrent = planName === tier
+          const isLoading = loadingTier === tier
 
           return (
             <div
@@ -124,24 +155,33 @@ export function PlanCard({ planName }: PlanCardProps) {
                 ))}
               </ul>
 
-              {!isCurrent && tier === "PRO" && (
-                <Button size="sm" onClick={handleUpgrade} disabled={loading} className="w-full">
-                  {loading ? (
+              {!isCurrent && PAYABLE_TIERS.includes(tier) && (
+                <Button
+                  size="sm"
+                  data-tier={tier}
+                  onClick={handlePaymentClick}
+                  disabled={loadingTier !== null}
+                  className="w-full"
+                >
+                  {isLoading ? (
                     <Loader2 className="size-3.5 animate-spin" />
                   ) : (
                     <Zap className="size-3.5" />
                   )}
-                  Перейти на Pro
+                  Перейти на {PLAN_LABELS[tier]}
                 </Button>
-              )}
-
-              {!isCurrent && tier === "MAX" && (
-                <p className="text-xs text-muted-foreground">Подключается вручную — напишите нам</p>
               )}
             </div>
           )
         })}
       </div>
+
+      {!renewableTier && (
+        <p className="mt-4 text-xs text-muted-foreground">
+          Оплата разовая, без автосписаний — тариф действует 30 дней и затем возвращается на Free,
+          если не продлить.
+        </p>
+      )}
     </div>
   )
 }

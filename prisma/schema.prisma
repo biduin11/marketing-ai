@@ -76,17 +76,24 @@ enum Priority {
   LOW
 }
 
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  CANCELED
+  REFUNDED
+}
+
 model User {
-  id                   String    @id @default(cuid())
-  email                String    @unique
-  name                 String?
-  passwordHash         String
-  plan                 Plan      @default(FREE)
-  stripeCustomerId     String?   @unique
-  stripeSubscriptionId String?   @unique
-  projects             Project[]
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime?
+  projects      Project[]
+  payments      Payment[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Project {
@@ -329,4 +336,19 @@ model ExpressAudit {
   createdAt      DateTime @default(now())
 
   @@index([projectId])
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  yookassaId String        @unique
+  plan       Plan
+  amount     Int // сумма в копейках
+  status     PaymentStatus @default(PENDING)
+  paidAt     DateTime?
+  expiresAt  DateTime? // когда истекает подписка при успешной оплате
+  createdAt  DateTime      @default(now())
+
+  @@index([userId])
 }

@@ -33,3 +33,10 @@ export const PLAN_LABELS: Record<PlanName, string> = {
   PRO: "Pro",
   MAX: "Max",
 }
+
+// planExpiresAt = null means "no expiry set" (manual/never), not "expired" —
+// a plan only lapses back to FREE once planExpiresAt is a real past date.
+export function getEffectivePlan(plan: PlanName, planExpiresAt: Date | null): PlanName {
+  if (planExpiresAt && planExpiresAt < new Date()) return "FREE"
+  return plan
+}
