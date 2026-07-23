@@ -28,7 +28,7 @@ import {
   deleteBrief,
   type BriefItem,
 } from "@/lib/actions/briefs"
-import type { PsychotypeKey } from "@/lib/ai/schemas/objections"
+import type { PsychotypeKey } from "@/lib/ai/schemas/psychotypes"
 import { cn } from "@/lib/utils"
 
 const BRIEF_TYPES: {

@@ -2,7 +2,7 @@ import type { Project, BriefType } from "@prisma/client"
 import { routeAI } from "@/lib/ai/router"
 import { briefContentSchema, type BriefContent } from "@/lib/ai/schemas/brief"
 import { briefsSystem, buildBriefInput, type CompanyCard } from "@/lib/ai/prompts/briefs"
-import type { PsychotypeKey } from "@/lib/ai/schemas/objections"
+import type { PsychotypeKey } from "@/lib/ai/schemas/psychotypes"
 
 function toCard(project: Project): CompanyCard {
   return {

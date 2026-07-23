@@ -93,14 +93,10 @@ prisma/
   Результат AI-анализа репутации через Anthropic web_search (без интеграций и парсинга).
   Каждый запуск («Обновить» на странице «Репутация») создаёт новый снапшот; версий/кэша по
   inputHash нет — генерация запускается только вручную, т.к. использует дорогой web_search.
-- `Hypothesis` — id, projectId, title, description, channel, budget, status (HypothesisStatus),
-  startDate, endDate, result, roi, conclusion (HypothesisResult), tags, timestamps
 - `Sprint` — id, projectId, weekStart, weekEnd, aiSummary, timestamps
 - `SprintTask` — id, sprintId, title, description, priority, category, estimatedHours,
   completed, dueDay, timestamps
 - `Brief` — id, projectId, type (BriefType), title, content (Json), timestamps
-- `Objection` — id, projectId, text, category, timestamps
-- `ObjectionResponse` — id, objectionId, psychotype, response, timestamps
 - `ClientAccess` — id, projectId, token (unique), clientName, clientEmail, isActive,
   expiresAt, lastVisitAt, createdAt
 - `ExpressAudit` — id, projectId, answers (Json), score, level, growthPoints (Json),
@@ -124,10 +120,11 @@ prisma/
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
 
-> Hypothesis — страница «Гипотезы» (`/hypotheses`, группа STRATEGY в сайдбаре). Ручной трекер
-  экспериментов: черновик → тест → результат, без AI-генерации. Заменил прежнюю заглушку
-  `/experiments` (удалена). `HypothesisStatus`: DRAFT | RUNNING | COMPLETED | ARCHIVED.
-  `HypothesisResult` (поле `conclusion`): CONFIRMED | REJECTED | INCONCLUSIVE.
+> Страницы «Гипотезы» (`/hypotheses`) и «Возражения» (`/objections`) удалены (модели `Hypothesis`,
+  `Objection`, `ObjectionResponse` и enum'ы `HypothesisStatus`/`HypothesisResult` — тоже; SQL см.
+  `prisma/migrations/remove_hypotheses_objections.sql`). Общий список психотипов, которым
+  пользовались ответы на возражения, вынесен в `lib/ai/schemas/psychotypes.ts` — от него
+  по-прежнему зависят Брифы (`lib/actions/briefs.ts`, `components/briefs/briefs-view.tsx`).
 
 **Enum ProjectStatus:** DRAFT | ACTIVE | PAUSED | ARCHIVED
 **Enum ArtifactType:** COMPANY_ANALYSIS | SWOT | POSITIONING | GROWTH_POINTS |
@@ -260,16 +257,15 @@ ENCRYPTION_KEY=           # случайная строка (openssl rand -hex 3
 | 4 | Analytics + Reports | ✅ Завершена |
 | 5 | AI Marketing Director | ✅ Завершена |
 | 6 | SaaS (биллинг, лимиты) | ✅ Завершена |
-| 7 | Дополнительные модули (спринт, гипотезы, брифы, возражения, УТП) | ✅ Завершена |
+| 7 | Дополнительные модули (спринт, брифы, УТП) | ✅ Завершена |
 
-Все 9 дополнительных модулей реализованы и задеплоены:
+Модули реализованы и задеплоены (7 из исходных 9 — «Трекер гипотез» и «База возражений»
+удалены: страницы падали с ошибкой, ценность модулей была неясна):
 ✅ Калькулятор окупаемости
-✅ База возражений
 ✅ Генератор УТП под площадку
 ✅ Шаблоны брифов
 ✅ Дашборд сравнения периодов
 ✅ Спринт-планировщик
-✅ Трекер гипотез
 ✅ Экспресс-аудит
 ✅ Кабинет клиента (read-only)
 

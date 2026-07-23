@@ -1,7 +1,7 @@
 import type { BriefType } from "@prisma/client"
 import type { CompanyCard } from "@/lib/ai/prompts/companyAnalysis"
 import { psychotypesBlock } from "@/lib/ai/prompts/audience"
-import type { PsychotypeKey } from "@/lib/ai/schemas/objections"
+import type { PsychotypeKey } from "@/lib/ai/schemas/psychotypes"
 
 export type { CompanyCard }
 

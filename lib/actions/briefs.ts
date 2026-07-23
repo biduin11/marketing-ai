@@ -6,7 +6,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { canGenerateAi } from "@/lib/gates"
 import { generateBriefContent } from "@/lib/services/brief.service"
-import { psychotypeKeys, type PsychotypeKey } from "@/lib/ai/schemas/objections"
+import { psychotypeKeys, type PsychotypeKey } from "@/lib/ai/schemas/psychotypes"
 import type { BriefType, Prisma } from "@prisma/client"
 import type { BriefContent } from "@/lib/ai/schemas/brief"
 
