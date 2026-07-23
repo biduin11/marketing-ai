@@ -63,11 +63,6 @@ export const AI_TASKS = {
     model: "gpt-5.4",
     useWebSearch: false,
   },
-  OBJECTIONS: {
-    provider: "openai" as const,
-    model: "gpt-5.4",
-    useWebSearch: false,
-  },
   PLATFORM_UTP: {
     provider: "openai" as const,
     model: "gpt-5.4-mini",

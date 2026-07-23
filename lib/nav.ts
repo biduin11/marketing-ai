@@ -7,10 +7,8 @@ import {
   ClipboardCheck,
   ClipboardList,
   Crosshair,
-  FlaskConical,
   Home,
   LayoutList,
-  MessageSquareX,
   Settings,
   Star,
   Users,
@@ -50,14 +48,12 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Стратегия", href: "/strategy", icon: ChartLine },
       { label: "Спринт", href: "/sprint", icon: CalendarDays },
-      { label: "Гипотезы", href: "/hypotheses", icon: FlaskConical },
     ],
   },
   {
     label: "EXECUTION",
     items: [
       { label: "Контент", href: "/content", icon: LayoutList },
-      { label: "Возражения", href: "/objections", icon: MessageSquareX },
       { label: "Брифы", href: "/briefs", icon: ClipboardList },
     ],
   },
