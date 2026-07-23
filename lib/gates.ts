@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { PLAN_LIMITS, type PlanName } from "@/lib/config/plans"
 import { getUsageThisMonth } from "@/lib/services/usage.service"
+import { AI_TASKS, type AITask } from "@/lib/ai/models"
 
 export interface GateResult {
   allowed: boolean
@@ -28,10 +29,19 @@ export async function canCreateProject(userId: string): Promise<GateResult> {
   return { allowed: true }
 }
 
-// FREE = unlimited AI generations within 1 project.
-// Upsell trigger = creating a 2nd project (canCreateProject).
-export async function canGenerateAi(userId: string): Promise<GateResult> {
+// Pass `task` when the caller knows which AI_TASKS entry it's about to run —
+// tasks with useWebSearch (COMPETITORS/REPUTATION/MARKET) are gated on the
+// plan's webSearch flag before the monthly generation count is checked.
+export async function canGenerateAi(userId: string, task?: AITask): Promise<GateResult> {
   const usage = await getUsageThisMonth(userId)
+
+  if (task && AI_TASKS[task].useWebSearch && !PLAN_LIMITS[usage.planName].webSearch) {
+    return {
+      allowed: false,
+      reason: "Анализ рынка, конкурентов и репутации доступен на тарифах Pro и Max. Перейдите на Pro.",
+    }
+  }
+
   if (usage.isUnlimited) return { allowed: true }
 
   // Only block if a finite limit is explicitly set (future plans)

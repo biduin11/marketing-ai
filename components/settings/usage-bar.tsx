@@ -1,4 +1,5 @@
 import type { UsageInfo } from "@/lib/services/usage.service"
+import { PLAN_LIMITS } from "@/lib/config/plans"
 import { Progress } from "@/components/ui/progress"
 
 interface UsageBarProps {
@@ -8,7 +9,7 @@ interface UsageBarProps {
 }
 
 export function UsageBar({ usage, projectCount, maxProjects }: UsageBarProps) {
-  const isProPlan = usage.planName === "PRO"
+  const isUnlimitedProjects = PLAN_LIMITS[usage.planName].maxProjects === Infinity
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
@@ -21,12 +22,12 @@ export function UsageBar({ usage, projectCount, maxProjects }: UsageBarProps) {
         <div className="mb-1.5 flex items-center justify-between">
           <span className="text-sm text-foreground">Проекты</span>
           <span className="text-xs text-muted-foreground">
-            {projectCount} / {isProPlan ? "∞" : maxProjects}
+            {projectCount} / {isUnlimitedProjects ? "∞" : maxProjects}
           </span>
         </div>
-        {!isProPlan && <Progress value={projectCount} max={maxProjects} />}
+        {!isUnlimitedProjects && <Progress value={projectCount} max={maxProjects} />}
         <p className="mt-1 text-xs text-muted-foreground">
-          {isProPlan ? "Без ограничений" : "На Free — 1 проект с безлимитными генерациями"}
+          {isUnlimitedProjects ? "Без ограничений" : `Доступно проектов: ${maxProjects}`}
         </p>
       </div>
 
@@ -35,11 +36,12 @@ export function UsageBar({ usage, projectCount, maxProjects }: UsageBarProps) {
         <div className="mb-1 flex items-center justify-between">
           <span className="text-sm text-foreground">AI-генерации</span>
           <span className="text-xs text-muted-foreground">
-            {usage.generationsUsed} в этом месяце
+            {usage.generationsUsed} / {usage.isUnlimited ? "∞" : usage.generationsLimit} в этом месяце
           </span>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {isProPlan ? "Без ограничений (Pro)" : "Без ограничений в рамках вашего проекта"}
+        {!usage.isUnlimited && <Progress value={usage.generationsUsed} max={usage.generationsLimit} />}
+        <p className="mt-1 text-xs text-muted-foreground">
+          {usage.isUnlimited ? "Без ограничений" : "Сбрасывается 1-го числа каждого месяца"}
         </p>
       </div>
     </div>

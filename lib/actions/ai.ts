@@ -25,6 +25,7 @@ import { horizonInputSchema } from "@/lib/validations/ai"
 import { canGenerateAi } from "@/lib/gates"
 import { z } from "zod"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
+import type { AITask } from "@/lib/ai/models"
 import { routeAI } from "@/lib/ai/router"
 import { periodComparisonCommentSchema } from "@/lib/ai/schemas/periodComparison"
 import { periodComparisonSystem, buildPeriodComparisonPrompt } from "@/lib/ai/prompts/periodComparison"
@@ -48,8 +49,11 @@ async function ownedProject(projectId: string) {
   })
 }
 
-async function checkAiGate(userId: string): Promise<{ success: false; error: string } | null> {
-  const gate = await canGenerateAi(userId)
+async function checkAiGate(
+  userId: string,
+  task?: AITask
+): Promise<{ success: false; error: string } | null> {
+  const gate = await canGenerateAi(userId, task)
   if (!gate.allowed) return { success: false, error: gate.reason ?? "Лимит генераций исчерпан" }
   return null
 }
@@ -172,7 +176,7 @@ export async function runCompetitorAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
+  const limit = await checkAiGate(project.userId, "COMPETITORS")
   if (limit) return limit
 
   try {
@@ -193,7 +197,7 @@ export async function runMarketAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
+  const limit = await checkAiGate(project.userId, "MARKET")
   if (limit) return limit
 
   try {
@@ -358,7 +362,7 @@ export async function runReputationAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
+  const limit = await checkAiGate(project.userId, "REPUTATION")
   if (limit) return limit
 
   try {
