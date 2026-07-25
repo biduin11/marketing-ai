@@ -94,6 +94,7 @@ export async function generateBrief(
   try {
     const { content } = await generateBriefContent(
       project,
+      gate.plan,
       parsed.data.type,
       parsed.data.task,
       parsed.data.psychotype

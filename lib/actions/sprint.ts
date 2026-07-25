@@ -96,7 +96,7 @@ export async function generateSprint(projectId: string): Promise<ActionResult<Sp
   }
 
   try {
-    const sprint = await generateSprintService(project)
+    const sprint = await generateSprintService(project, gate.plan)
     revalidatePath("/sprint")
     return { success: true, data: toItem(sprint) }
   } catch (error) {

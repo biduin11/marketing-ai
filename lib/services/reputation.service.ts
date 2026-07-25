@@ -1,11 +1,13 @@
 import type { Project, ReputationSnapshot } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { reputationSchema, type Reputation } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
 
 async function analyzeReputation(
-  project: Project
+  project: Project,
+  plan: PlanName
 ): Promise<{ payload: Reputation; model: string }> {
   const city = project.regions[0] ?? ""
   const socials =
@@ -26,6 +28,7 @@ async function analyzeReputation(
 
   const { data, model } = await routeAI({
     task: "REPUTATION",
+    plan,
     system: reputationSystem,
     prompt:
       buildReputationInput({
@@ -41,9 +44,10 @@ async function analyzeReputation(
 }
 
 export async function generateReputationSnapshot(
-  project: Project
+  project: Project,
+  plan: PlanName
 ): Promise<ReputationSnapshot> {
-  const { payload, model } = await analyzeReputation(project)
+  const { payload, model } = await analyzeReputation(project, plan)
   return prisma.reputationSnapshot.create({
     data: { projectId: project.id, payload, model },
   })

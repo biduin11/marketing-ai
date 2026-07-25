@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { contentPlanSchema } from "@/lib/ai/schemas/contentPlan"
 import {
   contentPlanSystem,
@@ -26,6 +27,7 @@ function toCard(project: Project): CompanyCard {
 
 export async function generateContentPlan(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
@@ -37,7 +39,7 @@ export async function generateContentPlan(
   })
   const platforms = platformRows.map((p) => ({ name: p.name, share: p.share }))
 
-  const inputHash = computeInputHash({ type: "CONTENT_PLAN", card, platforms })
+  const inputHash = computeInputHash({ type: "CONTENT_PLAN", card, platforms, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CONTENT_PLAN")
@@ -46,6 +48,7 @@ export async function generateContentPlan(
 
   const { data, model } = await routeAI({
     task: "CONTENT_PLAN",
+    plan,
     system: contentPlanSystem,
     prompt: buildContentPlanInput(card, platforms),
     schema: contentPlanSchema,

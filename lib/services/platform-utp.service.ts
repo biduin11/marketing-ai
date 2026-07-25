@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { platformUtpSchema } from "@/lib/ai/schemas/platform-utp"
 import type { PlatformKey } from "@/lib/ai/schemas/platform-utp"
 import {
@@ -42,12 +43,14 @@ export async function getLatestPlatformUtp(
 /** Always generates a new version — no inputHash caching, generation is manual-only. */
 export async function generatePlatformUtp(
   project: Project,
+  plan: PlanName,
   platform: PlatformKey
 ): Promise<AiArtifact> {
   const card = toCard(project)
 
   const { data, model } = await routeAI({
     task: "PLATFORM_UTP",
+    plan,
     system: platformUtpSystem,
     prompt: buildPlatformUtpInput(card, platform),
     schema: platformUtpSchema,

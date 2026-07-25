@@ -1,6 +1,7 @@
 import type { Project, AiArtifact, Metric } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { executiveReportSchema } from "@/lib/ai/schemas/executiveReport"
 import {
   executiveReportSystem,
@@ -23,6 +24,7 @@ const periodTypeMap: Record<ReportArtifactType, "weekly" | "monthly" | "quarterl
 
 export async function generateExecutiveReport(
   project: Project,
+  plan: PlanName,
   artifactType: ReportArtifactType,
   metrics: Metric[],
   period: string,
@@ -37,6 +39,7 @@ export async function generateExecutiveReport(
     metricsCount: metrics.length,
     totalSpend: summary.totalSpend,
     totalRevenue: summary.totalRevenue,
+    plan,
   })
 
   if (!options.force) {
@@ -47,6 +50,7 @@ export async function generateExecutiveReport(
   const periodType = periodTypeMap[artifactType]
   const { data, model } = await routeAI({
     task: "REPORT",
+    plan,
     system: executiveReportSystem,
     prompt: buildExecutiveReportInput({
       period,

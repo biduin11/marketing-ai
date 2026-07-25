@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { generateSprint } from "@/lib/services/sprint.service"
+import { getEffectivePlan } from "@/lib/config/plans"
 
 export const runtime = "nodejs"
 export const maxDuration = 300
@@ -15,6 +16,7 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const activeProjects = await prisma.project.findMany({
     where: { status: "ACTIVE" },
+    include: { user: { select: { plan: true, planExpiresAt: true } } },
   })
 
   let processed = 0
@@ -22,7 +24,8 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   for (const project of activeProjects) {
     try {
-      await generateSprint(project)
+      const plan = getEffectivePlan(project.user.plan, project.user.planExpiresAt)
+      await generateSprint(project, plan)
       processed++
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error"

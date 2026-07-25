@@ -1,5 +1,6 @@
 import type { Project, BriefType } from "@prisma/client"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { briefContentSchema, type BriefContent } from "@/lib/ai/schemas/brief"
 import { briefsSystem, buildBriefInput, type CompanyCard } from "@/lib/ai/prompts/briefs"
 import type { PsychotypeKey } from "@/lib/ai/schemas/psychotypes"
@@ -20,6 +21,7 @@ function toCard(project: Project): CompanyCard {
 
 export async function generateBriefContent(
   project: Project,
+  plan: PlanName,
   type: BriefType,
   task: string,
   psychotype: PsychotypeKey
@@ -28,6 +30,7 @@ export async function generateBriefContent(
 
   const { data, model } = await routeAI({
     task: "BRIEFS",
+    plan,
     system: briefsSystem,
     prompt: buildBriefInput(card, type, task, psychotype),
     schema: briefContentSchema,

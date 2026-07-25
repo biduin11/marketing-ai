@@ -75,7 +75,7 @@ export async function runPlatformUtp(
   }
 
   try {
-    const artifact = await generatePlatformUtp(project, platform)
+    const artifact = await generatePlatformUtp(project, gate.plan, platform)
     const parsed = platformUtpSchema.safeParse(artifact.payload)
     if (!parsed.success) {
       return { success: false, error: "AI-ответ не прошёл валидацию схемы" }

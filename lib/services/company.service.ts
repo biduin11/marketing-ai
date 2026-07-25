@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { companyAnalysisSchema } from "@/lib/ai/schemas/companyAnalysis"
 import {
   companyAnalysisSystem,
@@ -32,10 +33,11 @@ function toCard(project: Project): CompanyCard {
  */
 export async function generateCompanyAnalysis(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "COMPANY_ANALYSIS", card })
+  const inputHash = computeInputHash({ type: "COMPANY_ANALYSIS", card, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPANY_ANALYSIS")
@@ -46,6 +48,7 @@ export async function generateCompanyAnalysis(
 
   const { data, model } = await routeAI({
     task: "COMPANY_ANALYSIS",
+    plan,
     system: companyAnalysisSystem,
     prompt: buildCompanyAnalysisInput(card),
     schema: companyAnalysisSchema,

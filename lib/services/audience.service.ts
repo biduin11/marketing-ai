@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import {
   audienceSegmentsSchema,
   buyerPersonaSchema,
@@ -34,10 +35,11 @@ function toCard(project: Project): CompanyCard {
 
 export async function generateAudienceSegments(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "AUDIENCE_SEGMENTS", card })
+  const inputHash = computeInputHash({ type: "AUDIENCE_SEGMENTS", card, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "AUDIENCE_SEGMENTS")
@@ -46,6 +48,7 @@ export async function generateAudienceSegments(
 
   const { data, model } = await routeAI({
     task: "AUDIENCE",
+    plan,
     system: audienceSegmentsSystem,
     prompt: buildAudienceSegmentsInput(card),
     schema: audienceSegmentsSchema,
@@ -59,10 +62,11 @@ export async function generateAudienceSegments(
 
 export async function generateBuyerPersona(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "BUYER_PERSONA", card })
+  const inputHash = computeInputHash({ type: "BUYER_PERSONA", card, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "BUYER_PERSONA")
@@ -71,6 +75,7 @@ export async function generateBuyerPersona(
 
   const { data, model } = await routeAI({
     task: "AUDIENCE",
+    plan,
     system: buyerPersonaSystem,
     prompt: buildBuyerPersonaInput(card),
     schema: buyerPersonaSchema,
@@ -84,10 +89,11 @@ export async function generateBuyerPersona(
 
 export async function generateJtbd(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "JTBD", card })
+  const inputHash = computeInputHash({ type: "JTBD", card, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "JTBD")
@@ -96,6 +102,7 @@ export async function generateJtbd(
 
   const { data, model } = await routeAI({
     task: "AUDIENCE",
+    plan,
     system: jtbdSystem,
     prompt: buildJtbdInput(card),
     schema: jtbdSchema,

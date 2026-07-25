@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { cjmSchema } from "@/lib/ai/schemas/cjm"
 import {
   cjmSystem,
@@ -26,10 +27,11 @@ function toCard(project: Project): CompanyCard {
 
 export async function generateCjm(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "CJM", card })
+  const inputHash = computeInputHash({ type: "CJM", card, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CJM")
@@ -38,6 +40,7 @@ export async function generateCjm(
 
   const { data, model } = await routeAI({
     task: "CJM",
+    plan,
     system: cjmSystem,
     prompt: buildCjmInput(card),
     schema: cjmSchema,

@@ -2,6 +2,7 @@ import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { competitorAnalysisSchema } from "@/lib/ai/schemas/competitorAnalysis"
 import {
   competitorAnalysisSystem,
@@ -65,11 +66,12 @@ function parseCompetitorsDetailed(raw: Project["competitorsDetailed"]): Competit
 
 export async function generateCompetitorAnalysis(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
   const detailed = parseCompetitorsDetailed(project.competitorsDetailed)
-  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card, detailed })
+  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card, detailed, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPETITOR_ANALYSIS")
@@ -78,6 +80,7 @@ export async function generateCompetitorAnalysis(
 
   const { data, model } = await routeAI({
     task: "COMPETITORS",
+    plan,
     system: competitorAnalysisSystem,
     prompt: buildCompetitorAnalysisInput(card, detailed),
     schema: competitorAnalysisSchema,

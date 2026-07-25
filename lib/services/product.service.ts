@@ -2,6 +2,7 @@ import { z } from "zod"
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { productAnalysisSchema } from "@/lib/ai/schemas/product"
 import {
   productAnalysisSystem,
@@ -49,10 +50,11 @@ function toContext(project: Project): ProductCompanyContext {
 
 export async function generateProductAnalysis(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const context = toContext(project)
-  const inputHash = computeInputHash({ type: "PRODUCT_ANALYSIS", context })
+  const inputHash = computeInputHash({ type: "PRODUCT_ANALYSIS", context, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "PRODUCT_ANALYSIS")
@@ -61,6 +63,7 @@ export async function generateProductAnalysis(
 
   const { data, model } = await routeAI({
     task: "PRODUCT",
+    plan,
     system: productAnalysisSystem,
     prompt: buildProductAnalysisInput(context),
     schema: productAnalysisSchema,

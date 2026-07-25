@@ -1,6 +1,7 @@
 import type { Project, Sprint, SprintTask } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { sprintSchema } from "@/lib/ai/schemas/sprint"
 import { sprintSystem, buildSprintInput, type CompanyCard } from "@/lib/ai/prompts/sprint"
 import { computeSummary } from "@/lib/services/analytics.service"
@@ -86,7 +87,11 @@ async function buildContentContext(projectId: string): Promise<string> {
  * Always overwrites the existing sprint for that week — sprints are a live
  * weekly plan, not versioned artifacts like AiArtifact.
  */
-export async function generateSprint(project: Project, now: Date = new Date()): Promise<SprintWithTasks> {
+export async function generateSprint(
+  project: Project,
+  plan: PlanName,
+  now: Date = new Date()
+): Promise<SprintWithTasks> {
   const weekStart = startOfWeekMonday(now)
   const weekEnd = endOfWeekSunday(weekStart)
 
@@ -101,6 +106,7 @@ export async function generateSprint(project: Project, now: Date = new Date()): 
 
   const { data } = await routeAI({
     task: "SPRINT",
+    plan,
     system: sprintSystem,
     prompt: buildSprintInput({
       card: toCard(project),

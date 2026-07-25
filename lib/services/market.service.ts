@@ -1,6 +1,7 @@
 import type { Project, AiArtifact } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { marketAnalysisSchema } from "@/lib/ai/schemas/market"
 import {
   marketAnalysisSystem,
@@ -24,10 +25,11 @@ function toContext(project: Project): MarketCompanyContext {
 
 export async function generateMarketAnalysis(
   project: Project,
+  plan: PlanName,
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const context = toContext(project)
-  const inputHash = computeInputHash({ type: "MARKET_ANALYSIS", context })
+  const inputHash = computeInputHash({ type: "MARKET_ANALYSIS", context, plan })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "MARKET_ANALYSIS")
@@ -36,6 +38,7 @@ export async function generateMarketAnalysis(
 
   const { data, model } = await routeAI({
     task: "MARKET",
+    plan,
     system: marketAnalysisSystem,
     prompt: buildMarketAnalysisInput(context),
     schema: marketAnalysisSchema,

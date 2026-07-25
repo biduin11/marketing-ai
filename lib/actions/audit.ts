@@ -93,7 +93,7 @@ export async function runExpressAudit(
   }
 
   try {
-    const { payload } = await generateExpressAudit(project, parsedAnswers.data)
+    const { payload } = await generateExpressAudit(project, gate.plan, parsedAnswers.data)
 
     const audit = await prisma.expressAudit.create({
       data: {

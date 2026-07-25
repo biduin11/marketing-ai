@@ -1,6 +1,7 @@
 import type { Project, AiArtifact, Metric } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { directorAnalysisSchema } from "@/lib/ai/schemas/directorAnalysis"
 import {
   directorAnalysisSystem,
@@ -145,6 +146,7 @@ function buildDirectorContext(
 
 export async function generateDirectorAnalysis(
   project: Project,
+  plan: PlanName,
   metrics: Metric[],
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
@@ -154,6 +156,7 @@ export async function generateDirectorAnalysis(
     projectId: project.id,
     date: today,
     metricsCount: metrics.length,
+    plan,
   })
 
   if (!options.force) {
@@ -170,6 +173,7 @@ export async function generateDirectorAnalysis(
 
   const { data, model } = await routeAI({
     task: "DIRECTOR",
+    plan,
     system: directorAnalysisSystem,
     prompt: buildDirectorInput(ctx),
     schema: directorAnalysisSchema,

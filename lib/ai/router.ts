@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { AI_TASKS, type AITask, type AIProvider } from "@/lib/ai/models"
+import { resolveTaskConfig, type AITask, type AIProvider, type PlanName } from "@/lib/ai/models"
 import { generateStructuredWithAnthropic } from "@/lib/ai/generate-with-anthropic"
 import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
@@ -9,6 +9,7 @@ export type { AIProvider }
 
 interface RouterRequest<T extends z.ZodType> {
   task: AITask
+  plan: PlanName
   system: string
   prompt: string
   schema: T
@@ -86,9 +87,10 @@ async function callProvider<T extends z.ZodType>(
 
 /**
  * Single entry point for all structured AI generation in the app. Routes to
- * the provider assigned in AI_TASKS, and — for tasks that don't use
- * web_search — automatically retries once on Gemini if the primary call
- * fails with a transient error (rate limit, timeout, outage). Tasks with
+ * the provider/model resolved for (task, plan) via resolveTaskConfig, and —
+ * for tasks that don't use web_search — automatically retries once on
+ * Gemini if the primary call fails with a transient error (rate limit,
+ * timeout, outage). Tasks with
  * useWebSearch (COMPETITORS/REPUTATION/MARKET) never fall back: Gemini has
  * no web_search equivalent, so a failure there surfaces as a clear error
  * instead of silently switching providers. Schema/model/prompt bugs never
@@ -99,7 +101,7 @@ async function callProvider<T extends z.ZodType>(
 export async function routeAI<T extends z.ZodType>(
   request: RouterRequest<T>
 ): Promise<RouterResult<z.infer<T>>> {
-  const task = AI_TASKS[request.task]
+  const task = resolveTaskConfig(request.task, request.plan)
   const start = Date.now()
 
   try {

@@ -1,5 +1,6 @@
 import type { Project } from "@prisma/client"
 import { routeAI } from "@/lib/ai/router"
+import type { PlanName } from "@/lib/config/plans"
 import { expressAuditSchema, type ExpressAuditResult } from "@/lib/ai/schemas/express-audit"
 import { expressAuditSystem, buildExpressAuditInput, type CompanyCard } from "@/lib/ai/prompts/express-audit"
 
@@ -19,12 +20,14 @@ function toCard(project: Project): CompanyCard {
 
 export async function generateExpressAudit(
   project: Project,
+  plan: PlanName,
   answers: Record<string, number>
 ): Promise<{ payload: ExpressAuditResult; model: string }> {
   const card = toCard(project)
 
   const { data, model } = await routeAI({
     task: "EXPRESS_AUDIT",
+    plan,
     system: expressAuditSystem,
     prompt: buildExpressAuditInput(card, answers),
     schema: expressAuditSchema,

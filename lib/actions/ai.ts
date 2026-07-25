@@ -26,6 +26,7 @@ import { canGenerateAi } from "@/lib/gates"
 import { z } from "zod"
 import type { Horizon } from "@/lib/ai/schemas/strategy"
 import type { AITask } from "@/lib/ai/models"
+import type { PlanName } from "@/lib/config/plans"
 import { routeAI } from "@/lib/ai/router"
 import { periodComparisonCommentSchema } from "@/lib/ai/schemas/periodComparison"
 import { periodComparisonSystem, buildPeriodComparisonPrompt } from "@/lib/ai/prompts/periodComparison"
@@ -41,6 +42,10 @@ type ActionResult =
   | { success: true }
   | { success: false; error: string }
 
+type AiGate =
+  | { success: false; error: string }
+  | { success: true; plan: PlanName }
+
 async function ownedProject(projectId: string) {
   const session = await auth()
   if (!session?.user?.id) return null
@@ -49,13 +54,12 @@ async function ownedProject(projectId: string) {
   })
 }
 
-async function checkAiGate(
-  userId: string,
-  task?: AITask
-): Promise<{ success: false; error: string } | null> {
+async function checkAiGate(userId: string, task?: AITask): Promise<AiGate> {
   const gate = await canGenerateAi(userId, task)
-  if (!gate.allowed) return { success: false, error: gate.reason ?? "Лимит генераций исчерпан" }
-  return null
+  if (!gate.allowed) {
+    return { success: false, error: gate.reason ?? "Лимит генераций исчерпан" }
+  }
+  return { success: true, plan: gate.plan }
 }
 
 export async function runCompanyAnalysis(
@@ -65,11 +69,11 @@ export async function runCompanyAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateCompanyAnalysis(project, { force })
+    await generateCompanyAnalysis(project, gate.plan, { force })
     revalidatePath("/company")
     return { success: true }
   } catch (error) {
@@ -92,11 +96,11 @@ export async function runStrategy(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateStrategy(project, parsedHorizon.data, { force })
+    await generateStrategy(project, gate.plan, parsedHorizon.data, { force })
     revalidatePath("/strategy")
     return { success: true }
   } catch (error) {
@@ -113,11 +117,11 @@ export async function runAudienceSegments(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateAudienceSegments(project, { force })
+    await generateAudienceSegments(project, gate.plan, { force })
     revalidatePath("/audience")
     return { success: true }
   } catch (error) {
@@ -134,11 +138,11 @@ export async function runBuyerPersona(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateBuyerPersona(project, { force })
+    await generateBuyerPersona(project, gate.plan, { force })
     revalidatePath("/audience")
     return { success: true }
   } catch (error) {
@@ -155,11 +159,11 @@ export async function runJtbd(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateJtbd(project, { force })
+    await generateJtbd(project, gate.plan, { force })
     revalidatePath("/audience")
     return { success: true }
   } catch (error) {
@@ -176,11 +180,11 @@ export async function runCompetitorAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId, "COMPETITORS")
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId, "COMPETITORS")
+  if (!gate.success) return gate
 
   try {
-    await generateCompetitorAnalysis(project, { force })
+    await generateCompetitorAnalysis(project, gate.plan, { force })
     revalidatePath("/competitors")
     return { success: true }
   } catch (error) {
@@ -198,11 +202,11 @@ export async function runMarketAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId, "MARKET")
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId, "MARKET")
+  if (!gate.success) return gate
 
   try {
-    await generateMarketAnalysis(project, { force })
+    await generateMarketAnalysis(project, gate.plan, { force })
     revalidatePath("/company")
     return { success: true }
   } catch (error) {
@@ -219,11 +223,11 @@ export async function runProductAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateProductAnalysis(project, { force })
+    await generateProductAnalysis(project, gate.plan, { force })
     revalidatePath("/company")
     return { success: true }
   } catch (error) {
@@ -240,11 +244,11 @@ export async function runOffer(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateOffer(project, { force })
+    await generateOffer(project, gate.plan, { force })
     revalidatePath("/offers")
     return { success: true }
   } catch (error) {
@@ -261,11 +265,11 @@ export async function runCjm(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateCjm(project, { force })
+    await generateCjm(project, gate.plan, { force })
     revalidatePath("/journey")
     return { success: true }
   } catch (error) {
@@ -282,11 +286,11 @@ export async function runContentPlan(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
-    await generateContentPlan(project, { force })
+    await generateContentPlan(project, gate.plan, { force })
     revalidatePath("/content")
     return { success: true }
   } catch (error) {
@@ -309,8 +313,8 @@ export async function runReport(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
     const allMetrics = await listMetrics(projectId)
@@ -320,6 +324,7 @@ export async function runReport(
 
     await generateExecutiveReport(
       project,
+      gate.plan,
       parsed.data.type,
       metrics,
       parsed.data.period,
@@ -341,12 +346,12 @@ export async function runDirectorAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
     const metrics = await listMetrics(projectId)
-    await generateDirectorAnalysis(project, metrics, { force })
+    await generateDirectorAnalysis(project, gate.plan, metrics, { force })
     revalidatePath("/")
     revalidatePath("/director")
     return { success: true }
@@ -363,11 +368,11 @@ export async function runReputationAnalysis(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId, "REPUTATION")
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId, "REPUTATION")
+  if (!gate.success) return gate
 
   try {
-    await generateReputationSnapshot(project)
+    await generateReputationSnapshot(project, gate.plan)
     revalidatePath("/reputation")
     return { success: true }
   } catch (error) {
@@ -408,12 +413,13 @@ export async function generatePeriodComment(
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
 
-  const limit = await checkAiGate(project.userId)
-  if (limit) return limit
+  const gate = await checkAiGate(project.userId)
+  if (!gate.success) return gate
 
   try {
     const result = await routeAI({
       task: "PERIOD_COMPARISON",
+      plan: gate.plan,
       system: periodComparisonSystem,
       prompt: buildPeriodComparisonPrompt(parsed.data),
       schema: periodComparisonCommentSchema,
