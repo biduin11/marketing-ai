@@ -107,6 +107,10 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
     { timeout: WEB_SEARCH_TIMEOUT_MS }
   )
 
+  console.log('RAW anthropic response content types:', response.content.map(c => c.type))
+  console.log('Has web_search_tool_result:', response.content.some(c => c.type === 'web_search_tool_result'))
+  console.log('Has server_tool_use:', response.content.some(c => c.type === 'server_tool_use'))
+
   for (const block of response.content) {
     if (
       block.type === "tool_use" &&
