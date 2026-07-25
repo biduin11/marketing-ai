@@ -54,7 +54,6 @@ async function callProvider<T extends z.ZodType>(
     prompt: string
     schema: T
     maxTokens?: number
-    useWebSearch?: boolean
   }
 ): Promise<{ data: z.infer<T>; model: string }> {
   switch (provider) {
@@ -65,7 +64,6 @@ async function callProvider<T extends z.ZodType>(
         schema: args.schema,
         model: args.model,
         maxTokens: args.maxTokens,
-        useWebSearch: args.useWebSearch,
       })
     case "openai":
       return generateStructuredWithOpenAI({
@@ -87,16 +85,16 @@ async function callProvider<T extends z.ZodType>(
 
 /**
  * Single entry point for all structured AI generation in the app. Routes to
- * the provider/model resolved for (task, plan) via resolveTaskConfig, and —
- * for tasks that don't use web_search — automatically retries once on
- * Gemini if the primary call fails with a transient error (rate limit,
- * timeout, outage). Tasks with
- * useWebSearch (COMPETITORS/REPUTATION/MARKET) never fall back: Gemini has
- * no web_search equivalent, so a failure there surfaces as a clear error
- * instead of silently switching providers. Schema/model/prompt bugs never
- * trigger a fallback either — see lib/ai/errors.ts for the classification.
- * A missing API key IS fallback-eligible (absent config, not a code bug),
- * but still logs a console.warn below so it doesn't go unnoticed.
+ * the provider/model resolved for (task, plan) via resolveTaskConfig, and
+ * automatically retries once on Gemini if the primary call fails with a
+ * transient error (rate limit, timeout, outage) — including for
+ * COMPETITORS/REPUTATION/MARKET: their web search now runs separately via
+ * Tavily (lib/services/tavily.service.ts) before routeAI is ever called, so
+ * the prompt Gemini receives already has the same search results baked in
+ * as plain text. Schema/model/prompt bugs never trigger a fallback — see
+ * lib/ai/errors.ts for the classification. A missing API key IS
+ * fallback-eligible (absent config, not a code bug), but still logs a
+ * console.warn below so it doesn't go unnoticed.
  */
 export async function routeAI<T extends z.ZodType>(
   request: RouterRequest<T>
@@ -105,14 +103,12 @@ export async function routeAI<T extends z.ZodType>(
   const start = Date.now()
 
   try {
-    console.log('REPUTATION useWebSearch:', task.useWebSearch, 'plan:', request.plan)
     const result = await callProvider(task.provider, {
       model: task.model,
       system: request.system,
       prompt: request.prompt,
       schema: request.schema,
       maxTokens: request.maxTokens,
-      useWebSearch: task.useWebSearch,
     })
     const executionTime = Date.now() - start
     logRouterEvent({
@@ -132,20 +128,6 @@ export async function routeAI<T extends z.ZodType>(
   } catch (error) {
     const { fallbackEligible, reason } = classifyError(error)
     const executionTime = Date.now() - start
-
-    if (task.useWebSearch) {
-      logRouterEvent({
-        task: request.task,
-        provider: task.provider,
-        model: task.model,
-        status: "error",
-        reason,
-        executionTime,
-      })
-      throw new Error(
-        `Модуль ${request.task} требует Anthropic (web_search) и временно недоступен: ${reason}`
-      )
-    }
 
     if (!fallbackEligible) {
       logRouterEvent({

@@ -32,12 +32,12 @@ export async function canCreateProject(userId: string): Promise<GateResult> {
 }
 
 // Pass `task` when the caller knows which AI_TASKS entry it's about to run —
-// tasks with useWebSearch (COMPETITORS/REPUTATION/MARKET) are gated on the
+// tasks with requiresSearch (COMPETITORS/REPUTATION/MARKET) are gated on the
 // plan's webSearch flag before the monthly generation count is checked.
 export async function canGenerateAi(userId: string, task?: AITask): Promise<GateResult> {
   const usage = await getUsageThisMonth(userId)
 
-  if (task && AI_TASKS[task].useWebSearch && !PLAN_LIMITS[usage.planName].webSearch) {
+  if (task && AI_TASKS[task].requiresSearch && !PLAN_LIMITS[usage.planName].webSearch) {
     return {
       allowed: false,
       reason: "Анализ рынка, конкурентов и репутации доступен на тарифах Pro и Max. Перейдите на Pro.",

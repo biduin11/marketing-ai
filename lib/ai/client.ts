@@ -9,9 +9,12 @@ const globalForAnthropic = globalThis as unknown as {
 /**
  * ANTHROPIC_BASE_URL lets this point at an Anthropic-API-compatible router
  * instead of api.anthropic.com — e.g. router.cheap, which proxies Anthropic's
- * native request/tool format (including the web_search_20250305 tool) under
- * its own base URL, with an ANTHROPIC_API_KEY issued by router.cheap rather
- * than Anthropic directly.
+ * native request/tool-use format under its own base URL, with an
+ * ANTHROPIC_API_KEY issued by router.cheap rather than Anthropic directly.
+ * It does NOT proxy Anthropic's native web_search_20250305 server-side tool
+ * (confirmed with router.cheap support) — web search for
+ * COMPETITORS/REPUTATION/MARKET runs separately via Tavily
+ * (lib/services/tavily.service.ts) and is embedded as prompt text instead.
  */
 export const anthropic =
   globalForAnthropic.anthropic ??

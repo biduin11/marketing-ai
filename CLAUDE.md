@@ -90,9 +90,11 @@ prisma/
   Управляемые площадки контент-плана (вкладка «Площадки»). Входят в `inputHash` генерации
   CONTENT_PLAN и передаются в промт — AI распределяет контент по ним с учётом долей.
 - `ReputationSnapshot` — id, projectId, payload (Json), model, createdAt (index [projectId, createdAt])
-  Результат AI-анализа репутации через Anthropic web_search (без интеграций и парсинга).
-  Каждый запуск («Обновить» на странице «Репутация») создаёт новый снапшот; версий/кэша по
-  inputHash нет — генерация запускается только вручную, т.к. использует дорогой web_search.
+  Результат AI-анализа репутации: поиск через Tavily (`lib/services/tavily.service.ts`),
+  результаты вставляются текстом в промт, затем анализ через Anthropic/openai-совместимый роутер
+  (без интеграций и парсинга сайтов напрямую). Каждый запуск («Обновить» на странице «Репутация»)
+  создаёт новый снапшот; версий/кэша по inputHash нет — генерация запускается только вручную,
+  т.к. использует Tavily-поиск.
 - `Sprint` — id, projectId, weekStart, weekEnd, aiSummary, timestamps
 - `SprintTask` — id, sprintId, title, description, priority, category, estimatedHours,
   completed, dueDay, timestamps
@@ -120,8 +122,9 @@ prisma/
   `planExpiresAt`. `planExpiresAt: null` означает «без срока» (ручной MAX/PRO), а не «истёк».
 
 > MARKET_ANALYSIS — вкладка «Рынок» на странице «Анализ компании» (`/company`). Размер и рост
-  рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — через Anthropic
-  web_search. Кэш по inputHash, генерация только по кнопке «Сгенерировать»/«Регенерировать».
+  рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — поиск через Tavily,
+  результаты текстом в промте, анализ через роутер. Кэш по inputHash, генерация только по кнопке
+  «Сгенерировать»/«Регенерировать».
 
 > PRODUCT_ANALYSIS — вкладка «Продукт» на странице «Анализ компании» (`/company`). BCG-матрица,
   жизненный цикл, ABC-анализ ассортимента, возможности развития, продуктовая стратегия — без
@@ -227,7 +230,9 @@ DATABASE_URL=          # Neon connection string
 AUTH_SECRET=           # openssl rand -base64 32
 AUTH_URL=              # https://твой-домен.vercel.app (на проде)
 ANTHROPIC_API_KEY=     # ключ router.cheap (НЕ обязательно родной ключ Anthropic — router.cheap
-                       # проксирует нативный Anthropic-формат запросов, включая web_search).
+                       # проксирует нативный Anthropic-формат запросов, НО не нативный
+                       # web_search_20250305 tool — для Market/Competitors/Reputation поиск
+                       # идёт через Tavily (TAVILY_API_KEY), см. ниже).
                        # Используется задачами на claude-sonnet-4-6 в lib/ai/models.ts (Company
                        # Analysis, SWOT, Strategy, Positioning, Market, Competitors, Reputation).
 ANTHROPIC_BASE_URL=    # URL Anthropic-совместимого эндпоинта router.cheap (см. кабинет router.cheap).
@@ -240,12 +245,16 @@ OPENAI_API_KEY=        # тот же (или другой) ключ router.cheap
 OPENAI_BASE_URL=       # URL OpenAI-совместимого эндпоинта router.cheap. Без него — обращение к
                        # api.openai.com напрямую, где моделей gpt-5.4/gpt-5.4-mini не существует.
 GEMINI_API_KEY=        # опционально — аварийный автофолбэк роутера (lib/ai/router.ts), если
-                       # основной вызов через router.cheap упадёт. Не участвует в web_search-задачах
-                       # (Market/Competitors/Reputation) — для них при сбое роутер сразу возвращает
-                       # ошибку, без попытки Gemini.
+                       # основной вызов через router.cheap упадёт. Участвует и в задачах
+                       # Market/Competitors/Reputation — их веб-поиск (Tavily) не привязан к
+                       # провайдеру, так что Gemini получает тот же текстовый промт с результатами.
 AI_PROVIDER=           # "gemini" — принудительно переключает чат-ассистент и генерацию текста
                        # постов на Gemini вместо router.cheap (см. lib/actions/chat.ts,
                        # lib/actions/content-write.ts). Пусто/не задано = router.cheap (по умолчанию).
+TAVILY_API_KEY=           # ключ Tavily Search API (tavily.com) — веб-поиск для Market/Competitors/
+                          # Reputation (lib/services/tavily.service.ts), результаты вставляются
+                          # текстом в промт перед вызовом routeAI (заменил нативный Anthropic
+                          # web_search_20250305 — router.cheap его не проксирует).
 BLOB_READ_WRITE_TOKEN=    # (нужен с Итерации 4)
 YOOKASSA_SHOP_ID=         # ID магазина из личного кабинета ЮKassa (yookassa.ru)
 YOOKASSA_SECRET_KEY=      # Секретный ключ из личного кабинета ЮKassa

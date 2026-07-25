@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts/market"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { tavilyMultiSearch, formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
 
 function toContext(project: Project): MarketCompanyContext {
   return {
@@ -21,6 +22,21 @@ function toContext(project: Project): MarketCompanyContext {
     avgCheck: project.avgCheck,
     margin: project.margin,
   }
+}
+
+function buildMarketQueries(context: MarketCompanyContext): string[] {
+  const region = context.regions.length ? context.regions[0] : ""
+  const niche = context.niche ?? "рынок"
+  const mainProduct = context.products.length ? context.products[0] : niche
+
+  return [
+    `${niche} рынок ${region} объём 2024 2025`.trim(),
+    `${niche} рынок России рост динамика`.trim(),
+    `${niche} ${region} компании список`.trim(),
+    `${niche} ${region} конкуренты 2ГИС яндекс карты`.trim(),
+    `цены ${mainProduct} 2024 2025 динамика`.trim(),
+    `${niche} ${region} новости 2025`.trim(),
+  ]
 }
 
 export async function generateMarketAnalysis(
@@ -36,11 +52,18 @@ export async function generateMarketAnalysis(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const queries = buildMarketQueries(context)
+  const searchResults = await tavilyMultiSearch(queries)
+  const searchContext = `
+
+РЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:
+${formatSearchResultsForPrompt(searchResults)}`
+
   const { data, model } = await routeAI({
     task: "MARKET",
     plan,
     system: marketAnalysisSystem,
-    prompt: buildMarketAnalysisInput(context),
+    prompt: buildMarketAnalysisInput(context) + searchContext,
     schema: marketAnalysisSchema,
     maxTokens: 16000,
   })

@@ -12,6 +12,7 @@ import {
 } from "@/lib/ai/prompts/competitorAnalysis"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { tavilyMultiSearch, formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -64,6 +65,35 @@ function parseCompetitorsDetailed(raw: Project["competitorsDetailed"]): Competit
     }))
 }
 
+function buildCompetitorQueries(card: CompanyCard, detailed: CompetitorDetail[]): string[] {
+  const city = card.regions.length ? card.regions[0] : ""
+  const mainProduct = card.products.length ? card.products[0] : card.niche ?? "услуга"
+
+  const queries = [`${mainProduct} ${city}`.trim(), `${mainProduct} ${city} лучшие компании`.trim()]
+
+  if (detailed.length > 0) {
+    for (const c of detailed) {
+      queries.push(`${c.name} ${city} отзывы`.trim())
+      queries.push(`${c.name} авито ${city}`.trim())
+      const links = [c.site, c.yandexMaps, c.twogis, c.vk, c.telegram, c.instagram, c.youtube, c.tiktok].filter(
+        (v): v is string => Boolean(v)
+      )
+      if (links.length > 0) {
+        queries.push(...links)
+      } else {
+        queries.push(`${c.name} сайт`, `${c.name} Instagram ВКонтакте Telegram`)
+      }
+    }
+  } else {
+    for (const name of card.competitors) {
+      queries.push(`${name} ${city} отзывы`.trim())
+      queries.push(`${name} сайт`, `${name} Instagram ВКонтакте Telegram`)
+    }
+  }
+
+  return queries
+}
+
 export async function generateCompetitorAnalysis(
   project: Project,
   plan: PlanName,
@@ -78,11 +108,18 @@ export async function generateCompetitorAnalysis(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const queries = buildCompetitorQueries(card, detailed)
+  const searchResults = await tavilyMultiSearch(queries)
+  const searchContext = `
+
+РЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:
+${formatSearchResultsForPrompt(searchResults)}`
+
   const { data, model } = await routeAI({
     task: "COMPETITORS",
     plan,
     system: competitorAnalysisSystem,
-    prompt: buildCompetitorAnalysisInput(card, detailed),
+    prompt: buildCompetitorAnalysisInput(card, detailed) + searchContext,
     schema: competitorAnalysisSchema,
     maxTokens: 16000,
   })

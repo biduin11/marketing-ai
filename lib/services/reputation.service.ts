@@ -4,6 +4,19 @@ import { routeAI } from "@/lib/ai/router"
 import type { PlanName } from "@/lib/config/plans"
 import { reputationSchema, type Reputation } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
+import { tavilyMultiSearch, formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
+
+function buildReputationQueries(name: string, city: string, yandexMaps?: string, twogis?: string): string[] {
+  const queries = [
+    `${name} ${city} отзывы`.trim(),
+    `${name} ${city} рейтинг Яндекс Карты`.trim(),
+    `${name} ${city} 2ГИС отзывы`.trim(),
+    `${name} отзывы клиентов`.trim(),
+  ]
+  if (yandexMaps) queries.push(yandexMaps)
+  if (twogis) queries.push(twogis)
+  return queries
+}
 
 async function analyzeReputation(
   project: Project,
@@ -21,10 +34,14 @@ async function analyzeReputation(
 ПРЯМЫЕ ССЫЛКИ НА КАРТОЧКИ КОМПАНИИ:
 Яндекс.Карты: ${yandexMaps ?? "не указана"}
 2ГИС: ${twogis ?? "не указана"}
-
-ВАЖНО: Используй эти прямые ссылки для поиска отзывов.
-Не ищи компанию по названию — сразу переходи по ссылкам выше.
 `
+
+  const queries = buildReputationQueries(project.name, city, yandexMaps, twogis)
+  const searchResults = await tavilyMultiSearch(queries)
+  const searchContext = `
+
+РЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:
+${formatSearchResultsForPrompt(searchResults)}`
 
   const { data, model } = await routeAI({
     task: "REPUTATION",
@@ -35,7 +52,9 @@ async function analyzeReputation(
         name: project.name,
         city,
         website: project.website,
-      }) + companyContext,
+      }) +
+      companyContext +
+      searchContext,
     schema: reputationSchema,
     maxTokens: 8000,
   })

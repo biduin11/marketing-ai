@@ -15,17 +15,6 @@ interface GenerateStructuredWithAnthropicArgs<T extends z.ZodType> {
   schema: T
   model: string
   maxTokens?: number
-  /**
-   * COMPETITORS/REPUTATION/MARKET only. web_search is a server-side tool —
-   * Claude can search before answering. A forced tool_choice would prevent
-   * that, so this runs a two-phase call: tool_choice "auto" (search, then
-   * usually call the save tool); if Claude stops after searching without
-   * calling it, a second forced-tool call turns the search findings into
-   * structured JSON. Consolidates what used to be duplicated across
-   * competitor.service.ts and market.service.ts (reputation.service.ts used
-   * a third, less reliable text-regex variant — now unified on this one).
-   */
-  useWebSearch?: boolean
 }
 
 const SAVE_TOOL_NAME = "save_result"
@@ -36,15 +25,10 @@ const SAVE_TOOL_DESCRIPTION = "Сохранить структурированн
  * slow/hanging call just runs until Vercel force-kills the whole function at
  * its maxDuration (300s on the routes that call into this) — routeAI's
  * catch-and-fallback-to-Gemini never gets a chance to run, since the await
- * never resolves or rejects in time. These timeouts make the request fail
+ * never resolves or rejects in time. This timeout makes the request fail
  * fast enough for that fallback to actually happen, with margin under 300s.
- * The web_search path can run two calls back to back (search, then a forced
- * follow-up if Claude didn't call the save tool itself) — WEB_SEARCH +
- * FORCED_FOLLOWUP together must still leave headroom under 300s.
  */
-const NON_WEB_SEARCH_TIMEOUT_MS = 90_000
-const WEB_SEARCH_TIMEOUT_MS = 200_000
-const FORCED_FOLLOWUP_TIMEOUT_MS = 80_000
+const REQUEST_TIMEOUT_MS = 90_000
 
 export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   system,
@@ -52,7 +36,6 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   schema,
   model,
   maxTokens = 16000,
-  useWebSearch = false,
 }: GenerateStructuredWithAnthropicArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
   const { $schema: _unused, ...inputSchema } = z.toJSONSchema(schema, {
     target: "draft-7",
@@ -64,96 +47,24 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
     input_schema: inputSchema as never,
   }
 
-  if (!useWebSearch) {
-    const response = await anthropic.messages.create(
-      {
-        model,
-        max_tokens: maxTokens,
-        system,
-        tools: [saveToolDef],
-        tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
-        messages: [{ role: "user", content: user }],
-      },
-      { timeout: NON_WEB_SEARCH_TIMEOUT_MS }
-    )
-
-    const toolUse = response.content.find((block) => block.type === "tool_use")
-    if (!toolUse || toolUse.type !== "tool_use") {
-      throw new Error("AI не вернул структурированный ответ")
-    }
-
-    const parsed = schema.safeParse(toolUse.input)
-    if (!parsed.success) {
-      throw schemaValidationError(parsed.error)
-    }
-
-    return { data: parsed.data, model }
-  }
-
-  // web_search_20250305 is a server-side tool — Anthropic executes searches inline
-  const response = await anthropic.beta.messages.create(
+  const response = await anthropic.messages.create(
     {
       model,
       max_tokens: maxTokens,
       system,
-      tools: [
-        { type: "web_search_20250305", name: "web_search", max_uses: 15 } as never,
-        saveToolDef,
-      ] as never,
-      tool_choice: { type: "auto" },
-      messages: [{ role: "user", content: user }],
-      betas: ["web-search-2025-03-05"] as never,
-    },
-    { timeout: WEB_SEARCH_TIMEOUT_MS }
-  )
-
-  console.log('RAW anthropic response content types:', response.content.map(c => c.type))
-  console.log('Has web_search_tool_result:', response.content.some(c => c.type === 'web_search_tool_result'))
-  console.log('Has server_tool_use:', response.content.some(c => c.type === 'server_tool_use'))
-
-  for (const block of response.content) {
-    if (
-      block.type === "tool_use" &&
-      (block as { name: string }).name === SAVE_TOOL_NAME
-    ) {
-      const parsed = schema.safeParse((block as { input: unknown }).input)
-      if (parsed.success) return { data: parsed.data, model }
-      throw schemaValidationError(parsed.error)
-    }
-  }
-
-  // Claude finished searching without calling the save tool — force structured output
-  console.log("COMPETITORS raw response:", JSON.stringify(response.content).slice(0, 500))
-  const textBlocks = response.content
-    .filter((b) => b.type === "text")
-    .map((b) => ({ type: "text" as const, text: (b as { text: string }).text }))
-
-  const forcedResponse = await anthropic.messages.create(
-    {
-      model,
-      max_tokens: Math.min(maxTokens, 8000),
-      system,
       tools: [saveToolDef],
       tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
-      messages: [
-        { role: "user", content: user },
-        {
-          role: "assistant",
-          content: textBlocks.length ? textBlocks : [{ type: "text", text: "Анализ завершён." }],
-        },
-        { role: "user", content: `Сохрани результаты анализа используя инструмент ${SAVE_TOOL_NAME}.` },
-      ],
+      messages: [{ role: "user", content: user }],
     },
-    { timeout: FORCED_FOLLOWUP_TIMEOUT_MS }
+    { timeout: REQUEST_TIMEOUT_MS }
   )
 
-  const forcedBlock = forcedResponse.content.find((b) => b.type === "tool_use")
-  if (!forcedBlock || forcedBlock.type !== "tool_use") {
-    console.log("COMPETITORS raw response:", JSON.stringify(forcedResponse.content).slice(0, 500))
+  const toolUse = response.content.find((block) => block.type === "tool_use")
+  if (!toolUse || toolUse.type !== "tool_use") {
     throw new Error("AI не вернул структурированный ответ")
   }
 
-  const parsed = schema.safeParse(forcedBlock.input)
+  const parsed = schema.safeParse(toolUse.input)
   if (!parsed.success) {
     throw schemaValidationError(parsed.error)
   }
