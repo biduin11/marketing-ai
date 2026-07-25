@@ -184,6 +184,7 @@ export async function runCompetitorAnalysis(
     revalidatePath("/competitors")
     return { success: true }
   } catch (error) {
+    console.error("runCompetitorAnalysis error:", error instanceof Error ? error.stack : error)
     const message =
       error instanceof Error ? error.message : "Не удалось сгенерировать анализ конкурентов"
     return { success: false, error: message }

@@ -119,6 +119,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   }
 
   // Claude finished searching without calling the save tool — force structured output
+  console.log("COMPETITORS raw response:", JSON.stringify(response.content).slice(0, 500))
   const textBlocks = response.content
     .filter((b) => b.type === "text")
     .map((b) => ({ type: "text" as const, text: (b as { text: string }).text }))
@@ -144,6 +145,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
 
   const forcedBlock = forcedResponse.content.find((b) => b.type === "tool_use")
   if (!forcedBlock || forcedBlock.type !== "tool_use") {
+    console.log("COMPETITORS raw response:", JSON.stringify(forcedResponse.content).slice(0, 500))
     throw new Error("AI не вернул структурированный ответ")
   }
 
