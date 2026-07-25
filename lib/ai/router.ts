@@ -105,6 +105,7 @@ export async function routeAI<T extends z.ZodType>(
   const start = Date.now()
 
   try {
+    console.log('REPUTATION useWebSearch:', task.useWebSearch, 'plan:', request.plan)
     const result = await callProvider(task.provider, {
       model: task.model,
       system: request.system,
