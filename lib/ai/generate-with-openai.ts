@@ -29,14 +29,13 @@ function findBalancedJsonObject(text: string, start: number): string | null {
 }
 
 /**
- * Extracts the model's JSON object from raw completion text. Tries, in
- * order: the whole trimmed text as-is (the expected shape when
- * response_format: json_object is honored), a ```json fenced block, then a
- * balanced-brace scan from the first '{' — not a greedy first-'{'-to-last-'}'
- * regex, which would swallow trailing prose or an echoed schema fragment
- * (the system prompt now embeds the full JSON Schema — see
- * generateStructuredWithOpenAI — so the response text can itself contain
- * many stray braces).
+ * Extracts a JSON object from raw text. Tries, in order: the whole trimmed
+ * text as-is, a ```json fenced block, then a balanced-brace scan from the
+ * first '{' — not a greedy first-'{'-to-last-'}' regex, which would swallow
+ * trailing prose or stray braces. No longer the primary parse path for
+ * generateStructuredWithOpenAI (that now reads structured tool-call
+ * arguments directly) — kept as a defense-in-depth fallback for the rare
+ * case where the arguments string itself doesn't parse cleanly.
  */
 function extractJson(text: string): unknown {
   const trimmed = text.trim()
@@ -82,21 +81,26 @@ interface GenerateStructuredWithOpenAIArgs<T extends z.ZodType> {
   model?: string
 }
 
+const SAVE_TOOL_NAME = "save_result"
+const SAVE_TOOL_DESCRIPTION = "Сохранить структурированный результат анализа"
+
 /**
- * OpenAI-compatible provider for structured generation. Defaults to
- * OPENAI_MODEL — callers can override with `model` for lighter tasks.
- * Not used as generateStructured()'s automatic AI_PROVIDER
- * fallback path with the caller's Anthropic-shaped `model` (that default
- * would be an invalid OpenAI model id) — services that want OpenAI call
- * this directly instead. response_format: json_object only guarantees valid
- * JSON, not a specific shape — unlike Anthropic's forced tool_choice or
- * Gemini's responseSchema, the model never otherwise sees the actual field
- * names/types, only whatever prose happens to be in `system`. So the zod
- * schema is converted to JSON Schema (same z.toJSONSchema() used by the
- * Gemini path) and appended to the system prompt here, giving the model the
- * real shape to fill instead of making it guess. Carries over the same two
- * protections: explicit truncation detection (finish_reason "length") and a
- * clear error instead of a raw JSON.parse crash.
+ * OpenAI-compatible provider for structured generation via forced function
+ * calling (tool_choice), mirroring the Anthropic tool_use pattern in
+ * generate-with-anthropic.ts. Previously used response_format: json_object
+ * with the JSON Schema embedded as text in the system prompt, but that was
+ * unreliable through the router.cheap proxy: the model would finish with
+ * finish_reason "stop" while message.content held a syntactically truncated
+ * JSON object (the proxy not fully honoring an opaque param — same failure
+ * mode seen with Anthropic's web_search tool). Forcing tool_choice removes
+ * the free-text JSON layer: the schema goes into the function's `parameters`
+ * instead of prose, and the model must return arguments through the API's
+ * structured mechanism rather than text it fully controls the shape of.
+ * Defaults to OPENAI_MODEL — callers can override with `model` for lighter
+ * tasks. Not used as generateStructured()'s automatic AI_PROVIDER fallback
+ * path with the caller's Anthropic-shaped `model` (that default would be an
+ * invalid OpenAI model id) — services that want OpenAI call this directly
+ * instead.
  */
 export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   system,
@@ -108,15 +112,24 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   const { $schema: _unused, ...jsonSchema } = z.toJSONSchema(schema, {
     target: "draft-7",
   }) as Record<string, unknown>
-  const systemWithSchema = `${system}\n\nВерни ТОЛЬКО валидный JSON-объект без markdown-разметки, строго соответствующий следующей JSON Schema (заполни все поля, которые она требует):\n${JSON.stringify(jsonSchema)}`
 
   const response = await getOpenAIClient().chat.completions.create({
     model,
     max_tokens: maxTokens,
     temperature: 0.3,
-    response_format: { type: "json_object" },
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: SAVE_TOOL_NAME,
+          description: SAVE_TOOL_DESCRIPTION,
+          parameters: jsonSchema,
+        },
+      },
+    ],
+    tool_choice: { type: "function", function: { name: SAVE_TOOL_NAME } },
     messages: [
-      { role: "system", content: systemWithSchema },
+      { role: "system", content: system },
       { role: "user", content: user },
     ],
   })
@@ -129,14 +142,30 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
     )
   }
 
-  const text = choice?.message?.content ?? ""
-  if (!text) throw new Error("OpenAI вернул пустой ответ")
+  const toolCall = choice?.message?.tool_calls?.[0]
+  if (!toolCall || toolCall.type !== "function") {
+    throw new Error(
+      `OpenAI не вернул структурированный tool call (finish_reason: ${choice?.finish_reason ?? "нет"})`
+    )
+  }
+
+  const args = toolCall.function.arguments
 
   console.log("CONTENT_PLAN finish_reason:", choice?.finish_reason)
-  console.log("CONTENT_PLAN response length:", text.length)
-  console.log("CONTENT_PLAN last 200 chars:", text.slice(-200))
+  console.log("CONTENT_PLAN tool_calls count:", choice?.message?.tool_calls?.length ?? 0)
+  console.log("CONTENT_PLAN arguments length:", args.length)
+  console.log("CONTENT_PLAN arguments last 200 chars:", args.slice(-200))
 
-  const parsed = schema.safeParse(extractJson(text))
+  let rawData: unknown
+  try {
+    rawData = JSON.parse(args)
+  } catch {
+    // defense-in-depth: arguments should already be a clean JSON string,
+    // but fall back to lenient extraction if it isn't
+    rawData = extractJson(args)
+  }
+
+  const parsed = schema.safeParse(rawData)
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
     const path = issue?.path.join(".") || "(root)"
