@@ -11,6 +11,7 @@ import {
   LayoutList,
   Settings,
   Star,
+  Tag,
   Users,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -41,6 +42,7 @@ export const navGroups: NavGroup[] = [
       { label: "Бренд", href: "/company", icon: Building2 },
       { label: "Конкуренты", href: "/competitors", icon: Crosshair },
       { label: "Клиент", href: "/audience", icon: Users },
+      { label: "Офферы", href: "/offers", icon: Tag },
     ],
   },
   {
