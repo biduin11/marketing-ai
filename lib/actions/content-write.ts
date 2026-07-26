@@ -2,7 +2,6 @@
 
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { generateTextWithGemini } from "@/lib/ai/generate-with-gemini"
 import { generateTextWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { getLatestArtifact } from "@/lib/services/artifacts"
 import { canGenerateAi } from "@/lib/gates"
@@ -98,11 +97,6 @@ ${type === "email" ? `- Тема письма: дай вариант темы в
 Пиши по-русски. Готовый текст — сразу, без вступлений.`
 
   try {
-    if (process.env.AI_PROVIDER === "gemini") {
-      const text = await generateTextWithGemini({ user: prompt, maxTokens: 2000 })
-      return { success: true, text }
-    }
-
     const text = await generateTextWithOpenAI({
       messages: [{ role: "user", content: prompt }],
       maxTokens: 2000,
