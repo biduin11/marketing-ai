@@ -132,6 +132,10 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   const text = choice?.message?.content ?? ""
   if (!text) throw new Error("OpenAI вернул пустой ответ")
 
+  console.log("CONTENT_PLAN finish_reason:", choice?.finish_reason)
+  console.log("CONTENT_PLAN response length:", text.length)
+  console.log("CONTENT_PLAN last 200 chars:", text.slice(-200))
+
   const parsed = schema.safeParse(extractJson(text))
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
