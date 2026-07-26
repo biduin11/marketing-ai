@@ -70,8 +70,9 @@ export const contentPlanSchema = z.object({
           .describe("Цепляющее начало / hook (1-2 предложения)"),
       })
     )
+    .max(22)
     .describe(
-      "Публикационный календарь на месяц (24-28 позиций). СТРОГО соблюдай сплит: 70% educational, 20% engagement, 10% sales. Дни распределяй равномерно по 4 неделям (по 7 дней). Платформы: Instagram (8-10 записей: Reels/посты/Сторис), Telegram (5-6: текст/текст+фото), VK (3-4: посты), YouTube (1-2: видео), Блог (1-2: статьи), Email (1: рассылка)."
+      "Публикационный календарь на месяц (18-22 позиции). СТРОГО соблюдай сплит: 70% educational, 20% engagement, 10% sales. Дни распределяй равномерно по 4 неделям (по 7 дней). Платформы: Instagram (8-10 записей: Reels/посты/Сторис), Telegram (5-6: текст/текст+фото), VK (3-4: посты), YouTube (1-2: видео), Блог (1-2: статьи), Email (1: рассылка)."
     ),
   ideas: z.object({
     reels: z
@@ -82,6 +83,7 @@ export const contentPlanSchema = z.object({
           angle: z.string().describe("Угол подачи / формат съёмки"),
         })
       )
+      .max(10)
       .describe("Ровно 10 идей для Reels"),
     posts: z
       .array(
@@ -93,7 +95,8 @@ export const contentPlanSchema = z.object({
           angle: z.string().describe("Угол подачи"),
         })
       )
-      .describe("Ровно 15 идей для постов"),
+      .max(12)
+      .describe("Ровно 12 идей для постов"),
     stories: z
       .array(
         z.object({
@@ -105,6 +108,7 @@ export const contentPlanSchema = z.object({
             ),
         })
       )
+      .max(10)
       .describe("Ровно 10 идей для Stories"),
   }).describe("Банк идей контента"),
   reelsScripts: z
@@ -123,6 +127,7 @@ export const contentPlanSchema = z.object({
           .describe("5-8 релевантных хэштегов без #"),
       })
     )
+    .max(5)
     .describe("Ровно 3 готовых сценария Reels"),
   emailSequence: z
     .array(
@@ -147,6 +152,7 @@ export const contentPlanSchema = z.object({
           ),
       })
     )
+    .max(5)
     .describe("Email-цепочка из ровно 5 писем"),
 })
 export type ContentPlan = z.infer<typeof contentPlanSchema>
