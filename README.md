@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Marketing OS
 
-## Getting Started
+Веб-приложение для управления маркетингом: аудит компании и рынка,
+сегментация аудитории, анализ конкурентов, офферы, CJM, контент-план,
+аналитика, спринты, отчёты и рекомендации AI-директора.
 
-First, run the development server:
+## Стек
+
+- Next.js 16, React 19, TypeScript
+- Tailwind CSS 4 и shadcn/ui
+- Prisma 7 и PostgreSQL (Neon)
+- Auth.js / NextAuth 5
+- OpenAI, Anthropic и Gemini
+- Zustand, Recharts, Vercel Blob
+
+## Локальный запуск
+
+Требуется актуальная LTS-версия Node.js и доступная PostgreSQL.
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Приложение будет доступно по адресу
+[http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Минимальный `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```dotenv
+DATABASE_URL=postgresql://...
+AUTH_SECRET=...
+AUTH_URL=http://localhost:3000
+ANTHROPIC_API_KEY=...
+```
 
-## Learn More
+Дополнительные интеграции включаются соответствующими переменными:
 
-To learn more about Next.js, take a look at the following resources:
+```dotenv
+ANTHROPIC_BASE_URL=
+OPENAI_API_KEY=
+OPENAI_BASE_URL=
+GEMINI_API_KEY=
+DEEPSEEK_API_KEY=
+TAVILY_API_KEY=
+AI_PROVIDER=
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+CRON_SECRET=
+ENCRYPTION_KEY=
+BLOB_READ_WRITE_TOKEN=
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+YOOKASSA_SHOP_ID=
+YOOKASSA_SECRET_KEY=
+NEXT_PUBLIC_APP_URL=
+```
 
-## Deploy on Vercel
+## Проверки
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run lint
+npm test
+npx tsc --noEmit
+npm run build
+npm audit --omit=dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Структура
+
+- `app/` — маршруты, layouts, route handlers и cron endpoints.
+- `components/` — UI и компоненты предметных модулей.
+- `lib/actions/` — Server Actions, валидация запросов и контроль доступа.
+- `lib/services/` — бизнес-логика.
+- `lib/ai/` — маршрутизация AI-провайдеров, промпты и Zod-схемы.
+- `prisma/schema.prisma` — схема данных.
+
+Защищённые действия должны повторно проверять сессию и принадлежность
+ресурса пользователю. AI-ответы валидируются Zod-схемами до сохранения.
+
+## База данных
+
+Проект не запускает миграции автоматически при сборке или деплое.
+Изменения схемы применяются вручную в Neon SQL Editor, после чего
+обновляется Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+Не добавляйте `prisma migrate deploy` в build-скрипты.
+
+## Деплой
+
+Приложение рассчитано на Vercel. Расписания cron находятся в
+`vercel.json`; все cron endpoints защищаются через `CRON_SECRET`.
+Переменные окружения для production задаются в настройках проекта Vercel.

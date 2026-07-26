@@ -43,7 +43,7 @@ function logRouterEvent(event: LogEvent): void {
   if (event.reason) parts.push(`Reason: ${event.reason}`)
   if (event.fallbackProvider) parts.push(`Fallback Provider: ${event.fallbackProvider}`)
   parts.push(`Execution Time: ${event.executionTime}ms`)
-  console.log(parts.join(" | "))
+  console.info(parts.join(" | "))
 }
 
 async function callProvider<T extends z.ZodType>(

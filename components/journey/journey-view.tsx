@@ -149,7 +149,6 @@ const INSIGHT_ICONS = [Target, TrendingUp, Users, Lightbulb] as const
 export function JourneyView({
   projectId,
   cjm,
-  version,
   cjmCreatedAt,
 }: JourneyViewProps) {
   const router = useRouter()

@@ -38,6 +38,8 @@ export function GenerationProgress({
 
   // Auto-advance through steps until second-to-last (hold there until resolved)
   useEffect(() => {
+    if (completed || error) return
+
     const advance = () => {
       const next = currentRef.current + 1
       if (next >= steps.length - 1) return // Hold on last step
@@ -57,27 +59,22 @@ export function GenerationProgress({
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [completed, error, stepDuration, steps.length])
 
-  // When completed or error, resolve final step
-  useEffect(() => {
-    if (!completed && !error) return
-    if (timerRef.current) clearTimeout(timerRef.current)
-
-    setStates((prev) =>
-      prev.map((s, i) => {
-        if (i < steps.length - 1 && s.status !== "done") return { status: "done" }
-        if (i === steps.length - 1) return { status: error ? "error" : "done" }
-        return s
-      })
-    )
-  }, [completed, error, steps.length])
+  const displayedStates =
+    completed || error
+      ? states.map((state, index): StepState => {
+          if (index < steps.length - 1) return { status: "done" }
+          if (index === steps.length - 1)
+            return { status: error ? "error" : "done" }
+          return state
+        })
+      : states
 
   return (
     <div className="space-y-2.5 rounded-2xl border border-border bg-card p-5 shadow-sm">
       {steps.map((step, i) => {
-        const { status } = states[i] ?? { status: "pending" }
+        const { status } = displayedStates[i] ?? { status: "pending" }
         return (
           <div key={step.id} className="flex items-center gap-3">
             <StepIcon status={status} />

@@ -7,9 +7,27 @@ import { LogOut, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react"
 import { navGroups } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
+import { useSyncExternalStore } from "react"
 
 const COLLAPSED_KEY = "sidebar-collapsed"
+const COLLAPSED_EVENT = "sidebar-collapsed-change"
+
+function subscribeToCollapsedState(onStoreChange: () => void): () => void {
+  window.addEventListener("storage", onStoreChange)
+  window.addEventListener(COLLAPSED_EVENT, onStoreChange)
+  return () => {
+    window.removeEventListener("storage", onStoreChange)
+    window.removeEventListener(COLLAPSED_EVENT, onStoreChange)
+  }
+}
+
+function getCollapsedSnapshot(): boolean {
+  return localStorage.getItem(COLLAPSED_KEY) === "1"
+}
+
+function getCollapsedServerSnapshot(): boolean {
+  return false
+}
 
 interface AppSidebarProps {
   userEmail?: string | null
@@ -25,20 +43,17 @@ export function AppSidebar({
   onMobileClose,
 }: AppSidebarProps) {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
+  const collapsed = useSyncExternalStore(
+    subscribeToCollapsedState,
+    getCollapsedSnapshot,
+    getCollapsedServerSnapshot
+  )
   // На мобильном overlay всегда показывает полный список — collapsed влияет только на десктоп-ширину
   const hideLabels = collapsed && !mobileOpen
 
-  useEffect(() => {
-    const saved = localStorage.getItem(COLLAPSED_KEY)
-    if (saved === "1") setCollapsed(true)
-  }, [])
-
   function toggle() {
-    setCollapsed((v) => {
-      localStorage.setItem(COLLAPSED_KEY, v ? "0" : "1")
-      return !v
-    })
+    localStorage.setItem(COLLAPSED_KEY, collapsed ? "0" : "1")
+    window.dispatchEvent(new Event(COLLAPSED_EVENT))
   }
 
   return (

@@ -37,9 +37,10 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   model,
   maxTokens = 16000,
 }: GenerateStructuredWithAnthropicArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
-  const { $schema: _unused, ...inputSchema } = z.toJSONSchema(schema, {
+  const inputSchema = z.toJSONSchema(schema, {
     target: "draft-7",
   }) as Record<string, unknown>
+  delete inputSchema.$schema
 
   const saveToolDef = {
     name: SAVE_TOOL_NAME,

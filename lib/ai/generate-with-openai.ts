@@ -109,9 +109,10 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   maxTokens = 8000,
   model = OPENAI_MODEL,
 }: GenerateStructuredWithOpenAIArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
-  const { $schema: _unused, ...jsonSchema } = z.toJSONSchema(schema, {
+  const jsonSchema = z.toJSONSchema(schema, {
     target: "draft-7",
   }) as Record<string, unknown>
+  delete jsonSchema.$schema
 
   const response = await getOpenAIClient().chat.completions.create({
     model,
@@ -150,11 +151,6 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   }
 
   const args = toolCall.function.arguments
-
-  console.log("CONTENT_PLAN finish_reason:", choice?.finish_reason)
-  console.log("CONTENT_PLAN tool_calls count:", choice?.message?.tool_calls?.length ?? 0)
-  console.log("CONTENT_PLAN arguments length:", args.length)
-  console.log("CONTENT_PLAN arguments last 200 chars:", args.slice(-200))
 
   let rawData: unknown
   try {

@@ -9,7 +9,6 @@ import { Eye, MousePointerClick, UserCheck, TrendingUp } from "lucide-react"
 import type { ChannelMetrics, TimeSeriesPoint } from "@/lib/services/analytics.service"
 import type { ContentPlan } from "@/lib/ai/schemas/contentPlan"
 import { EmptyState } from "@/components/empty-state"
-import { cn } from "@/lib/utils"
 
 interface ContentTabProps {
   channels: ChannelMetrics[]
@@ -31,6 +30,16 @@ const CHANNEL_COLORS = [
 ]
 
 export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProps) {
+  const planStats = useMemo(() => {
+    if (!contentPlan?.calendar) return null
+    const byPlatform: Record<string, number> = {}
+    for (const item of contentPlan.calendar) {
+      const platform = item.platform ?? "other"
+      byPlatform[platform] = (byPlatform[platform] ?? 0) + 1
+    }
+    return byPlatform
+  }, [contentPlan])
+
   if (!channels.length) {
     return (
       <div className="flex h-[40vh] items-center justify-center">
@@ -48,17 +57,6 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
   const totalLeads = channels.reduce((s, c) => s + c.leads, 0)
   const avgCtr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0
   const bestChannel = [...channels].sort((a, b) => b.impressions - a.impressions)[0]
-
-  // Planned posts by platform from contentPlan
-  const planStats = useMemo(() => {
-    if (!contentPlan?.calendar) return null
-    const byPlatform: Record<string, number> = {}
-    for (const item of contentPlan.calendar) {
-      const p = item.platform ?? "other"
-      byPlatform[p] = (byPlatform[p] ?? 0) + 1
-    }
-    return byPlatform
-  }, [contentPlan])
 
   const reachData = [...channels]
     .filter((c) => c.impressions > 0)

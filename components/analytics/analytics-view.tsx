@@ -263,6 +263,7 @@ export function AnalyticsView({
           </Button>
 
           <MetricFormDialog
+            key={editingMetric?.id ?? "new"}
             projectId={projectId}
             channels={channels}
             editingMetric={editingMetric}
@@ -340,7 +341,7 @@ export function AnalyticsView({
               <AnalyticsTable channels={channelBreakdown} />
             </div>
             <AnalyticsDonuts channels={channelBreakdown} />
-            <AnalyticsBottom channels={channelBreakdown} summary={summary} />
+            <AnalyticsBottom channels={channelBreakdown} />
             <MetricsList metrics={metrics} onEdit={(m) => setEditingMetric(m)} />
           </div>
         )

@@ -32,8 +32,7 @@ const FALLBACK_PATTERNS = [
   /retry-after/i,
   // Missing/absent config, not a code bug: the key simply isn't set in this
   // environment (e.g. a preview deploy without secrets configured yet), so
-  // the Router falls back instead of failing the whole task. See router.ts
-  // for the console.warn emitted specifically for this case.
+  // the Router falls back instead of failing the whole task.
   /missing environment variable/i,
   /missing api key/i,
   /is not set/i, // our own "X_API_KEY is not set" errors

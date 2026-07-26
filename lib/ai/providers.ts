@@ -78,9 +78,10 @@ export async function generateAI(options: GenerateOptions): Promise<string> {
     }
 
     case "gemini": {
-      const { $schema: _unused, ...jsonSchema } = schema
+      const jsonSchema = schema
         ? (z.toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>)
-        : { $schema: undefined }
+        : {}
+      delete jsonSchema.$schema
 
       const geminiModel = getGeminiClient().getGenerativeModel({
         model,
@@ -120,7 +121,7 @@ export async function generateAIWithFallback(
   } catch (error) {
     console.error(`AI provider ${options.provider} failed:`, error)
     if (fallback) {
-      console.log(`Falling back to ${fallback.provider}`)
+      console.info(`Falling back to ${fallback.provider}`)
       return await generateAI(fallback)
     }
     throw error
@@ -144,7 +145,6 @@ export function parseAIJson<T>(text: string, schema: z.ZodType<T>): T {
     parsed = JSON.parse(jsonMatch[0])
   } catch (e) {
     console.error("AI JSON parse error:", e)
-    console.error("Raw response:", clean.slice(0, 500))
     throw new Error(`Не удалось распарсить ответ AI: ${e instanceof Error ? e.message : e}`)
   }
 

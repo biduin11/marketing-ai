@@ -28,8 +28,6 @@ const LINES = [
   { key: "spend", label: "Расходы", color: "#111111", yAxis: "right" },
 ] as const
 
-type LineKey = (typeof LINES)[number]["key"]
-
 function weekKey(dateStr: string): string {
   const d = new Date(dateStr)
   const year = d.getFullYear()

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { Plus, Loader2 } from "lucide-react"
@@ -29,6 +29,20 @@ const emptyForm = () => ({
   impressions: "",
 })
 
+function initialForm(metric?: Metric | null): ReturnType<typeof emptyForm> {
+  if (!metric) return emptyForm()
+
+  return {
+    channel: metric.channel,
+    date: new Date(metric.date).toISOString().slice(0, 10),
+    spend: String(metric.spend),
+    revenue: String(metric.revenue),
+    leads: String(metric.leads),
+    clicks: String(metric.clicks),
+    impressions: String(metric.impressions),
+  }
+}
+
 export function MetricFormDialog({
   projectId,
   channels,
@@ -38,25 +52,10 @@ export function MetricFormDialog({
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState(emptyForm())
+  const [form, setForm] = useState(() => initialForm(editingMetric))
 
   const isEditing = !!editingMetric
   const isOpen = open || isEditing
-
-  // Pre-fill form when editingMetric changes
-  useEffect(() => {
-    if (editingMetric) {
-      setForm({
-        channel: editingMetric.channel,
-        date: new Date(editingMetric.date).toISOString().slice(0, 10),
-        spend: String(editingMetric.spend),
-        revenue: String(editingMetric.revenue),
-        leads: String(editingMetric.leads),
-        clicks: String(editingMetric.clicks),
-        impressions: String(editingMetric.impressions),
-      })
-    }
-  }, [editingMetric])
 
   function set(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }))
