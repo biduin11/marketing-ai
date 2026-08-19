@@ -84,16 +84,18 @@ enum PaymentStatus {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  passwordHash  String
-  plan          Plan      @default(FREE)
-  planExpiresAt DateTime?
-  projects      Project[]
-  payments      Payment[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  name                  String?
+  passwordHash          String
+  plan                  Plan      @default(FREE)
+  planExpiresAt         DateTime?
+  role                  String?
+  onboardingDismissedAt DateTime?
+  projects              Project[]
+  payments              Payment[]
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 }
 
 model Project {

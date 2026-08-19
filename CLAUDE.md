@@ -76,7 +76,12 @@ prisma/
 ## База данных (текущая схема)
 
 ### Применённые модели (Итерации 0–4)
-- `User` — id, email, name, passwordHash, plan (Plan), planExpiresAt, createdAt, updatedAt
+- `User` — id, email, name, passwordHash, plan (Plan), planExpiresAt, role (String?, "MARKETER" |
+  "BUSINESS_OWNER", ставится в Welcome-модалке при первом входе без проектов — влияет только на
+  копирайт, не блокирует), onboardingDismissedAt (DateTime?, закрытие плавающего виджета «Быстрый
+  старт» — `components/onboarding/quick-start-widget.tsx`, чек-лист из 5 пунктов на основе
+  существующих данных без отдельных счётчиков, агрегация по всем проектам пользователя через
+  `lib/services/onboarding.service.ts`), createdAt, updatedAt
 - `Project` — id, userId, name, niche, website, socials (Json), regions (String[]),
   products (String[]), competitors (String[]), budget (Int), goals, status (ProjectStatus), timestamps
 - `AiArtifact` — id, projectId, type (ArtifactType), version, payload (Json),

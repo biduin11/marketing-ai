@@ -19,10 +19,18 @@ import { KpiCard } from "@/components/strategy/kpi-card"
 import { TaskList, type TaskItem } from "@/components/strategy/task-list"
 import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { ExportPdfButton } from "@/components/shared/export-pdf-button"
+import { GenerationProgress } from "@/components/shared/generation-progress"
 import { runStrategy } from "@/lib/actions/ai"
 import type { Strategy, Horizon } from "@/lib/ai/schemas/strategy"
 import { cn } from "@/lib/utils"
 import { ArtifactVersionSelect } from "@/components/shared/artifact-version-select"
+
+const STRATEGY_STEPS = [
+  { id: "niche", label: "Анализирую нишу и регион..." },
+  { id: "positioning", label: "Подбираю позиционирование..." },
+  { id: "utp", label: "Формирую УТП под вашу аудиторию..." },
+  { id: "assemble", label: "Собираю стратегию..." },
+]
 
 export interface StrategyEntry {
   artifactId: string
@@ -49,6 +57,8 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
   const router = useRouter()
   const [horizon, setHorizon] = useState<Horizon>(30)
   const [loading, setLoading] = useState(false)
+  const [genCompleted, setGenCompleted] = useState(false)
+  const [genError, setGenError] = useState<string | null>(null)
   const [selectedVersionId, setSelectedVersionId] = useState<Record<number, string>>({})
 
   const versions = allVersionEntries?.[horizon] ?? []
@@ -61,16 +71,22 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
 
   async function generate(force: boolean) {
     setLoading(true)
+    setGenCompleted(false)
+    setGenError(null)
     try {
       const result = await runStrategy(projectId, horizon, force)
       if (!result.success) {
+        setGenError(result.error)
         toast.error(result.error)
         return
       }
+      setGenCompleted(true)
       toast.success(force ? "Стратегия обновлена" : "Стратегия готова")
-      router.refresh()
+      setTimeout(() => router.refresh(), 600)
     } catch {
-      toast.error("Не удалось сгенерировать стратегию")
+      const msg = "Не удалось сгенерировать стратегию"
+      setGenError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -158,8 +174,17 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
         ))}
       </div>
 
+      {/* Generation progress */}
+      {loading && (
+        <GenerationProgress
+          steps={STRATEGY_STEPS}
+          completed={genCompleted}
+          error={genError}
+        />
+      )}
+
       {/* Content */}
-      {!entry ? (
+      {!loading && !entry ? (
         <div className="flex h-[40vh] items-center justify-center">
           <EmptyState
             icon={CalendarDays}
@@ -167,7 +192,7 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
             description="Нажмите «Сгенерировать», чтобы AI построил стратегию с KPI, неделями и задачами."
           />
         </div>
-      ) : (
+      ) : !loading && entry ? (
         <div id="strategy-print-area" className="space-y-6">
           {/* Метрик-строка — фирменный приём эталона (#1) */}
           <StatRow cols={4}>
@@ -263,7 +288,7 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

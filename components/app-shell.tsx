@@ -4,16 +4,30 @@ import { useState } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AppHeader } from "@/components/app-header"
 import { AiChatPanel } from "@/components/ai-chat/ai-chat-panel"
+import { WelcomeRoleModal } from "@/components/onboarding/welcome-role-modal"
+import { QuickStartWidget } from "@/components/onboarding/quick-start-widget"
 import type { ProjectListItem } from "@/components/project-switcher"
+import type { QuickStartStep } from "@/lib/services/onboarding.service"
 
 interface AppShellProps {
   userEmail?: string | null
   userName?: string | null
   projects: ProjectListItem[]
+  showRoleModal: boolean
+  quickStartSteps: QuickStartStep[]
+  onboardingDismissed: boolean
   children: React.ReactNode
 }
 
-export function AppShell({ userEmail, userName, projects, children }: AppShellProps) {
+export function AppShell({
+  userEmail,
+  userName,
+  projects,
+  showRoleModal,
+  quickStartSteps,
+  onboardingDismissed,
+  children,
+}: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
@@ -39,6 +53,9 @@ export function AppShell({ userEmail, userName, projects, children }: AppShellPr
         </main>
       </div>
       <AiChatPanel />
+
+      {showRoleModal && <WelcomeRoleModal show />}
+      {!onboardingDismissed && <QuickStartWidget steps={quickStartSteps} />}
     </div>
   )
 }
