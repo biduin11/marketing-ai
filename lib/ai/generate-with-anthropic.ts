@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type Anthropic from "@anthropic-ai/sdk"
 import { anthropic } from "@/lib/ai/client"
 
 function schemaValidationError(error: z.ZodError): Error {
@@ -15,6 +16,8 @@ interface GenerateStructuredWithAnthropicArgs<T extends z.ZodType> {
   schema: T
   model: string
   maxTokens?: number
+  /** Overrides the router.cheap client — e.g. the ClaudeHub client in generate-with-claudehub.ts. */
+  client?: Anthropic
 }
 
 const SAVE_TOOL_NAME = "save_result"
@@ -36,6 +39,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
   schema,
   model,
   maxTokens = 16000,
+  client = anthropic,
 }: GenerateStructuredWithAnthropicArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
   const inputSchema = z.toJSONSchema(schema, {
     target: "draft-7",
@@ -48,7 +52,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
     input_schema: inputSchema as never,
   }
 
-  const response = await anthropic.messages.create(
+  const response = await client.messages.create(
     {
       model,
       max_tokens: maxTokens,

@@ -244,10 +244,17 @@ OPENAI_API_KEY=        # тот же (или другой) ключ router.cheap
                        # Content Plan, Director, Report, чат-ассистент, копирайтинг постов и др.).
 OPENAI_BASE_URL=       # URL OpenAI-совместимого эндпоинта router.cheap. Без него — обращение к
                        # api.openai.com напрямую, где моделей gpt-5.4/gpt-5.4-mini не существует.
-GEMINI_API_KEY=        # опционально — аварийный автофолбэк роутера (lib/ai/router.ts), если
-                       # основной вызов через router.cheap упадёт. Участвует и в задачах
-                       # Market/Competitors/Reputation — их веб-поиск (Tavily) не привязан к
-                       # провайдеру, так что Gemini получает тот же текстовый промт с результатами.
+GEMINI_API_KEY=        # опционально — используется только при AI_PROVIDER=gemini (чат-ассистент
+                       # и генерация текста постов, см. ниже). Больше НЕ автофолбэк роутера
+                       # (lib/ai/router.ts) — эту роль занял CLAUDEHUB_API_KEY, см. ниже.
+CLAUDEHUB_API_KEY=     # опционально — аварийный автофолбэк роутера (lib/ai/router.ts), если
+                       # основной вызов через router.cheap упадёт (rate limit/timeout/outage/
+                       # отсутствующий ключ). Ключ вида sk-hub-... с app.claudehub.fun, один
+                       # работает и в Anthropic-, и в OpenAI-совместимом режиме (см.
+                       # lib/ai/claudehub-client.ts, lib/ai/generate-with-claudehub.ts). Участвует
+                       # и в задачах Market/Competitors/Reputation — их веб-поиск (Tavily) не
+                       # привязан к провайдеру, так что ClaudeHub получает тот же текстовый промт
+                       # с результатами. Без ключа routeAI просто пробрасывает исходную ошибку.
 AI_PROVIDER=           # "gemini" — принудительно переключает чат-ассистент и генерацию текста
                        # постов на Gemini вместо router.cheap (см. lib/actions/chat.ts,
                        # lib/actions/content-write.ts). Пусто/не задано = router.cheap (по умолчанию).

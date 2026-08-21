@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type OpenAI from "openai"
 import { getOpenAIClient, OPENAI_MODEL } from "@/lib/ai/client"
 
 /**
@@ -79,6 +80,8 @@ interface GenerateStructuredWithOpenAIArgs<T extends z.ZodType> {
   maxTokens?: number
   /** Overrides OPENAI_MODEL — e.g. a lighter model id for cheaper copywriting tasks. */
   model?: string
+  /** Overrides the router.cheap client — e.g. the ClaudeHub client in generate-with-claudehub.ts. */
+  client?: OpenAI
 }
 
 const SAVE_TOOL_NAME = "save_result"
@@ -108,13 +111,14 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   schema,
   maxTokens = 8000,
   model = OPENAI_MODEL,
+  client,
 }: GenerateStructuredWithOpenAIArgs<T>): Promise<{ data: z.infer<T>; model: string }> {
   const jsonSchema = z.toJSONSchema(schema, {
     target: "draft-7",
   }) as Record<string, unknown>
   delete jsonSchema.$schema
 
-  const response = await getOpenAIClient().chat.completions.create({
+  const response = await (client ?? getOpenAIClient()).chat.completions.create({
     model,
     max_tokens: maxTokens,
     temperature: 0.3,

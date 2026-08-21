@@ -19,8 +19,8 @@
  * NOT passed to the Anthropic API — router.cheap doesn't proxy Anthropic's
  * native web_search_20250305 server-side tool, so search now happens entirely
  * outside the model call. Because the search results arrive as plain prompt
- * text, any provider can analyze them — Gemini is a valid automatic fallback
- * for these tasks too (see router.ts).
+ * text, any provider can analyze them — ClaudeHub is a valid automatic
+ * fallback for these tasks too (see router.ts).
  *
  * COMPETITORS/REPUTATION/MARKET have `byPlan.FREE: null` — gated on
  * PLAN_LIMITS[plan].webSearch in lib/gates.ts before the service layer ever
@@ -31,10 +31,11 @@ import type { PlanName } from "@/lib/config/plans"
 
 export type { PlanName }
 
-export type AIProvider = "anthropic" | "openai" | "gemini"
+export type AIProvider = "anthropic" | "openai" | "gemini" | "claudehub"
 
 interface TaskModelConfig {
-  provider: AIProvider
+  /** Only anthropic/openai — gemini/claudehub are fallback-only, never a task's primary provider (see routeAI in lib/ai/router.ts). */
+  provider: Extract<AIProvider, "anthropic" | "openai">
   model: string
 }
 

@@ -3,6 +3,7 @@ import { resolveTaskConfig, type AITask, type AIProvider, type PlanName } from "
 import { generateStructuredWithAnthropic } from "@/lib/ai/generate-with-anthropic"
 import { generateStructuredWithOpenAI } from "@/lib/ai/generate-with-openai"
 import { generateStructuredWithGemini } from "@/lib/ai/generate-with-gemini"
+import { generateStructuredWithClaudeHub } from "@/lib/ai/generate-with-claudehub"
 import { classifyError } from "@/lib/ai/errors"
 
 export type { AIProvider }
@@ -80,21 +81,30 @@ async function callProvider<T extends z.ZodType>(
         schema: args.schema,
         maxTokens: args.maxTokens,
       })
+    case "claudehub":
+      // Never dispatched here — the fallback path in routeAI calls
+      // generateStructuredWithClaudeHub directly (it needs originalProvider
+      // + plan, not a bare model id). Kept for AIProvider exhaustiveness.
+      throw new Error("callProvider does not support claudehub — use generateStructuredWithClaudeHub")
   }
 }
 
 /**
  * Single entry point for all structured AI generation in the app. Routes to
  * the provider/model resolved for (task, plan) via resolveTaskConfig, and
- * automatically retries once on Gemini if the primary call fails with a
- * transient error (rate limit, timeout, outage) — including for
- * COMPETITORS/REPUTATION/MARKET: their web search now runs separately via
- * Tavily (lib/services/tavily.service.ts) before routeAI is ever called, so
- * the prompt Gemini receives already has the same search results baked in
- * as plain text. Schema/model/prompt bugs never trigger a fallback — see
- * lib/ai/errors.ts for the classification. A missing API key IS
- * fallback-eligible (absent config, not a code bug), but still logs a
+ * automatically retries once on ClaudeHub (api.claudehub.fun) if the primary
+ * call fails with a transient error (rate limit, timeout, outage) —
+ * including for COMPETITORS/REPUTATION/MARKET: their web search now runs
+ * separately via Tavily (lib/services/tavily.service.ts) before routeAI is
+ * ever called, so the prompt ClaudeHub receives already has the same search
+ * results baked in as plain text. Schema/model/prompt bugs never trigger a
+ * fallback — see lib/ai/errors.ts for the classification. A missing API key
+ * IS fallback-eligible (absent config, not a code bug), but still logs a
  * console.warn below so it doesn't go unnoticed.
+ *
+ * Gemini (generate-with-gemini.ts) is no longer the automatic fallback here
+ * — it's still used directly by lib/actions/chat.ts and
+ * lib/actions/content-write.ts when AI_PROVIDER=gemini forces that path.
  */
 export async function routeAI<T extends z.ZodType>(
   request: RouterRequest<T>
@@ -147,37 +157,38 @@ export async function routeAI<T extends z.ZodType>(
       model: task.model,
       status: "fallback",
       reason,
-      fallbackProvider: "gemini",
+      fallbackProvider: "claudehub",
       executionTime,
     })
 
     if (/missing (environment variable|api key)|is not set|is undefined/i.test(reason)) {
       console.warn(
-        `[AI Router] ${task.provider} key missing for task ${request.task} — falling back to Gemini. Reason: ${reason}`
+        `[AI Router] ${task.provider} key missing for task ${request.task} — falling back to ClaudeHub. Reason: ${reason}`
       )
     }
 
-    // Max one retry, on Gemini, no loop.
+    // Max one retry, on ClaudeHub, no loop.
     try {
-      const fallback = await callProvider("gemini", {
-        model: "gemini-2.5-flash",
+      const fallback = await generateStructuredWithClaudeHub({
+        originalProvider: task.provider,
+        plan: request.plan,
         system: request.system,
-        prompt: request.prompt,
+        user: request.prompt,
         schema: request.schema,
         maxTokens: request.maxTokens,
       })
       const totalTime = Date.now() - start
       logRouterEvent({
         task: request.task,
-        provider: "gemini",
+        provider: "claudehub",
         model: fallback.model,
         status: "success",
-        fallbackProvider: "gemini",
+        fallbackProvider: "claudehub",
         executionTime: totalTime,
       })
       return {
         data: fallback.data,
-        provider: "gemini",
+        provider: "claudehub",
         model: fallback.model,
         usedFallback: true,
         executionTime: totalTime,
@@ -186,8 +197,8 @@ export async function routeAI<T extends z.ZodType>(
       const totalTime = Date.now() - start
       logRouterEvent({
         task: request.task,
-        provider: "gemini",
-        model: "gemini-2.5-flash",
+        provider: "claudehub",
+        model: "unknown",
         status: "error",
         executionTime: totalTime,
       })
