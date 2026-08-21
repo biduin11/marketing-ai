@@ -103,6 +103,8 @@ const STATUS_STYLES: Record<string, string> = {
   ARCHIVED: "text-muted-foreground bg-muted",
 }
 
+const PILL = "rounded-md px-1.5 py-0.5 text-xs font-medium"
+
 const REPORT_LABELS: Record<string, string> = {
   REPORT_WEEKLY: "Еженедельный",
   REPORT_MONTHLY: "Ежемесячный",
@@ -154,7 +156,7 @@ function todayRu(): string {
 function DeltaBadge({ current, prev }: { current: number; prev: number }) {
   if (prev === 0) {
     return (
-      <span className="ml-1 inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+      <span className={cn("ml-1 inline-flex items-center", PILL, "bg-muted text-muted-foreground")}>
         нет базы
       </span>
     )
@@ -165,7 +167,8 @@ function DeltaBadge({ current, prev }: { current: number; prev: number }) {
   return (
     <span
       className={cn(
-        "ml-1 inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium",
+        "ml-1 inline-flex items-center gap-0.5",
+        PILL,
         up ? "bg-success/10 text-success" : big ? "bg-danger/10 text-danger" : "bg-warning/10 text-warning"
       )}
     >
@@ -183,7 +186,7 @@ function RoiBadge({ roi }: { roi: number }) {
       ? "bg-warning/10 text-warning"
       : "bg-danger/10 text-danger"
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", cls)}>
+    <span className={cn("rounded-md px-2 py-0.5 text-xs font-medium", cls)}>
       {roi.toFixed(1)}%
     </span>
   )
@@ -326,7 +329,7 @@ export function DashboardView({
                     <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
                     {p.niche && <p className="truncate text-xs text-muted-foreground">{p.niche}</p>}
                   </div>
-                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground")}>
+                  <span className={cn("ml-3 rounded-md px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground")}>
                     {STATUS_LABELS[p.status] ?? p.status}
                   </span>
                 </div>
@@ -559,7 +562,7 @@ export function DashboardView({
 
           {/* Block 2: Plan vs Fact */}
           {strategyKpis.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card shadow-sm">
+            <div className="rounded-2xl border border-border bg-card">
               <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <Target className="size-4 text-foreground" />
@@ -598,7 +601,7 @@ export function DashboardView({
           )}
 
           {/* Block 3: Tasks */}
-          <div className="rounded-2xl border border-border bg-card shadow-sm">
+          <div className="rounded-2xl border border-border bg-card">
             <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <CheckSquare className="size-4 text-foreground" />
@@ -699,7 +702,7 @@ export function DashboardView({
           </div>
 
           {/* Block 5: Top Channels */}
-          <div className="rounded-2xl border border-border bg-card shadow-sm">
+          <div className="rounded-2xl border border-border bg-card">
             <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <p className="text-sm font-medium text-foreground">Топ каналы</p>
               <Link
@@ -722,7 +725,7 @@ export function DashboardView({
                   <Link
                     key={c.channel}
                     href={`/analytics?channel=${encodeURIComponent(c.channel)}`}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-muted transition-colors"
+                    className="flex items-center justify-between px-5 py-3 transition-colors hover:bg-muted active:translate-y-px"
                   >
                     <div className="flex items-center gap-2.5">
                       <span className="flex size-5 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
@@ -743,7 +746,7 @@ export function DashboardView({
           </div>
 
           {/* Block 6: Recent Reports */}
-          <div className="rounded-2xl border border-border bg-card shadow-sm">
+          <div className="rounded-2xl border border-border bg-card">
             <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
               <div className="flex items-center gap-2">
                 <FileText className="size-4 text-foreground" />
@@ -769,7 +772,7 @@ export function DashboardView({
                   <Link
                     key={r.id}
                     href="/reports"
-                    className="flex items-center justify-between px-5 py-3 hover:bg-muted"
+                    className="flex items-center justify-between px-5 py-3 transition-colors hover:bg-muted active:translate-y-px"
                   >
                     <p className="text-sm font-medium text-foreground">
                       {REPORT_LABELS[r.type] ?? r.type}
@@ -782,7 +785,7 @@ export function DashboardView({
           </div>
 
           {/* Block 7: Quick Actions */}
-          <div className="rounded-2xl border border-border bg-card shadow-sm">
+          <div className="rounded-2xl border border-border bg-card">
             <div className="border-b border-border px-5 py-3.5">
               <p className="text-sm font-medium text-foreground">Быстрые действия</p>
             </div>
@@ -796,16 +799,16 @@ export function DashboardView({
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-muted transition-colors"
+                  className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted active:translate-y-px"
                 >
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted transition-transform duration-200 group-hover:scale-105">
                     <Icon className="size-3.5 text-foreground" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">{label}</p>
                     <p className="text-xs text-muted-foreground">{desc}</p>
                   </div>
-                  <ChevronRight className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+                  <ChevronRight className="ml-auto size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Link>
               ))}
             </div>

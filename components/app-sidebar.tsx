@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LogOut, PanelLeftClose, PanelLeftOpen, X, Zap } from "lucide-react"
+import { LogOut, PanelLeftClose, PanelLeftOpen, X } from "lucide-react"
 import { navGroups } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -68,7 +68,21 @@ export function AppSidebar({
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-3">
         <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent-foreground/10 ring-1 ring-sidebar-accent-foreground/20">
-          <Zap className="size-4 text-sidebar-accent-foreground" />
+          <svg
+            viewBox="0 0 16 16"
+            className="size-3.5 text-sidebar-accent-foreground"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M2 11.5 6.5 3l2 5.5L12 6l2 2.5"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <circle cx="12" cy="6" r="1.3" fill="currentColor" />
+          </svg>
         </div>
         {!hideLabels && (
           <span className="truncate text-sm font-semibold text-sidebar-accent-foreground">
@@ -133,7 +147,7 @@ export function AppSidebar({
                       <item.icon className="size-4 shrink-0" />
                       {!hideLabels && <span className="truncate">{item.label}</span>}
                       {!hideLabels && item.badge && (
-                        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-sidebar-accent-foreground/15 px-1 text-[10px] font-semibold text-sidebar-accent-foreground">
+                        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-md bg-sidebar-accent-foreground/15 px-1 text-[10px] font-semibold text-sidebar-accent-foreground">
                           {item.badge}
                         </span>
                       )}
