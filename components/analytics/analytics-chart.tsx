@@ -21,11 +21,11 @@ interface AnalyticsChartProps {
 type Grouping = "day" | "week"
 
 const LINES = [
-  { key: "impressions", label: "Показы", color: "#8b5cf6", yAxis: "left" },
-  { key: "clicks", label: "Клики", color: "#3b82f6", yAxis: "left" },
-  { key: "leads", label: "Лиды", color: "#10b981", yAxis: "left" },
-  { key: "sales", label: "Продажи", color: "#f97316", yAxis: "left" },
-  { key: "spend", label: "Расходы", color: "#111111", yAxis: "right" },
+  { key: "impressions", label: "Показы", color: "var(--chart-5)", yAxis: "left" },
+  { key: "clicks", label: "Клики", color: "var(--chart-4)", yAxis: "left" },
+  { key: "leads", label: "Лиды", color: "var(--chart-3)", yAxis: "left" },
+  { key: "sales", label: "Продажи", color: "var(--chart-1)", yAxis: "left" },
+  { key: "spend", label: "Расходы", color: "var(--chart-2)", yAxis: "right" },
 ] as const
 
 function weekKey(dateStr: string): string {
@@ -139,7 +139,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="dateLabel"
-            tick={{ fontSize: 10, fill: "#6b7280" }}
+            tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
@@ -147,7 +147,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
           <YAxis
             yAxisId="left"
             tickFormatter={fmtTick}
-            tick={{ fontSize: 10, fill: "#6b7280" }}
+            tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
             axisLine={false}
             tickLine={false}
             width={44}
@@ -156,7 +156,7 @@ export function AnalyticsChart({ data }: AnalyticsChartProps) {
             yAxisId="right"
             orientation="right"
             tickFormatter={fmtTick}
-            tick={{ fontSize: 10, fill: "#6b7280" }}
+            tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
             axisLine={false}
             tickLine={false}
             width={44}

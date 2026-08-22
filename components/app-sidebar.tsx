@@ -67,7 +67,7 @@ export function AppSidebar({
     >
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-3">
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent-foreground/10 ring-1 ring-sidebar-accent-foreground/20">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">
           <svg
             viewBox="0 0 16 16"
             className="size-3.5 text-sidebar-accent-foreground"
@@ -85,14 +85,14 @@ export function AppSidebar({
           </svg>
         </div>
         {!hideLabels && (
-          <span className="truncate text-sm font-semibold text-sidebar-accent-foreground">
+          <span className="truncate text-sm font-semibold text-foreground">
             AI Marketing OS
           </span>
         )}
         <button
           onClick={toggle}
           className={cn(
-            "ml-auto hidden size-6 items-center justify-center rounded text-sidebar-primary hover:text-sidebar-accent-foreground md:flex",
+            "ml-auto hidden size-6 items-center justify-center rounded text-sidebar-primary hover:text-foreground md:flex",
             collapsed && "mx-auto"
           )}
           title={collapsed ? "Развернуть" : "Свернуть"}
@@ -105,7 +105,7 @@ export function AppSidebar({
         </button>
         <button
           onClick={onMobileClose}
-          className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-sidebar-primary hover:text-sidebar-accent-foreground md:hidden"
+          className="ml-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-sidebar-primary hover:text-foreground md:hidden"
           aria-label="Закрыть меню"
         >
           <X className="size-5" />
@@ -137,7 +137,7 @@ export function AppSidebar({
                       title={hideLabels ? item.label : undefined}
                       onClick={onMobileClose}
                       className={cn(
-                        "flex min-h-[44px] items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors md:min-h-0",
+                        "flex min-h-[44px] items-center gap-2.5 rounded-full px-3 py-2 text-sm transition-colors md:min-h-0",
                         hideLabels && "justify-center",
                         isActive
                           ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
@@ -147,7 +147,7 @@ export function AppSidebar({
                       <item.icon className="size-4 shrink-0" />
                       {!hideLabels && <span className="truncate">{item.label}</span>}
                       {!hideLabels && item.badge && (
-                        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-md bg-sidebar-accent-foreground/15 px-1 text-[10px] font-semibold text-sidebar-accent-foreground">
+                        <span className="ml-auto flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
                           {item.badge}
                         </span>
                       )}
@@ -164,17 +164,17 @@ export function AppSidebar({
       <div className="border-t border-sidebar-border p-3">
         <div
           className={cn(
-            "flex items-center gap-2 rounded-lg px-2 py-1.5",
+            "flex items-center gap-2 rounded-full px-2 py-1.5",
             hideLabels && "justify-center px-0"
           )}
         >
-          <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sidebar-accent-foreground/10 text-xs font-medium text-sidebar-accent-foreground">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground">
             {(userName ?? userEmail ?? "U").charAt(0).toUpperCase()}
           </div>
           {!hideLabels && (
             <div className="min-w-0 flex-1">
               {userName && (
-                <p className="truncate text-xs font-medium text-sidebar-accent-foreground">
+                <p className="truncate text-xs font-medium text-foreground">
                   {userName}
                 </p>
               )}

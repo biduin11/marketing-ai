@@ -39,119 +39,163 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 1.5rem;
+  --radius-full: 9999px;
   /* Semantic */
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-success-bg: var(--success-bg);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger-bg: var(--danger-bg);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-subtle: var(--brand-subtle);
+  /* Finexy semantic type scale */
+  --text-display: 2rem;
+  --text-display--line-height: 2.5rem;
+  --text-display--font-weight: 700;
+  --text-h1: 1.75rem;
+  --text-h1--line-height: 2.25rem;
+  --text-h1--font-weight: 700;
+  --text-h2: 1.25rem;
+  --text-h2--line-height: 1.75rem;
+  --text-h2--font-weight: 600;
+  --text-h3: 1rem;
+  --text-h3--line-height: 1.5rem;
+  --text-h3--font-weight: 600;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-caption--font-weight: 500;
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 0.875rem;
+  --text-micro--font-weight: 500;
 }
 
 :root {
-  /* === AI Marketing OS Design Tokens === */
+  /* === Finexy Design Tokens === */
 
-  /* ─ Neutrals (warm bias: hue 80 = amber, chroma 0.006–0.010) ─ */
-  /* #F9F8F6 warm off-white */
-  --background: oklch(0.982 0.006 80);
-  --foreground: oklch(0.138 0.008 80);
-  /* #FFFFFF card surface */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.138 0.008 80);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.138 0.008 80);
-  /* Primary #1A1A18 warm near-black */
-  --primary: oklch(0.138 0.008 80);
-  --primary-foreground: oklch(0.982 0.006 80);
-  /* Secondary surface #F4F2EF */
-  --secondary: oklch(0.962 0.007 80);
-  --secondary-foreground: oklch(0.200 0.008 80);
-  --muted: oklch(0.962 0.007 80);
-  /* Muted text #6B6860 warm grey */
-  --muted-foreground: oklch(0.542 0.010 80);
-  --accent: oklch(0.962 0.007 80);
-  --accent-foreground: oklch(0.200 0.008 80);
-  --destructive: oklch(0.577 0.245 27.325);
-  /* Border #E5E3DE warm border */
-  --border: oklch(0.916 0.007 80);
-  --input: oklch(0.916 0.007 80);
-  --ring: oklch(0.700 0.008 80);
-  /* Charts — monochrome warm scale */
-  --chart-1: oklch(0.860 0.008 80);
-  --chart-2: oklch(0.542 0.010 80);
-  --chart-3: oklch(0.430 0.010 80);
-  --chart-4: oklch(0.360 0.010 80);
-  --chart-5: oklch(0.260 0.010 80);
-  --radius: 0.75rem;
+  --background: #F0F0F0;
+  --foreground: #17171A;
+  --card: #FFFFFF;
+  --card-foreground: #17171A;
+  --popover: #FFFFFF;
+  --popover-foreground: #17171A;
+  /* Primary button surface — near-black (brand accent lives in --brand) */
+  --primary: #1A1A1A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F2F2F2;
+  --secondary-foreground: #17171A;
+  --muted: #F2F2F2;
+  --muted-foreground: #8B8D98;
+  --accent: #F2F2F2;
+  --accent-foreground: #17171A;
+  --destructive: #EF4444;
+  --border: #EAEAEA;
+  --input: #EAEAEA;
+  --ring: #DCDCE0;
+  /* Charts — brand orange for primary series, dark→grey scale for the rest */
+  --chart-1: #FF5A1F;
+  --chart-2: #1A1A1A;
+  --chart-3: #2B2B2B;
+  --chart-4: #8B8D98;
+  --chart-5: #B4B6C0;
+  --radius: 1.25rem;
 
-  /* ─ Sidebar — dark charcoal (same in light & dark: always dark) ─ */
-  /* #1A1A18 */
-  --sidebar: oklch(0.138 0.008 80);
-  --sidebar-foreground: oklch(0.820 0.010 80);
-  --sidebar-primary: oklch(0.820 0.010 80);
-  --sidebar-primary-foreground: oklch(0.138 0.008 80);
-  /* Active item bg: rgba(white, 0.09) */
-  --sidebar-accent: oklch(0.980 0.006 80 / 9%);
-  --sidebar-accent-foreground: oklch(0.960 0.006 80);
-  /* #2E2C29 */
-  --sidebar-border: oklch(0.240 0.008 80 / 60%);
-  --sidebar-ring: oklch(0.500 0.010 80);
+  /* ─ Brand accent (sparse use: CTAs, highlighted cards, profit line) ─ */
+  --brand: #FF5A1F;
+  --brand-hover: #E6501B;
+  --brand-subtle: #FFE7DB;
+
+  /* ─ Semantic tint backgrounds (pill badges) ─ */
+  --success-bg: #DCFCE7;
+  --warning-bg: #FEF3C7;
+  --danger-bg: #FEE2E2;
+
+  /* ─ Sidebar — light surface, matches card ─ */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #8B8D98;
+  --sidebar-primary: #8B8D98;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #EAEAEA;
+  --sidebar-ring: #DCDCE0;
 
   /* ─ Semantic ─ */
-  --success: oklch(0.543 0.165 153);
-  --warning: oklch(0.679 0.177 80);
-  --danger: oklch(0.577 0.245 27.325);
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --danger: #EF4444;
 
   /* ─ Fonts ─ */
-  --font-sans: var(--font-geist-sans);
-  --font-heading: var(--font-dm-sans);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-inter);
+
+  /* ─ Shadows ─ */
+  --shadow-sm: 0 1px 2px rgba(16, 16, 20, 0.04);
+  --shadow-card: 0 2px 8px rgba(16, 16, 20, 0.05);
+  --shadow-md: 0 4px 16px rgba(16, 16, 20, 0.06);
+  --shadow-popover: 0 8px 24px rgba(16, 16, 20, 0.10);
 }
 
 .dark {
-  /* ─ Dark mode: warm dark tones ─ */
-  /* #141412 */
-  --background: oklch(0.128 0.008 80);
-  --foreground: oklch(0.920 0.008 80);
-  /* #1E1D1B */
-  --card: oklch(0.168 0.008 80);
-  --card-foreground: oklch(0.920 0.008 80);
-  --popover: oklch(0.168 0.008 80);
-  --popover-foreground: oklch(0.920 0.008 80);
-  /* Primary: near-white */
-  --primary: oklch(0.900 0.008 80);
-  --primary-foreground: oklch(0.168 0.008 80);
-  /* #252422 */
-  --secondary: oklch(0.200 0.008 80);
-  --secondary-foreground: oklch(0.920 0.008 80);
-  --muted: oklch(0.200 0.008 80);
-  /* Muted text #9B9890 */
-  --muted-foreground: oklch(0.640 0.010 80);
-  --accent: oklch(0.200 0.008 80);
-  --accent-foreground: oklch(0.920 0.008 80);
-  --destructive: oklch(0.704 0.191 22.216);
-  /* #2E2C29 */
-  --border: oklch(0.240 0.008 80);
-  --input: oklch(0.260 0.008 80);
-  --ring: oklch(0.500 0.010 80);
-  /* Charts — warm dark scale */
-  --chart-1: oklch(0.860 0.008 80);
-  --chart-2: oklch(0.640 0.010 80);
-  --chart-3: oklch(0.440 0.010 80);
-  --chart-4: oklch(0.340 0.010 80);
-  --chart-5: oklch(0.240 0.010 80);
-  /* Sidebar: even darker in dark mode #0E0E0C */
-  --sidebar: oklch(0.095 0.006 80);
-  --sidebar-foreground: oklch(0.600 0.010 80);
-  --sidebar-primary: oklch(0.600 0.010 80);
-  --sidebar-primary-foreground: oklch(0.095 0.006 80);
-  --sidebar-accent: oklch(0.920 0.008 80 / 8%);
-  --sidebar-accent-foreground: oklch(0.900 0.008 80);
-  --sidebar-border: oklch(0.200 0.008 80);
-  --sidebar-ring: oklch(0.400 0.010 80);
+  /* ─ Dark mode: derived from Finexy's own --color-bg-dark/-dark-hover
+     (reference has no dark-mode spec — this extrapolates it) ─ */
+  --background: #17171A;
+  --foreground: #F0F0F0;
+  --card: #1A1A1A;
+  --card-foreground: #F0F0F0;
+  --popover: #1A1A1A;
+  --popover-foreground: #F0F0F0;
+  --primary: #F0F0F0;
+  --primary-foreground: #1A1A1A;
+  --secondary: #2B2B2B;
+  --secondary-foreground: #F0F0F0;
+  --muted: #2B2B2B;
+  --muted-foreground: #B4B6C0;
+  --accent: #2B2B2B;
+  --accent-foreground: #F0F0F0;
+  --destructive: #EF4444;
+  --border: #2B2B2B;
+  --input: #2B2B2B;
+  --ring: #3A3A3A;
+  --chart-1: #FF5A1F;
+  --chart-2: #F0F0F0;
+  --chart-3: #B4B6C0;
+  --chart-4: #8B8D98;
+  --chart-5: #5A5C66;
+
+  --brand: #FF5A1F;
+  --brand-hover: #FF7440;
+  --brand-subtle: #3A2115;
+
+  --success-bg: rgba(22, 163, 74, 0.16);
+  --warning-bg: rgba(245, 158, 11, 0.16);
+  --danger-bg: rgba(239, 68, 68, 0.16);
+
+  --sidebar: #1A1A1A;
+  --sidebar-foreground: #8B8D98;
+  --sidebar-primary: #8B8D98;
+  --sidebar-primary-foreground: #F0F0F0;
+  --sidebar-accent: #2B2B2B;
+  --sidebar-accent-foreground: #F0F0F0;
+  --sidebar-border: #2B2B2B;
+  --sidebar-ring: #3A3A3A;
+
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.32);
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 @layer base {

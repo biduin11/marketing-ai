@@ -103,7 +103,7 @@ const STATUS_STYLES: Record<string, string> = {
   ARCHIVED: "text-muted-foreground bg-muted",
 }
 
-const PILL = "rounded-md px-1.5 py-0.5 text-xs font-medium"
+const PILL = "rounded-full px-1.5 py-0.5 text-xs font-medium"
 
 const REPORT_LABELS: Record<string, string> = {
   REPORT_WEEKLY: "Еженедельный",
@@ -186,7 +186,7 @@ function RoiBadge({ roi }: { roi: number }) {
       ? "bg-warning/10 text-warning"
       : "bg-danger/10 text-danger"
   return (
-    <span className={cn("rounded-md px-2 py-0.5 text-xs font-medium", cls)}>
+    <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", cls)}>
       {roi.toFixed(1)}%
     </span>
   )
@@ -329,7 +329,7 @@ export function DashboardView({
                     <p className="truncate text-sm font-medium text-foreground">{p.name}</p>
                     {p.niche && <p className="truncate text-xs text-muted-foreground">{p.niche}</p>}
                   </div>
-                  <span className={cn("ml-3 rounded-md px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground")}>
+                  <span className={cn("ml-3 rounded-full px-2 py-0.5 text-xs font-medium shrink-0", STATUS_STYLES[p.status] ?? "bg-muted text-muted-foreground")}>
                     {STATUS_LABELS[p.status] ?? p.status}
                   </span>
                 </div>
@@ -364,7 +364,7 @@ export function DashboardView({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="font-heading text-xl font-semibold text-foreground">
+        <h1 className="font-heading text-h2 text-foreground">
           {projectName ?? "Главная"}
         </h1>
         <div className="flex items-center gap-2">
@@ -629,7 +629,7 @@ export function DashboardView({
                       type="checkbox"
                       checked={tasksDone[task.id] ?? task.done}
                       onChange={() => handleToggle(task)}
-                      className="mt-0.5 h-4 w-4 cursor-pointer rounded border-border accent-[#111]"
+                      className="mt-0.5 h-4 w-4 cursor-pointer rounded border-border accent-[var(--primary)]"
                     />
                     <span
                       className={cn(
@@ -691,7 +691,7 @@ export function DashboardView({
                 <div key={label} className="rounded-xl bg-muted px-3 py-2.5">
                   <p className="text-xs text-muted-foreground">{label}</p>
                   <div className="mt-0.5 flex items-center">
-                    <p className="font-heading text-lg font-semibold tabular-nums text-foreground">{value}</p>
+                    <p className="font-heading text-h3 tabular-nums text-foreground">{value}</p>
                     {curr !== null && prev !== null && (
                       <DeltaBadge current={curr} prev={prev} />
                     )}

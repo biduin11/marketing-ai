@@ -185,21 +185,33 @@ prisma/
 
 ---
 
-## Дизайн-система (токены в `app/globals.css`)
+## Дизайн-система — Finexy (токены в `app/globals.css`)
+
+> Дизайн-система полностью заменена на Finexy (fintech/SaaS-референс). Референсные файлы
+> (`design-tokens.css`, `tailwind.config.js` — v3-синтаксис, не используется напрямую, т.к.
+> проект на Tailwind v4 CSS-first) смёржены в CSS-переменные `app/globals.css`.
 
 ```
-Фон страницы:  #fafafa
-Карточки:      #ffffff  border: #eaeaea
-Текст:         #111111  / muted: #6b7280
-Primary btn:   #111111 (чёрная, белый текст)
-Success:       #16a34a  Warning: #d97706  Danger: #dc2626
-Радиус:        карточки rounded-2xl, контролы rounded-lg
-Шрифт:         Geist Sans (next/font)
+Фон страницы:  #F0F0F0
+Карточки:      #FFFFFF  border: #EAEAEA
+Текст:         #17171A  / muted: #8B8D98
+Primary btn:   #1A1A1A (чёрная, белый текст) — rounded-full
+Brand-акцент:  #FF5A1F (--brand) — точечно: CTA, выделенные карточки, основная серия графика.
+               НЕ красить в акцент каждую кнопку — только когда нужен явный highlight.
+Success:       #16A34A (bg #DCFCE7)  Warning: #F59E0B (bg #FEF3C7)  Danger: #EF4444 (bg #FEE2E2)
+Радиус:        --radius-sm 8px / md 12px / lg 16px / xl 20px / 2xl 24px / full 9999px
+               Кнопки, инпуты, бейджи, активный nav — rounded-full. Карточки — rounded-xl/2xl.
+Тени:          --shadow-sm / --shadow-card / --shadow-md / --shadow-popover
+Шрифт:         Inter (next/font/google), --font-sans = --font-heading (единый, без пары)
+Тип-шкала:     text-display 32px / text-h1 28px / text-h2 20px / text-h3 16px /
+               text-caption 12px / text-micro 11px (токены в `@theme`, globals.css)
 ```
 
-Карточки: `bg-white border border-[#eaeaea] rounded-2xl p-6 shadow-sm`
-Sidebar: 240px, активный пункт — `bg-neutral-100 rounded-lg`
-Графики Recharts: монохром, линии `#111`, без заливок, тонкая сетка `#eaeaea`
+Карточки: `bg-card rounded-xl shadow-[var(--shadow-card)] p-6` (или через `<Card>` из `components/ui/card.tsx`)
+Sidebar: светлый (`bg-sidebar` = белый), активный пункт — `bg-sidebar-accent rounded-full`
+  (тёмная пилюля, белый текст/иконка) — см. `components/app-sidebar.tsx`.
+Графики Recharts: `--chart-1` (brand orange, основная серия) → `--chart-2..5` (тёмный→серый),
+  без произвольных hex в компонентах — только `var(--chart-N)`.
 
 ---
 
