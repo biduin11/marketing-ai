@@ -154,7 +154,7 @@ export function AudienceView({
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">Клиент</h1>
+        <h1 className="font-heading text-h2 text-foreground">Клиент</h1>
         <div className="flex items-center gap-3">
           <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
             <Download size={15} />
@@ -254,7 +254,7 @@ export function AudienceView({
                           </p>
                           <div className="flex items-end justify-between">
                             <div>
-                              <p className="tabular-nums text-2xl font-bold text-foreground">
+                              <p className="tabular-nums font-heading text-h1 text-foreground">
                                 {m.value}
                               </p>
                               {m.sub && (

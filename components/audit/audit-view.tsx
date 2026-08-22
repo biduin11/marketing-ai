@@ -60,7 +60,7 @@ function ScoreRing({ score }: { score: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-foreground">{score}</span>
+        <span className="font-heading text-h1 text-foreground">{score}</span>
         <span className="text-xs text-muted-foreground">из 100</span>
       </div>
     </div>
@@ -79,7 +79,7 @@ function AuditResult({
       <div className="mb-6 rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Результат аудита</h2>
+            <h2 className="font-heading text-h2 text-foreground">Результат аудита</h2>
             <p className="text-sm text-muted-foreground">
               {DATE_FORMAT.format(new Date(audit.createdAt))}
             </p>
@@ -92,7 +92,7 @@ function AuditResult({
         <div className="mb-6 flex items-center gap-8">
           <ScoreRing score={audit.score} />
           <div>
-            <p className="mb-1 text-xl font-semibold text-foreground">{audit.level}</p>
+            <p className="mb-1 font-heading text-h3 text-foreground">{audit.level}</p>
             <p className="text-sm leading-relaxed text-muted-foreground">{audit.summary}</p>
           </div>
         </div>
@@ -254,7 +254,7 @@ export function AuditView({ projectId, initialAudits }: AuditViewProps) {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-8 text-center">
-        <h1 className="mb-2 text-2xl font-semibold text-foreground">Экспресс-аудит маркетинга</h1>
+        <h1 className="mb-2 font-heading text-h2 text-foreground">Экспресс-аудит маркетинга</h1>
         <p className="text-sm text-muted-foreground">10 вопросов · 60 секунд · Скоркарта и точки роста</p>
       </div>
 
@@ -277,7 +277,7 @@ export function AuditView({ projectId, initialAudits }: AuditViewProps) {
         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {question.category}
         </p>
-        <h2 className="mb-6 text-lg font-semibold text-foreground">{question.question}</h2>
+        <h2 className="mb-6 font-heading text-h3 text-foreground">{question.question}</h2>
 
         <div className="space-y-3">
           {question.options.map((opt) => (

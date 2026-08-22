@@ -44,7 +44,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Офферы</h2>
+          <h2 className="font-heading text-h3 text-foreground">Офферы</h2>
           <p className="text-sm text-muted-foreground">
             УТП, акции, спецпредложения и лид-магниты
             {version && <span className="ml-2 text-xs">· версия {version}</span>}
@@ -126,7 +126,7 @@ export function OffersView({ projectId, offer, version }: OffersViewProps) {
                 <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Главное УТП
                 </p>
-                <p className="text-xl font-semibold leading-snug text-foreground">{offer.usp}</p>
+                <p className="font-heading text-h2 leading-snug text-foreground">{offer.usp}</p>
                 {offer.tagline && (
                   <p className="mt-3 inline-block rounded-full border border-border bg-muted px-3 py-1 text-sm text-muted-foreground">
                     {offer.tagline}

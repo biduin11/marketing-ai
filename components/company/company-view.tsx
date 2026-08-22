@@ -187,7 +187,7 @@ export function CompanyView({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">
+          <h2 className="font-heading text-h3 text-foreground">
             Анализ компании
           </h2>
           <p className="text-sm text-muted-foreground">

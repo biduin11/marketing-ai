@@ -264,7 +264,7 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Отчёты</h2>
+          <h2 className="font-heading text-h3 text-foreground">Отчёты</h2>
           <p className="text-sm text-muted-foreground">
             AI-резюме для руководителя с экспортом в PDF
           </p>
@@ -367,7 +367,7 @@ export function ReportsView({ projectId, weekly, monthly, quarterly }: ReportsVi
                     версия {currentEntry.version}
                   </Badge>
                 </div>
-                <p className="text-lg font-semibold leading-snug text-foreground">
+                <p className="font-heading text-h3 leading-snug text-foreground">
                   {currentEntry.report.headline}
                 </p>
               </div>

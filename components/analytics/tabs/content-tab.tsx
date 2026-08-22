@@ -116,7 +116,7 @@ export function ContentTab({ channels, timeSeries, contentPlan }: ContentTabProp
               <Icon className="size-3.5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">{label}</p>
             </div>
-            <p className="text-2xl font-semibold text-foreground">{value}</p>
+            <p className="font-heading text-h1 text-foreground">{value}</p>
             {label === "Охват (показы)" && bestChannel && (
               <p className="mt-1 text-[10px] text-muted-foreground">Лидер: {bestChannel.channel}</p>
             )}

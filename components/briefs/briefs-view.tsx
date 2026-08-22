@@ -196,7 +196,7 @@ export function BriefsView({ projectId, initialBriefs }: BriefsViewProps) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">
+          <h2 className="font-heading text-h3 text-foreground">
             Брифы для подрядчиков
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -236,7 +236,7 @@ export function BriefsView({ projectId, initialBriefs }: BriefsViewProps) {
               <div className="mb-6 flex items-start justify-between gap-3">
                 <div>
                   <Badge variant="outline">{BRIEF_TYPE_LABEL[brief.type]}</Badge>
-                  <h3 className="mt-2 text-lg font-semibold text-foreground">
+                  <h3 className="mt-2 font-heading text-h3 text-foreground">
                     {brief.title}
                   </h3>
                   <p className="text-xs text-muted-foreground">

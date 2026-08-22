@@ -33,7 +33,7 @@ export function SettingsView({ name, email, usage, projectCount, maxProjects, pr
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <div>
-        <h2 className="font-heading text-lg font-semibold text-foreground">Настройки</h2>
+        <h2 className="font-heading text-h3 text-foreground">Настройки</h2>
         <p className="text-sm text-muted-foreground">Профиль, план и расход AI</p>
       </div>
 

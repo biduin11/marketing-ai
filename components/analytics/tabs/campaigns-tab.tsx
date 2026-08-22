@@ -43,19 +43,19 @@ export function CampaignsTab({ channels, summary }: CampaignsTabProps) {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <p className="text-xs text-muted-foreground">Всего каналов</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">{channels.length}</p>
+          <p className="mt-1 font-heading text-h1 text-foreground">{channels.length}</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <p className="text-xs text-muted-foreground">Общий бюджет</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">{fmt(totalSpend)} ₽</p>
+          <p className="mt-1 font-heading text-h1 text-foreground">{fmt(totalSpend)} ₽</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <p className="text-xs text-muted-foreground">Средний ROMI</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">{fmt(summary.romi)}%</p>
+          <p className="mt-1 font-heading text-h1 text-foreground">{fmt(summary.romi)}%</p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
           <p className="text-xs text-muted-foreground">Выручка</p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">{fmt(summary.totalRevenue)} ₽</p>
+          <p className="mt-1 font-heading text-h1 text-foreground">{fmt(summary.totalRevenue)} ₽</p>
         </div>
       </div>
 

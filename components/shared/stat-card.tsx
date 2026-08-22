@@ -46,13 +46,13 @@ export function StatCard({
   const content = (
     <>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <p className="text-xs leading-snug text-muted-foreground">{label}</p>
+        <p className="text-caption leading-snug text-muted-foreground">{label}</p>
         {Icon && <Icon className="size-4 shrink-0 text-muted-foreground/50" />}
       </div>
-      <p className={cn("text-xl font-semibold tabular-nums", TONE_TEXT[tone])}>
+      <p className={cn("font-heading text-h2 tabular-nums", TONE_TEXT[tone])}>
         {value}
       </p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+      {sub && <p className="text-caption text-muted-foreground">{sub}</p>}
     </>
   )
 

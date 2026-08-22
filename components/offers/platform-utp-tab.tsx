@@ -85,7 +85,7 @@ export function PlatformUtpTab({ projectId }: PlatformUtpTabProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-lg font-semibold text-foreground">
+        <h2 className="font-heading text-h3 text-foreground">
           УТП по площадкам
         </h2>
         <p className="text-sm text-muted-foreground">

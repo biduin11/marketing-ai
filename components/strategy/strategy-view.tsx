@@ -90,7 +90,7 @@ export function StrategyView({ projectId, entries, allVersionEntries }: Strategy
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">Стратегия</h2>
+          <h2 className="font-heading text-h3 text-foreground">Стратегия</h2>
           <p className="text-sm text-muted-foreground">
             Маркетинговый план по горизонтам
           </p>

@@ -48,14 +48,14 @@ export function ScoreCard({ score, level, className }: ScoreCardProps) {
           />
         </svg>
         <div className="absolute flex flex-col items-center">
-          <span className="text-3xl font-semibold text-foreground">
+          <span className="font-heading text-display text-foreground">
             {clamped}
           </span>
-          <span className="text-xs text-muted-foreground">/ 100</span>
+          <span className="text-caption text-muted-foreground">/ 100</span>
         </div>
       </div>
       <p className="mt-4 text-sm font-medium text-foreground">{level}</p>
-      <p className="text-xs text-muted-foreground">Общая оценка</p>
+      <p className="text-caption text-muted-foreground">Общая оценка</p>
     </div>
   )
 }

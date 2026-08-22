@@ -24,7 +24,7 @@ export function KpiCard({ name, target }: KpiCardProps) {
         <KpiIcon name={name} />
         <span className="text-xs font-medium">{name}</span>
       </div>
-      <p className="mt-2 text-xl font-semibold text-foreground">{target}</p>
+      <p className="mt-2 font-heading text-h2 text-foreground">{target}</p>
     </div>
   )
 }

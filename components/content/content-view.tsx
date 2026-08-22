@@ -110,7 +110,7 @@ export function ContentView({ projectId, plan, version, platforms }: ContentView
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-heading text-lg font-semibold text-foreground">
+          <h2 className="font-heading text-h3 text-foreground">
             Контент-план
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -469,7 +469,7 @@ function RubricsTab({ plan }: { plan: ContentPlan }) {
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-semibold text-foreground">{count}</p>
+                <p className="font-heading text-h2 text-foreground">{count}</p>
                 <p className="text-xs text-muted-foreground">публ. · {pct}%</p>
               </div>
             </div>
@@ -502,7 +502,7 @@ function MetricCard({
         <p className="text-xs text-muted-foreground">{label}</p>
         <Icon className="size-4 text-muted-foreground/50" />
       </div>
-      <p className="text-xl font-semibold text-foreground">{value}</p>
+      <p className="font-heading text-h2 text-foreground">{value}</p>
       <p className="text-xs text-muted-foreground">{sub}</p>
     </div>
   )

@@ -130,7 +130,7 @@ export function ReputationView({
   const header = (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Репутация</h1>
+        <h1 className="font-heading text-h2 text-foreground">Репутация</h1>
         <p className="text-sm text-muted-foreground">
           {searchedAt
             ? `Последний анализ: ${fmtDate(searchedAt)}`

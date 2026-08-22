@@ -84,7 +84,7 @@ export function OnboardingWizard() {
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-foreground">
           <Sparkles className="size-5 text-background" />
         </div>
-        <h1 className="text-xl font-semibold text-foreground">Добро пожаловать в AI Marketing OS</h1>
+        <h1 className="font-heading text-h2 text-foreground">Добро пожаловать в AI Marketing OS</h1>
         <p className="mt-1 text-sm text-muted-foreground">Создайте первый проект за 3 шага</p>
       </div>
 

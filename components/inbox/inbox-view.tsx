@@ -94,7 +94,7 @@ export function InboxView({ projectId, signals: initialSignals }: InboxViewProps
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground flex items-center gap-2">
+          <h1 className="font-heading text-h2 text-foreground flex items-center gap-2">
             <Bell className="size-5" />
             Входящие
           </h1>

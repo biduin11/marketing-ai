@@ -164,7 +164,7 @@ export function SprintView({ projectId, initialSprint }: SprintViewProps) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-heading text-lg font-semibold text-foreground">Спринт на неделю</h1>
+          <h1 className="font-heading text-h2 text-foreground">Спринт на неделю</h1>
           {sprint && (
             <p className="text-sm text-muted-foreground">
               {RU_DATE.format(new Date(sprint.weekStart))} — {RU_DATE_FULL.format(new Date(sprint.weekEnd))}

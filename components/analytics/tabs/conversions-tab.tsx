@@ -63,7 +63,7 @@ export function ConversionsTab({ summary, channels, timeSeries }: ConversionsTab
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <p className="text-[11px] leading-snug text-muted-foreground">{label}</p>
-            <p className="mt-1 text-xl font-semibold text-foreground">{value}</p>
+            <p className="mt-1 font-heading text-h2 text-foreground">{value}</p>
           </div>
         ))}
       </div>

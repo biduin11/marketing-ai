@@ -81,7 +81,7 @@ export function ClientDashboard({ data }: ClientDashboardProps) {
                 </div>
               </div>
               <div>
-                <p className="mb-1 text-lg font-semibold text-foreground">
+                <p className="mb-1 font-heading text-h3 text-foreground">
                   {data.companyAnalysis.level}
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">

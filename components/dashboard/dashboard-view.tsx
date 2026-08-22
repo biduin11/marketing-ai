@@ -309,7 +309,7 @@ export function DashboardView({
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-foreground">Главная</h1>
+          <h1 className="font-heading text-h2 text-foreground">Главная</h1>
           <Button size="sm" onClick={() => setNewProjectOpen(true)}>
             <Plus className="size-3.5" />
             Новый проект

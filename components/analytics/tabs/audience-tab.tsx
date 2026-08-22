@@ -103,7 +103,7 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
               <Icon className="size-3.5 text-muted-foreground" />
               <p className="text-xs text-muted-foreground">{label}</p>
             </div>
-            <p className="text-2xl font-semibold text-foreground">{value}</p>
+            <p className="font-heading text-h1 text-foreground">{value}</p>
             <p className="mt-0.5 text-[10px] text-muted-foreground">{sub}</p>
           </div>
         ))}
@@ -190,7 +190,7 @@ export function AudienceTab({ summary, channels, timeSeries, audienceSegments, b
                     <span className="text-xs font-medium text-foreground">{d.channel}</span>
                     <span className={`rounded border px-1.5 py-0.5 text-[10px] font-medium ${tierCls}`}>{tier}</span>
                   </div>
-                  <p className="text-lg font-semibold text-foreground">{d.quality}</p>
+                  <p className="font-heading text-h3 text-foreground">{d.quality}</p>
                   <p className="mb-2 text-[10px] text-muted-foreground">лидов/1К показов</p>
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: d.color }} />
