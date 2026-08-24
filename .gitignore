@@ -43,3 +43,5 @@ next-env.d.ts
 graphify-out/
 AI-Marketing-OS-Blueprint.md
 AI-Marketing-OS-Runbook.md
+.vercel
+.env*

@@ -352,3 +352,16 @@ model Payment {
 
   @@index([userId])
 }
+
+model SkillChunk {
+  id         Int      @id @default(autoincrement())
+  skillSlug  String   @map("skill_slug")
+  section    String?
+  content    String
+  tokenCount Int?     @map("token_count")
+  embedding  Unsupported("vector(1536)")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([skillSlug])
+  @@map("skill_chunks")
+}
