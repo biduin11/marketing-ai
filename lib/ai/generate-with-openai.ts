@@ -155,6 +155,8 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   }
 
   const args = toolCall.function.arguments
+  const args = toolCall.function.arguments
+console.log("RAW TOOL CALL ARGS:", args) // ← временно, для диагностики
 
   let rawData: unknown
   try {
