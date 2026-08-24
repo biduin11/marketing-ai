@@ -18,6 +18,7 @@ import {
 } from "@/lib/ai/prompts/audience"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -39,17 +40,25 @@ export async function generateAudienceSegments(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "AUDIENCE_SEGMENTS", card, plan })
+
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "audience",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const inputHash = computeInputHash({ type: "AUDIENCE_SEGMENTS", card, plan, skillsPrompt })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "AUDIENCE_SEGMENTS")
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const system = skillsPrompt ? `${audienceSegmentsSystem}\n\n---\n\n${skillsPrompt}` : audienceSegmentsSystem
+
   const { data, model } = await routeAI({
     task: "AUDIENCE",
     plan,
-    system: audienceSegmentsSystem,
+    system,
     prompt: buildAudienceSegmentsInput(card),
     schema: audienceSegmentsSchema,
   })
@@ -66,17 +75,25 @@ export async function generateBuyerPersona(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "BUYER_PERSONA", card, plan })
+
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "audience",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const inputHash = computeInputHash({ type: "BUYER_PERSONA", card, plan, skillsPrompt })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "BUYER_PERSONA")
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const system = skillsPrompt ? `${buyerPersonaSystem}\n\n---\n\n${skillsPrompt}` : buyerPersonaSystem
+
   const { data, model } = await routeAI({
     task: "AUDIENCE",
     plan,
-    system: buyerPersonaSystem,
+    system,
     prompt: buildBuyerPersonaInput(card),
     schema: buyerPersonaSchema,
   })
@@ -93,17 +110,25 @@ export async function generateJtbd(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "JTBD", card, plan })
+
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "audience",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const inputHash = computeInputHash({ type: "JTBD", card, plan, skillsPrompt })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "JTBD")
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const system = skillsPrompt ? `${jtbdSystem}\n\n---\n\n${skillsPrompt}` : jtbdSystem
+
   const { data, model } = await routeAI({
     task: "AUDIENCE",
     plan,
-    system: jtbdSystem,
+    system,
     prompt: buildJtbdInput(card),
     schema: jtbdSchema,
   })

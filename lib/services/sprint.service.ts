@@ -6,6 +6,7 @@ import { sprintSchema } from "@/lib/ai/schemas/sprint"
 import { sprintSystem, buildSprintInput, type CompanyCard } from "@/lib/ai/prompts/sprint"
 import { computeSummary } from "@/lib/services/analytics.service"
 import { getLatestArtifact } from "@/lib/services/artifacts"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 export type SprintWithTasks = Sprint & { tasks: SprintTask[] }
 
@@ -104,12 +105,19 @@ export async function generateSprint(
 
   const weekDates = `${RU_DATE.format(weekStart)} — ${RU_DATE.format(weekEnd)}`
 
+  const card = toCard(project)
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "sprint-planner",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+  const system = skillsPrompt ? `${sprintSystem}\n\n---\n\n${skillsPrompt}` : sprintSystem
+
   const { data } = await routeAI({
     task: "SPRINT",
     plan,
-    system: sprintSystem,
+    system,
     prompt: buildSprintInput({
-      card: toCard(project),
+      card,
       weekDates,
       strategyContext,
       unfinishedTasks,

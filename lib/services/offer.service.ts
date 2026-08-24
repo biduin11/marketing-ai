@@ -36,7 +36,7 @@ export async function generateOffer(
 
   const [skillsPrompt, clientProfileBlock] = await Promise.all([
     buildSystemPrompt({
-      featureId: "ad-copy",
+      featureId: "offers",
       userQuery: `${card.niche}. Цели: ${card.goals}`,
     }),
     buildClientProfileBlock(project.id),

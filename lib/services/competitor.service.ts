@@ -13,6 +13,7 @@ import {
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
 import { tavilyMultiSearch, formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -101,7 +102,13 @@ export async function generateCompetitorAnalysis(
 ): Promise<AiArtifact> {
   const card = toCard(project)
   const detailed = parseCompetitorsDetailed(project.competitorsDetailed)
-  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card, detailed, plan })
+
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "competitors",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const inputHash = computeInputHash({ type: "COMPETITOR_ANALYSIS", card, detailed, plan, skillsPrompt })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPETITOR_ANALYSIS")
@@ -115,10 +122,12 @@ export async function generateCompetitorAnalysis(
 РЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:
 ${formatSearchResultsForPrompt(searchResults)}`
 
+  const system = skillsPrompt ? `${competitorAnalysisSystem}\n\n---\n\n${skillsPrompt}` : competitorAnalysisSystem
+
   const { data, model } = await routeAI({
     task: "COMPETITORS",
     plan,
-    system: competitorAnalysisSystem,
+    system,
     prompt: buildCompetitorAnalysisInput(card, detailed) + searchContext,
     schema: competitorAnalysisSchema,
     maxTokens: 16000,

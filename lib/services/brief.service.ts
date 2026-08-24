@@ -4,6 +4,7 @@ import type { PlanName } from "@/lib/config/plans"
 import { briefContentSchema, type BriefContent } from "@/lib/ai/schemas/brief"
 import { briefsSystem, buildBriefInput, type CompanyCard } from "@/lib/ai/prompts/briefs"
 import type { PsychotypeKey } from "@/lib/ai/schemas/psychotypes"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -28,10 +29,17 @@ export async function generateBriefContent(
 ): Promise<{ content: BriefContent; model: string }> {
   const card = toCard(project)
 
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "briefs",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const system = skillsPrompt ? `${briefsSystem}\n\n---\n\n${skillsPrompt}` : briefsSystem
+
   const { data, model } = await routeAI({
     task: "BRIEFS",
     plan,
-    system: briefsSystem,
+    system,
     prompt: buildBriefInput(card, type, task, psychotype),
     schema: briefContentSchema,
   })

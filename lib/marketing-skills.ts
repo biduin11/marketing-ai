@@ -48,15 +48,22 @@ const HEAVY_SKILLS = new Set([
 // Какие скилы нужны какой фиче/агенту в приложении.
 // Подгони под реальные фичи AI Marketing OS.
 export const FEATURE_SKILLS: Record<string, string[]> = {
-  "content-plan": ["content-strategy"],
+  // уже подключено — для справки, ничего не трогать
+  "content-plan": ["content-strategy", "social"],   // + social, см. шаг про Content Factory ниже
   "cjm": ["customer-journey-map"],
-  "ad-copy": ["ad-creative"],
-  "seo-brief": ["seo-audit", "ai-seo", "schema"],
-  "sales-collateral": ["sales-enablement", "competitors"],
-  "gtm-plan": ["marketing-plan", "product-marketing"],
-  "social-content": ["social", "content-strategy"],
-  "launch-plan": ["launch", "marketing-plan"],
-  "competitor-teardown": ["competitor-profiling", "competitors"],
+  "offers": ["brand-positioning-toolkit"],           // проверить маркер-тестом, что реально этот
+
+  // новое — подключить в этом заходе
+  "audience": ["customer-research"],
+  "competitors": ["competitor-profiling"],
+  "express-audit": ["seo-audit", "ai-seo", "marketing-ideas"],
+  "briefs": ["sales-enablement"],
+  "sprint-planner": ["marketing-loops", "marketing-ideas"],
+  "company-intelligence": ["brand-positioning-toolkit"],
+
+  // на паузе / без дома — не трогать в этом заходе
+  // "strategy": ["marketing-plan"],  — сам решил отложить
+  // brand-marketing-check — нет генерирующей фичи, это валидатор, см. отдельный пункт ниже
 };
 
 const lightSkillCache = new Map<string, string>();

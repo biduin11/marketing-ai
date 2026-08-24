@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts/companyAnalysis"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -37,7 +38,13 @@ export async function generateCompanyAnalysis(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "COMPANY_ANALYSIS", card, plan })
+
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "company-intelligence",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const inputHash = computeInputHash({ type: "COMPANY_ANALYSIS", card, plan, skillsPrompt })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "COMPANY_ANALYSIS")
@@ -46,10 +53,12 @@ export async function generateCompanyAnalysis(
     }
   }
 
+  const system = skillsPrompt ? `${companyAnalysisSystem}\n\n---\n\n${skillsPrompt}` : companyAnalysisSystem
+
   const { data, model } = await routeAI({
     task: "COMPANY_ANALYSIS",
     plan,
-    system: companyAnalysisSystem,
+    system,
     prompt: buildCompanyAnalysisInput(card),
     schema: companyAnalysisSchema,
   })

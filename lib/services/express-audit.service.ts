@@ -3,6 +3,7 @@ import { routeAI } from "@/lib/ai/router"
 import type { PlanName } from "@/lib/config/plans"
 import { expressAuditSchema, type ExpressAuditResult } from "@/lib/ai/schemas/express-audit"
 import { expressAuditSystem, buildExpressAuditInput, type CompanyCard } from "@/lib/ai/prompts/express-audit"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -25,10 +26,17 @@ export async function generateExpressAudit(
 ): Promise<{ payload: ExpressAuditResult; model: string }> {
   const card = toCard(project)
 
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "express-audit",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const system = skillsPrompt ? `${expressAuditSystem}\n\n---\n\n${skillsPrompt}` : expressAuditSystem
+
   const { data, model } = await routeAI({
     task: "EXPRESS_AUDIT",
     plan,
-    system: expressAuditSystem,
+    system,
     prompt: buildExpressAuditInput(card, answers),
     schema: expressAuditSchema,
   })
