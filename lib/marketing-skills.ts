@@ -163,7 +163,13 @@ export async function buildSystemPrompt(opts: BuildPromptOptions): Promise<strin
     parts.push(`## Профиль клиента (Spiritsa)\n\n${JSON.stringify(spiritsaProfile, null, 2)}`);
   }
 
-  return parts.join("\n\n---\n\n");
+  const result = parts.join("\n\n---\n\n");
+
+  console.info(
+    `[Skills] feature=${featureId} skills=[${skillSlugs.join(", ")}] chars=${result.length}`
+  );
+
+  return result;
 }
 
 /**

@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts/contentPlan"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -46,10 +47,15 @@ export async function generateContentPlan(
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "content-plan",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
   const { data, model } = await routeAI({
     task: "CONTENT_PLAN",
     plan,
-    system: contentPlanSystem,
+    system: skillsPrompt ? `${contentPlanSystem}\n\n---\n\n${skillsPrompt}` : contentPlanSystem,
     prompt: buildContentPlanInput(card, platforms),
     schema: contentPlanSchema,
     maxTokens: 16000,
