@@ -10,6 +10,8 @@ import {
 } from "@/lib/ai/prompts/offer"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
+import { buildClientProfileBlock } from "@/lib/services/clientProfile"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -31,17 +33,36 @@ export async function generateOffer(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "OFFER", card, plan })
+
+  const [skillsPrompt, clientProfileBlock] = await Promise.all([
+    buildSystemPrompt({
+      featureId: "ad-copy",
+      userQuery: `${card.niche}. Цели: ${card.goals}`,
+    }),
+    buildClientProfileBlock(project.id),
+  ])
+
+  const inputHash = computeInputHash({
+    type: "OFFER",
+    card,
+    plan,
+    skillsPrompt,
+    clientProfileBlock,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "OFFER")
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const system = [offerSystem, skillsPrompt, clientProfileBlock]
+    .filter(Boolean)
+    .join("\n\n---\n\n")
+
   const { data, model } = await routeAI({
     task: "OFFERS",
     plan,
-    system: offerSystem,
+    system,
     prompt: buildOfferInput(card),
     schema: offerSchema,
   })

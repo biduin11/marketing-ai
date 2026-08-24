@@ -1,32 +1,10 @@
-# customer-journey-map
+# Customer Journey Map — фреймворк
 
-# Customer Journey Map Skill
+## Стадии пути клиента
 
-Build a complete, visually rich Customer Journey Map for any business — from a quick description or a detailed brief.
+5-7 стадий, адаптированных под тип бизнеса. Базовый универсальный набор:
 
----
-
-## Workflow
-
-### Step 1 — Gather context
-
-Before building, extract the following. If any are missing, ask the user:
-
-- **Business type** — what does the company sell / do?
-- **Target persona** — who is the typical client? (if unknown, define the most common one)
-- **Goal of the map** — find leaks in the funnel? build content strategy? improve sales scripts?
-- **Output format** — HTML artifact, text analysis, Figma, or Miro?
-- **Known pain points** — anything the user already knows about where clients struggle?
-
-If the user is describing a regional SMB (construction, roofing, dental, manufacturing, agriculture), apply the **Regional SMB Template** (see below).
-
----
-
-### Step 2 — Define the Journey Stages
-
-Use 5–7 stages appropriate for the business type. Default universal stages:
-
-| # | Stage | Russian |
+| # | Stage | Русский |
 |---|-------|---------|
 | 1 | Awareness | Осведомлённость |
 | 2 | Consideration | Рассмотрение |
@@ -36,107 +14,63 @@ Use 5–7 stages appropriate for the business type. Default universal stages:
 | 6 | Post-purchase | Послепродажный опыт |
 | 7 | Loyalty / Advocacy | Лояльность |
 
-Adapt stages to the business (e.g., for roofing: add "Site Inspection" between Decision and Purchase).
+Стадии адаптируются под бизнес (например, для кровельных работ — добавляется «Выезд на замер» между «Решение» и «Покупка»).
 
 ---
 
-### Step 3 — Fill each stage with:
+## Что заполняется на каждой стадии
 
-For each stage, populate:
+1. **Точки контакта (touchpoints)** — конкретные каналы, где клиент встречается с брендом (поиск в Яндексе, Instagram, звонок, сайт, WhatsApp, визит менеджера, счёт и т.д.)
+2. **Действия клиента (customerActions)** — что клиент физически делает
+3. **Мысли клиента** — внутренние вопросы и сомнения («Кто эти люди?», «А вдруг сделают плохо?»). Отдельного поля под них нет — используются как контекст для описания стадии (description) и целей клиента (customerGoal)
+4. **Эмоции (emotion / emotionScore / emotionLabel)** — доминирующее состояние: positive / neutral / negative, балл 1-5 (1 = очень негативно, 5 = восторг) и словесная метка (например: нейтрально, заинтересован, немного сомневается, доволен, восторг)
+5. **Боли / барьеры (painPoints)** — что вызывает отток или колебания
+6. **Возможности (opportunities)** — что бизнес мог бы сделать лучше на этой стадии
 
-1. **Touchpoints** — specific channels where client meets the brand (Yandex search, Instagram, call, site, WhatsApp, manager visit, invoice, etc.)
-2. **Client actions** — what the client physically does
-3. **Client thoughts** — internal questions and doubts ("Кто эти люди?", "А вдруг сделают плохо?")
-4. **Emotions** — score 1–5 or label: frustration / neutral / relief / trust / delight
-5. **Pain points / Barriers** — what causes drop-off or hesitation
-6. **Opportunities** — what the business could do better at this stage
-
----
-
-### Step 4 — Output
-
-Choose output based on user request:
-
-#### A) HTML Artifact (default if no tool specified)
-
-Build an interactive HTML table using `show_widget`. Design rules:
-- Dark background (#0f1117) with colored stage headers
-- Emotion shown as emoji row (😤 😐 🤔 😊 🤩) + colored bar
-- Pain points highlighted in amber/red
-- Opportunities highlighted in green
-- Mobile-friendly, horizontally scrollable
-- Include a summary section: top 3 pains + top 3 opportunities
-
-Use CSS variables, clean typography (system-ui or Inter), and make it look like a real consulting deliverable.
-
-#### B) Text analysis
-
-Output a structured markdown report:
-- Persona card
-- Stage-by-stage table
-- Critical moments (moments of truth)
-- Priority recommendations ranked by impact
-
-#### C) Figma
-
-Load `/mnt/skills/plugins/figma:figma-use/SKILL.md` first.
-Create a FigJam board with:
-- Swimlane layout (one row per CJM dimension)
-- Color-coded sticky notes per stage
-- Emotion curve as a connected line
-- Pain points as red stickies, opportunities as green
-
-#### D) Miro
-
-Use Miro MCP tools. Create a board with:
-- Table layout using `Miro:table_create`
-- Diagram for emotion curve using `Miro:diagram_create`
-- Color-coded stickies or doc blocks for each cell
+Дополнительно схема CJM ожидает на каждой стадии **риск оттока (churnRisk: low/medium/high)** с причинами (**churnReasons**) и, по возможности, одну главную рекомендацию (**recommendation**) — их тоже нужно продумывать по ходу анализа, а не только 6 пунктов выше.
 
 ---
 
 ## Regional SMB Template
 
-For businesses in Dagestan / North Caucasus / regional Russian markets, apply these additional layers:
+Для бизнесов в Дагестане / на Северном Кавказе / в региональных российских рынках — дополнительный слой поверх базовой структуры.
 
-**Trust dynamics**: The client decision cycle is longer and more relationship-based. Add a "Trust building" sub-layer to the Consideration and Decision stages. Key touchpoints: word-of-mouth, WhatsApp messages, real photos (not stock), local reviews, visible company address.
+**Динамика доверия**: цикл принятия решения дольше и сильнее завязан на отношения. Добавляется под-слой «Формирование доверия» на стадиях «Рассмотрение» и «Решение». Ключевые точки контакта: сарафанное радио, сообщения в WhatsApp, реальные фото (не стоковые), локальные отзывы, видимый адрес компании.
 
-**Typical pain points by vertical:**
+**Типичные боли по отраслям:**
 
-*Roofing / Construction:*
-- Awareness: client doesn't know how to compare contractors
-- Consideration: fears being overcharged or ghosted after deposit
-- Decision: no clear pricing, no visual portfolio
-- Post-purchase: zero communication during project
-- Loyalty: no one asks for a review or referral
+*Кровля / Строительство:*
+- Осведомлённость: клиент не знает, как сравнивать подрядчиков
+- Рассмотрение: боится переплатить или что подрядчик пропадёт после предоплаты
+- Решение: нет прозрачного прайса, нет визуального портфолио
+- Послепродажный опыт: ноль коммуникации в процессе работ
+- Лояльность: никто не просит отзыв или рекомендацию
 
-*Dental / Medical:*
-- Awareness: fear of pain overrides interest
-- Consideration: price anxiety, no transparent cost breakdown
-- Decision: needs social proof (before/after photos, real reviews)
-- Post-purchase: no follow-up from clinic
+*Стоматология / Медицина:*
+- Осведомлённость: страх боли перевешивает интерес
+- Рассмотрение: тревога по цене, нет прозрачной разбивки стоимости
+- Решение: нужны социальные доказательства (фото до/после, реальные отзывы)
+- Послепродажный опыт: нет follow-up от клиники
 
-*Manufacturing / B2B (sandwich panels, trellis, etc.):*
-- Awareness: found via Yandex, unsure if company is real
-- Consideration: needs technical specs and volume pricing
-- Decision: wants a phone call with a real person, not a form
-- Post-purchase: delivery timing uncertainty
-
----
-
-## Output Quality Checklist
-
-Before delivering the CJM, verify:
-- [ ] At least 5 stages defined
-- [ ] Every stage has: touchpoints, client thought, emotion score, at least 1 pain
-- [ ] At least one "moment of truth" identified (highest-impact decision point)
-- [ ] At least 3 actionable opportunities listed
-- [ ] If HTML: emotion row is visually present and color-coded
-- [ ] Persona is named and described (not "client" — give them a name and a brief)
+*Производство / B2B (сэндвич-панели, металлоконструкции и т.п.):*
+- Осведомлённость: нашли через Яндекс, не уверены, что компания реальная
+- Рассмотрение: нужны технические характеристики и цены за объём
+- Решение: хотят звонок с реальным человеком, а не форму на сайте
+- Послепродажный опыт: неопределённость со сроками доставки
 
 ---
 
-## Example Persona Card
+## Критерии качества карты
+
+- Минимум 5 стадий определено
+- У каждой стадии есть: точки контакта, мысль клиента, оценка эмоции, минимум 1 боль
+- Определён хотя бы один «момент истины» (точка с наибольшим влиянием на решение)
+- Минимум 3 конкретные возможности перечислены
+- Персона названа и описана (не «клиент» вообще, а имя и краткий портрет)
+
+---
+
+## Пример карточки персоны
 
 ```
 Имя: Рустам, 38 лет
@@ -149,9 +83,8 @@ Before delivering the CJM, verify:
 
 ---
 
-## Notes for the AI
+## Общие принципы
 
-- If the user provides a real client case (e.g., "roofing company I worked with"), use real details — don't invent generic placeholder content.
-- Prefer Russian language for all client-facing content (thoughts, touchpoints, pain points) unless user specifies otherwise.
-- The map should feel like a real consulting artifact, not a textbook diagram.
-- If building HTML, invest in the visual — this is something the user may show to their client.
+- Если известен реальный кейс клиента — использовать реальные детали, а не общие места
+- По умолчанию — русский язык для всего клиентского контента (мысли, точки контакта, боли)
+- Карта должна ощущаться как реальный консалтинговый артефакт, а не учебная диаграмма

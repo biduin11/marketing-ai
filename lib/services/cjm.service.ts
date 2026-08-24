@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts/cjm"
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
+import { buildSystemPrompt } from "@/lib/marketing-skills"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -31,17 +32,25 @@ export async function generateCjm(
   options: { force?: boolean } = {}
 ): Promise<AiArtifact> {
   const card = toCard(project)
-  const inputHash = computeInputHash({ type: "CJM", card, plan })
+
+  const skillsPrompt = await buildSystemPrompt({
+    featureId: "cjm",
+    userQuery: `${card.niche}. Цели: ${card.goals}`,
+  })
+
+  const inputHash = computeInputHash({ type: "CJM", card, plan, skillsPrompt })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CJM")
     if (latest && latest.inputHash === inputHash) return latest
   }
 
+  const system = skillsPrompt ? `${cjmSystem}\n\n---\n\n${skillsPrompt}` : cjmSystem
+
   const { data, model } = await routeAI({
     task: "CJM",
     plan,
-    system: cjmSystem,
+    system,
     prompt: buildCjmInput(card),
     schema: cjmSchema,
     maxTokens: 8000,

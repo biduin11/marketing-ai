@@ -11,6 +11,7 @@ import {
 import { computeInputHash } from "@/lib/services/hash"
 import { getLatestArtifact, getNextVersion } from "@/lib/services/artifacts"
 import { buildSystemPrompt } from "@/lib/marketing-skills"
+import { buildClientProfileBlock } from "@/lib/services/clientProfile"
 
 function toCard(project: Project): CompanyCard {
   return {
@@ -40,22 +41,36 @@ export async function generateContentPlan(
   })
   const platforms = platformRows.map((p) => ({ name: p.name, share: p.share }))
 
-  const inputHash = computeInputHash({ type: "CONTENT_PLAN", card, platforms, plan })
+  const [skillsPrompt, clientProfileBlock] = await Promise.all([
+    buildSystemPrompt({
+      featureId: "content-plan",
+      userQuery: `${card.niche}. Цели: ${card.goals}`,
+    }),
+    buildClientProfileBlock(project.id),
+  ])
+
+  const inputHash = computeInputHash({
+    type: "CONTENT_PLAN",
+    card,
+    platforms,
+    plan,
+    skillsPrompt,
+    clientProfileBlock,
+  })
 
   if (!options.force) {
     const latest = await getLatestArtifact(project.id, "CONTENT_PLAN")
     if (latest && latest.inputHash === inputHash) return latest
   }
 
-  const skillsPrompt = await buildSystemPrompt({
-    featureId: "content-plan",
-    userQuery: `${card.niche}. Цели: ${card.goals}`,
-  })
+  const system = [contentPlanSystem, skillsPrompt, clientProfileBlock]
+    .filter(Boolean)
+    .join("\n\n---\n\n")
 
   const { data, model } = await routeAI({
     task: "CONTENT_PLAN",
     plan,
-    system: skillsPrompt ? `${contentPlanSystem}\n\n---\n\n${skillsPrompt}` : contentPlanSystem,
+    system,
     prompt: buildContentPlanInput(card, platforms),
     schema: contentPlanSchema,
     maxTokens: 16000,

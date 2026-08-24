@@ -34,13 +34,13 @@ const LIGHT_SKILLS = new Set([
   "programmatic-seo",
   "launch",
   "marketing-council",
+  "ad-creative",
 ]);
 
 const HEAVY_SKILLS = new Set([
   "marketing-plan",
   "marketing-loops",
   "social",
-  "ad-creative",
   "sales-enablement",
   "ai-seo",
 ]);
@@ -48,8 +48,9 @@ const HEAVY_SKILLS = new Set([
 // Какие скилы нужны какой фиче/агенту в приложении.
 // Подгони под реальные фичи AI Marketing OS.
 export const FEATURE_SKILLS: Record<string, string[]> = {
-  "content-plan": ["content-strategy", "product-marketing"],
-  "ad-copy": ["ad-creative", "product-marketing"],
+  "content-plan": ["content-strategy"],
+  "cjm": ["customer-journey-map"],
+  "ad-copy": ["ad-creative"],
   "seo-brief": ["seo-audit", "ai-seo", "schema"],
   "sales-collateral": ["sales-enablement", "competitors"],
   "gtm-plan": ["marketing-plan", "product-marketing"],
