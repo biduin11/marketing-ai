@@ -27,7 +27,6 @@ const HEAVY_SKILLS = [
   "marketing-plan",
   "marketing-loops",
   "social",
-  "ad-creative",
   "sales-enablement",
   "ai-seo",
 ];

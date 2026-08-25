@@ -34,7 +34,6 @@ const LIGHT_SKILLS = new Set([
   "programmatic-seo",
   "launch",
   "marketing-council",
-  "ad-creative",
 ]);
 
 const HEAVY_SKILLS = new Set([
