@@ -51,7 +51,7 @@ export const FEATURE_SKILLS: Record<string, string[]> = {
   // уже подключено — для справки, ничего не трогать
   "content-plan": ["content-strategy", "social"],   // + social, см. шаг про Content Factory ниже
   "cjm": ["customer-journey-map"],
-  "offers": ["brand-positioning-toolkit"],           // проверить маркер-тестом, что реально этот
+  "offers": ["brand-positioning-toolkit"],           // подтверждено — ad-creative для offers не используется
 
   // новое — подключить в этом заходе
   "audience": ["customer-research"],
@@ -184,7 +184,7 @@ export async function buildSystemPrompt(opts: BuildPromptOptions): Promise<strin
  * Пример использования в API-роуте:
  *
  * const systemPrompt = await buildSystemPrompt({
- *   featureId: "ad-copy",
+ *   featureId: "offers",
  *   userQuery: "Заголовки для рекламы монтажа мембранной кровли, ЦА — застройщики",
  *   spiritsaProfile: { type: "Traditionalist" },
  * });
