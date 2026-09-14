@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Digital-отчёт за 2 недели — Фин Кровля × Надёжная Крыша</title>
+<style>
+:root{
+  --navy:#0b172a;--navy2:#15263d;--paper:#f4f7fb;--white:#fff;--ink:#142033;
+  --muted:#6d788a;--line:#dfe6ef;--orange:#f28c28;--green:#18a66a;--red:#db4b4b;
+  --purple:#a923b5;--blue:#4c6fff;--shadow:0 28px 70px rgba(4,16,36,.16);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#07111f;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;overflow:hidden}
+button{font:inherit}
+.deck{position:relative;width:100vw;height:100vh}
+.slide{
+  position:absolute;inset:0;display:none;overflow:auto;background:var(--paper);
+  padding:clamp(28px,4vw,66px) clamp(28px,6vw,96px) 72px;
+}
+.slide.active{display:flex;flex-direction:column;animation:show .28s ease}
+@keyframes show{from{opacity:.15;transform:translateX(18px)}to{opacity:1;transform:none}}
+.slide.dark{background:linear-gradient(135deg,#07111f 0%,#0f213a 58%,#182f4b 100%);color:#fff}
+.slide.dark:before{content:"";position:absolute;width:54vw;height:54vw;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-20vw;top:-28vw}
+.slide.dark:after{content:"";position:absolute;width:42vw;height:13vw;background:linear-gradient(90deg,transparent,rgba(242,140,40,.22));transform:rotate(-24deg);right:-5vw;bottom:5vw;clip-path:polygon(0 30%,100% 0,100% 68%,0 100%)}
+.kicker{font-size:clamp(12px,1.25vw,18px);letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:var(--orange);margin-bottom:18px;position:relative;z-index:2}
+h1{font-size:clamp(44px,6.3vw,92px);line-height:.94;letter-spacing:-.055em;margin:0;max-width:1050px;position:relative;z-index:2}
+h2{font-size:clamp(31px,4.3vw,62px);line-height:1.02;letter-spacing:-.045em;margin:0}
+h3{font-size:clamp(18px,2vw,28px);line-height:1.15;margin:0}
+p{margin:0}
+.sub{font-size:clamp(18px,2vw,28px);line-height:1.35;color:var(--muted)}
+.dark .sub{color:#cbd6e6}
+.cover-copy{margin-top:auto;margin-bottom:auto}
+.cover-meta{display:flex;gap:38px;flex-wrap:wrap;margin-top:42px;font-size:clamp(14px,1.25vw,18px);color:#d5deea;position:relative;z-index:2}
+.cover-meta b{display:block;color:#fff;margin-bottom:5px}
+.roofline{position:absolute;right:6vw;bottom:9vh;width:min(520px,43vw);height:220px;opacity:.92;z-index:1}
+.roofline i{position:absolute;display:block;background:#284562;box-shadow:0 14px 40px rgba(0,0,0,.3)}
+.roofline .r1{width:78%;height:12px;transform:rotate(-20deg);right:4%;top:55px}
+.roofline .r2{width:54%;height:12px;transform:rotate(30deg);left:1%;top:80px}
+.roofline .wall{width:68%;height:120px;right:8%;bottom:0;background:#122942;border-top:8px solid var(--orange)}
+.header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:clamp(28px,4vh,48px)}
+.period{padding:10px 15px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:700;white-space:nowrap;background:#fff}
+.grid{display:grid;gap:clamp(14px,1.6vw,24px)}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:clamp(18px,2.2vw,30px);box-shadow:0 10px 32px rgba(17,39,70,.06)}
+.metric .label{font-size:clamp(13px,1.15vw,17px);color:var(--muted);font-weight:700;margin-bottom:10px}
+.metric .value{font-size:clamp(30px,4vw,58px);line-height:1;font-weight:850;letter-spacing:-.045em}
+.metric .delta{margin-top:11px;font-size:clamp(13px,1.1vw,17px);font-weight:800}
+.up{color:var(--green)}.down{color:var(--red)}.neutral{color:var(--muted)}
+.callout{background:var(--navy);color:#fff;border-radius:22px;padding:22px 26px;display:flex;align-items:center;gap:22px;margin-top:20px}
+.callout strong{color:var(--orange);font-size:clamp(25px,3vw,45px);letter-spacing:-.04em;white-space:nowrap}
+.callout span{font-size:clamp(14px,1.25vw,18px);line-height:1.4}
+.brand-tag{display:inline-flex;align-items:center;gap:9px;font-weight:850}
+.brand-tag:before{content:"";width:11px;height:11px;border-radius:3px;background:var(--orange)}
+.compare{display:grid;grid-template-columns:180px 1fr 1fr;gap:9px 18px;align-items:center;background:#fff;border:1px solid var(--line);padding:22px;border-radius:22px}
+.compare .head{font-weight:850;color:var(--navy);padding-bottom:9px}
+.compare .name{font-weight:700;color:var(--muted)}
+.barbox{height:14px;background:#edf1f6;border-radius:99px;overflow:hidden;margin-top:8px}
+.bar{height:100%;border-radius:99px;background:var(--blue)}
+.bar.orange{background:var(--orange)}.bar.green{background:var(--green)}.bar.red{background:var(--red)}.bar.purple{background:var(--purple)}
+.bigsplit{display:grid;grid-template-columns:1.05fr .95fr;gap:28px;flex:1;min-height:0}
+.hero-metric{background:var(--navy);color:#fff;border-radius:28px;padding:clamp(25px,3vw,42px);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.hero-metric:after{content:"";position:absolute;width:250px;height:250px;border:55px solid rgba(242,140,40,.14);border-radius:50%;right:-100px;top:-90px}
+.hero-metric .value{font-size:clamp(58px,8vw,118px);font-weight:900;letter-spacing:-.065em;line-height:.9}
+.hero-metric .caption{color:#b9c6d8;font-size:clamp(14px,1.3vw,19px)}
+.hero-metric .smallrow{display:flex;gap:24px;margin-top:26px;flex-wrap:wrap}
+.hero-metric .smallrow b{display:block;font-size:clamp(24px,2.7vw,40px);color:#fff}
+.sidecards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.sidecards .card{display:flex;flex-direction:column;justify-content:space-between}
+.donut{width:min(210px,18vw);aspect-ratio:1;border-radius:50%;margin:auto;background:conic-gradient(var(--purple) 0 var(--pct),#e6ebf2 var(--pct) 100%);display:grid;place-items:center}
+.donut:after{content:"";width:66%;height:66%;border-radius:50%;background:#fff}
+.donut-label{text-align:center;font-weight:850;font-size:clamp(25px,3vw,42px);margin-top:-58%;position:relative}
+.note{margin-top:14px;padding:13px 16px;border-left:4px solid var(--orange);background:#fff7ed;border-radius:7px 14px 14px 7px;color:#5c4630;font-size:clamp(13px,1.15vw,17px);line-height:1.4}
+.insight{display:flex;gap:16px;align-items:flex-start}
+.insight .n{min-width:44px;height:44px;border-radius:14px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900}
+.insight p{color:var(--muted);line-height:1.45;margin-top:8px;font-size:clamp(14px,1.2vw,18px)}
+.winner{border:2px solid var(--green);position:relative}
+.winner:after{content:"ЛИДЕР";position:absolute;right:18px;top:16px;color:var(--green);font-size:12px;letter-spacing:.12em;font-weight:900}
+.risk{border:2px solid #f2c6c6}
+.timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;position:relative;margin-top:18px}
+.step{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;position:relative}
+.step .num{font-size:13px;color:var(--orange);font-weight:900;letter-spacing:.13em}
+.step h3{margin:12px 0}
+.step ul{padding-left:18px;margin:0;color:var(--muted);line-height:1.55;font-size:clamp(13px,1.08vw,16px)}
+.footer{position:absolute;left:clamp(28px,6vw,96px);right:clamp(28px,6vw,96px);bottom:22px;display:flex;justify-content:space-between;color:#8692a4;font-size:12px}
+.dark .footer{color:#9fb0c4}
+.controls{position:fixed;z-index:20;right:18px;bottom:18px;display:flex;align-items:center;gap:8px;background:rgba(7,17,31,.9);padding:8px;border-radius:16px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+.controls button{border:0;background:#20324b;color:#fff;width:42px;height:42px;border-radius:11px;cursor:pointer;font-weight:900;font-size:18px}
+.controls button:hover{background:var(--orange)}
+.counter{color:#fff;font-size:13px;font-weight:800;padding:0 8px;min-width:54px;text-align:center}
+.progress{position:fixed;left:0;bottom:0;height:4px;background:var(--orange);z-index:30;transition:width .25s ease}
+.speaker{display:none;position:fixed;left:18px;bottom:18px;z-index:25;max-width:min(650px,70vw);background:rgba(7,17,31,.95);color:#fff;padding:16px 18px;border-radius:16px;line-height:1.45;font-size:14px;box-shadow:var(--shadow)}
+.speaker.show{display:block}
+.source{color:#8a96a8;font-size:12px;margin-top:12px}
+@media(max-width:850px){
+  .slide{padding:28px 22px 78px}
+  .g4,.g3{grid-template-columns:1fr 1fr}
+  .bigsplit{grid-template-columns:1fr}
+  .hero-metric{min-height:330px}
+  .compare{grid-template-columns:110px 1fr 1fr;font-size:12px}
+  .timeline{grid-template-columns:1fr}
+  .footer{left:22px;right:22px}
+  .roofline{opacity:.4;width:70vw}
+}
+@media(max-width:560px){
+  .g2,.g3,.g4,.sidecards{grid-template-columns:1fr}
+  .period{display:none}
+  .slide{overflow-y:auto}
+  .compare{grid-template-columns:90px 1fr 1fr;padding:14px;gap:8px}
+}
+@media print{
+  html,body{overflow:visible;background:#fff}
+  .deck{height:auto}
+  .slide{position:relative;display:flex!important;width:13.333in;height:7.5in;page-break-after:always;overflow:hidden}
+  .controls,.progress,.speaker{display:none!important}
+}
+</style>
+</head>
+<body>
+<main class="deck" id="deck">
+
+<section class="slide dark active" data-note="Начните с главного: это отчёт по цифровому вниманию и поведению аудитории. Продажи и заявки здесь не оцениваются — для них нужна CRM-аналитика.">
+  <div class="cover-copy">
+    <div class="kicker">Управленческий отчёт · 14 сентября 2026</div>
+    <h1>Digital-статистика<br>за 2 недели</h1>
+    <p class="sub" style="margin-top:25px">Фин Кровля × Надёжная Крыша</p>
+    <div class="cover-meta">
+      <div><b>Сайты</b>1–14 сентября</div>
+      <div><b>Instagram</b>31 августа–13 сентября</div>
+      <div><b>Подготовил</b>Кадиев Зайнулабид Рамазанович</div>
+    </div>
+  </div>
+  <div class="roofline"><i class="r1"></i><i class="r2"></i><i class="wall"></i></div>
+  <div class="footer"><span>Фин Кровля × Надёжная Крыша</span><span>01</span></div>
+</section>
+
+<section class="slide" data-note="Основной тезис: Фин Кровля — лидер периода. Надёжная Крыша требует отдельного плана восстановления. При этом просмотры Instagram нельзя напрямую считать продажами.">
+  <div class="header"><div><div class="kicker">Резюме</div><h2>Главное за период</h2></div><div class="period">14 дней</div></div>
+  <div class="grid g4">
+    <div class="card metric"><div class="label">Просмотры сайтов</div><div class="value">3 046</div><div class="delta neutral">две компании</div></div>
+    <div class="card metric"><div class="label">Визиты на сайты</div><div class="value">1 859</div><div class="delta neutral">1 607 посетителей</div></div>
+    <div class="card metric"><div class="label">Instagram-просмотры</div><div class="value">127 149</div><div class="delta neutral">суммарно</div></div>
+    <div class="card metric"><div class="label">Взаимодействия</div><div class="value">3 164</div><div class="delta up">чистый прирост +28</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:20px">
+    <div class="card winner"><h3>Фин Кровля</h3><p class="sub" style="margin-top:13px">Сайт растёт, Instagram лидирует: <b style="color:var(--ink)">85 283</b> просмотра и <b style="color:var(--ink)">2 687</b> взаимодействий.</p></div>
+    <div class="card risk"><h3>Надёжная Крыша</h3><p class="sub" style="margin-top:13px">Снижаются объём и качество сайта; Instagram: <b style="color:var(--ink)">41 866</b> просмотров и прирост <b class="down">−2</b>.</p></div>
+  </div>
+  <div class="note"><b>Ограничение:</b> в исходных данных нет обращений, замеров, продаж и расходов — ROMI и влияние охвата на выручку пока определить нельзя.</div>
+  <div class="footer"><span>Источники: Яндекс.Метрика, Instagram Insights</span><span>02</span></div>
+</section>
+
+<section class="slide" data-note="Фин Кровля растёт по всем трём показателям объёма. У Надёжной Крыши падение примерно на 14–16 процентов — важно разложить его по каналам и страницам.">
+  <div class="header"><div><div class="kicker">Сайты · объём</div><h2>Трафик движется разнонаправленно</h2></div><div class="period">1–14 сентября</div></div>
+  <div class="grid g2">
+    <div class="card winner">
+      <div class="brand-tag">Фин Кровля</div>
+      <div class="grid g3" style="margin-top:26px">
+        <div class="metric"><div class="label">Просмотры</div><div class="value">1 892</div><div class="delta up">▲ 18,25%</div></div>
+        <div class="metric"><div class="label">Визиты</div><div class="value">1 058</div><div class="delta up">▲ 18,88%</div></div>
+        <div class="metric"><div class="label">Посетители</div><div class="value">917</div><div class="delta up">▲ 15,06%</div></div>
+      </div>
+    </div>
+    <div class="card risk">
+      <div class="brand-tag">Надёжная Крыша</div>
+      <div class="grid g3" style="margin-top:26px">
+        <div class="metric"><div class="label">Просмотры</div><div class="value">1 154</div><div class="delta down">▼ 16,44%</div></div>
+        <div class="metric"><div class="label">Визиты</div><div class="value">801</div><div class="delta down">▼ 13,69%</div></div>
+        <div class="metric"><div class="label">Посетители</div><div class="value">690</div><div class="delta down">▼ 15,54%</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><strong>+32%</strong><span>На сайте «Фин Кровли» на 257 визитов больше: 1 058 против 801 у «Надёжной Крыши».</span></div>
+  <div class="footer"><span>Источник: Яндекс.Метрика</span><span>03</span></div>
+</section>
+
+<section class="slide" data-note="Рост трафика Фин Кровли не должен успокаивать: время на сайте снизилось, а отказы выросли. У Надёжной Крыши 72,53 процента отказов — это самый тревожный показатель отчёта.">
+  <div class="header"><div><div class="kicker">Сайты · качество</div><h2>Пользовательское вовлечение снижается</h2></div><div class="period">1–14 сентября</div></div>
+  <div class="compare">
+    <div></div><div class="head">Фин Кровля</div><div class="head">Надёжная Крыша</div>
+    <div class="name">Время</div>
+    <div><b>1:02</b> <span class="down">−16,52%</span><div class="barbox"><div class="bar orange" style="width:62%"></div></div></div>
+    <div><b>0:52</b> <span class="down">−19,63%</span><div class="barbox"><div class="bar" style="width:52%"></div></div></div>
+    <div class="name">Глубина</div>
+    <div><b>1,79</b> <span class="neutral">−0,53%</span><div class="barbox"><div class="bar orange" style="width:79%"></div></div></div>
+    <div><b>1,44</b> <span class="down">−3,19%</span><div class="barbox"><div class="bar" style="width:44%"></div></div></div>
+    <div class="name">Отказы</div>
+    <div><b>58,51%</b> <span class="down">+2,66%</span><div class="barbox"><div class="bar red" style="width:58.51%"></div></div></div>
+    <div><b>72,53%</b> <span class="down">+4%</span><div class="barbox"><div class="bar red" style="width:72.53%"></div></div></div>
+    <div class="name">Переходы<br>по ссылкам</div>
+    <div><b>500</b> · 47,3% визитов<div class="barbox"><div class="bar green" style="width:47.3%"></div></div></div>
+    <div><b>347</b> · 43,3% визитов<div class="barbox"><div class="bar green" style="width:43.3%"></div></div></div>
+  </div>
+  <div class="note"><b>Приоритет:</b> проверить мобильную скорость, первый экран, соответствие рекламного обещания посадочной странице и заметность кнопок звонка/WhatsApp.</div>
+  <div class="footer"><span>Источник: Яндекс.Метрика · доли переходов рассчитаны от визитов</span><span>04</span></div>
+</section>
+
+<section class="slide" data-note="Фин Кровля показывает лучший Instagram-результат. Особенно важны 90 процентов просмотров от неподписчиков — контент хорошо выходит на новую аудиторию. Теперь задача — превращать её в подписку и обращение.">
+  <div class="header"><div><div class="kicker">Instagram · Фин Кровля</div><h2>Лидер по охвату и реакции</h2></div><div class="period">31 авг — 13 сен</div></div>
+  <div class="bigsplit">
+    <div class="hero-metric">
+      <div><div class="caption">Просмотры всего контента</div><div class="value">85 283</div></div>
+      <div class="smallrow">
+        <div><span class="caption">Зрители</span><b>55 420</b></div>
+        <div><span class="caption">Взаимодействия</span><b>2 687</b></div>
+        <div><span class="caption">Прирост</span><b class="up">+30</b></div>
+      </div>
+    </div>
+    <div class="sidecards">
+      <div class="card" style="grid-column:1/-1">
+        <div><div class="label" style="color:var(--muted);font-weight:800">Новая аудитория</div><div class="donut" style="--pct:90%"><div class="donut-label">90%</div></div></div>
+        <p style="text-align:center;color:var(--muted)">просмотров от неподписчиков</p>
+      </div>
+      <div class="card metric"><div class="label">Reels</div><div class="value">≈75 тыс.</div><div class="barbox"><div class="bar purple" style="width:88%"></div></div></div>
+      <div class="card metric"><div class="label">Истории / посты</div><div class="value" style="font-size:clamp(25px,3vw,44px)">≈6 тыс. / 4,6 тыс.</div><div class="delta up">3,15% взаимодействий*</div></div>
+    </div>
+  </div>
+  <div class="source">* Расчёт: 2 687 взаимодействий / 85 283 просмотра.</div>
+  <div class="footer"><span>Источник: Instagram Insights</span><span>05</span></div>
+</section>
+
+<section class="slide" data-note="У Надёжной Крыши охват меньше более чем вдвое, а взаимодействий меньше более чем в пять раз. Негативный прирост небольшой, но показывает, что контент пока не закрепляет новую аудиторию.">
+  <div class="header"><div><div class="kicker">Instagram · Надёжная Крыша</div><h2>Охват есть, конверсия внимания слабая</h2></div><div class="period">31 авг — 13 сен</div></div>
+  <div class="bigsplit">
+    <div class="hero-metric">
+      <div><div class="caption">Просмотры всего контента</div><div class="value">41 866</div></div>
+      <div class="smallrow">
+        <div><span class="caption">Зрители</span><b>19 736</b></div>
+        <div><span class="caption">Взаимодействия</span><b>477</b></div>
+        <div><span class="caption">Прирост</span><b class="down">−2</b></div>
+      </div>
+    </div>
+    <div class="sidecards">
+      <div class="card" style="grid-column:1/-1">
+        <div><div class="label" style="color:var(--muted);font-weight:800">Новая аудитория</div><div class="donut" style="--pct:83.8%"><div class="donut-label">83,8%</div></div></div>
+        <p style="text-align:center;color:var(--muted)">просмотров от неподписчиков</p>
+      </div>
+      <div class="card metric"><div class="label">Reels</div><div class="value">≈36 тыс.</div><div class="barbox"><div class="bar purple" style="width:86%"></div></div></div>
+      <div class="card metric"><div class="label">Истории / посты</div><div class="value" style="font-size:clamp(25px,3vw,44px)">≈6 тыс. / 138</div><div class="delta down">1,14% взаимодействий*</div></div>
+    </div>
+  </div>
+  <div class="source">* Расчёт: 477 взаимодействий / 41 866 просмотров.</div>
+  <div class="footer"><span>Источник: Instagram Insights</span><span>06</span></div>
+</section>
+
+<section class="slide" data-note="Здесь важно озвучить не только двукратный разрыв по просмотрам. Разрыв по взаимодействиям — 5,63 раза, то есть контент Фин Кровли не просто чаще показывается, он заметно сильнее вызывает реакцию.">
+  <div class="header"><div><div class="kicker">Instagram · сравнение</div><h2>Фин Кровля выигрывает по всем ключевым метрикам</h2></div><div class="period">14 дней</div></div>
+  <div class="grid g3">
+    <div class="card metric winner"><div class="label">Просмотры</div><div class="value">2,04×</div><div class="delta up">85 283 против 41 866</div></div>
+    <div class="card metric winner"><div class="label">Зрители</div><div class="value">2,81×</div><div class="delta up">55 420 против 19 736</div></div>
+    <div class="card metric winner"><div class="label">Взаимодействия</div><div class="value">5,63×</div><div class="delta up">2 687 против 477</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:20px">
+    <div class="card">
+      <h3>Доля взаимодействий*</h3>
+      <div style="margin-top:23px"><b style="font-size:30px">Фин Кровля · 3,15%</b><div class="barbox"><div class="bar orange" style="width:78%"></div></div></div>
+      <div style="margin-top:20px"><b style="font-size:25px">Надёжная Крыша · 1,14%</b><div class="barbox"><div class="bar" style="width:28%"></div></div></div>
+    </div>
+    <div class="card">
+      <h3>Прирост подписчиков</h3>
+      <div style="display:flex;gap:26px;align-items:flex-end;margin-top:32px">
+        <div class="metric"><div class="label">Фин Кровля</div><div class="value up">+30</div></div>
+        <div class="metric"><div class="label">Надёжная Крыша</div><div class="value down">−2</div></div>
+      </div>
+      <p class="sub" style="margin-top:25px">Reels дают около 88% и 86% просмотров соответственно.</p>
+    </div>
+  </div>
+  <div class="source">* Взаимодействия / просмотры; это расчётный показатель, не официальный ER Instagram.</div>
+  <div class="footer"><span>Источник: Instagram Insights</span><span>07</span></div>
+</section>
+
+<section class="slide" data-note="Вывод должен звучать спокойно: мы видим сильную верхнюю часть воронки у Фин Кровли и ослабление Надёжной Крыши. Но без фиксации обращений нельзя говорить, какая активность приносит деньги.">
+  <div class="header"><div><div class="kicker">Управленческие выводы</div><h2>Что означают результаты</h2></div><div class="period">Факты → решения</div></div>
+  <div class="grid g3" style="flex:1">
+    <div class="card">
+      <div class="insight"><div class="n">1</div><div><h3>Фин Кровля — масштабировать</h3><p>Одновременно растёт сайт и лидирует Instagram. Повторить выигрышные Reels, усилить CTA и вести аудиторию на конкретное обращение.</p></div></div>
+    </div>
+    <div class="card">
+      <div class="insight"><div class="n">2</div><div><h3>Надёжная Крыша — восстановить</h3><p>Снижаются трафик и поведенческие показатели сайта; Instagram заметно уступает. Нужны аудит источников, посадочных страниц и контент-гипотез.</p></div></div>
+    </div>
+    <div class="card">
+      <div class="insight"><div class="n">3</div><div><h3>Обе компании — измерять</h3><p>Reels остаются главным источником внимания. Следующий отчёт должен связывать охват с обращениями, замерами, заказами и выручкой.</p></div></div>
+    </div>
+  </div>
+  <div class="callout"><strong>Нет данных</strong><span>для оценки стоимости заявки, конверсии в продажу и окупаемости маркетинга. Это главный аналитический пробел.</span></div>
+  <div class="footer"><span>Интерпретация на основе предоставленной статистики</span><span>08</span></div>
+</section>
+
+<section class="slide dark" data-note="Завершите конкретным обязательством на следующие две недели: масштабируем сильный контент, исправляем слабые посадочные и внедряем фиксацию источника до продажи.">
+  <div class="header" style="position:relative;z-index:2"><div><div class="kicker">План действий</div><h2>Следующие 2 недели</h2></div><div class="period" style="background:transparent;color:#d7e0ec;border-color:#40536b">15–28 сентября</div></div>
+  <div class="timeline" style="z-index:2">
+    <div class="step" style="color:var(--ink)">
+      <div class="num">01 · КОНТЕНТ</div><h3>Масштабировать сильные Reels</h3>
+      <ul><li>Повторить 3–5 лучших сюжетов</li><li>Один оффер и один CTA в ролике</li><li>Для НК протестировать 3 новые подачи</li></ul>
+    </div>
+    <div class="step" style="color:var(--ink)">
+      <div class="num">02 · САЙТ</div><h3>Снизить потери трафика</h3>
+      <ul><li>Проверить 5 ключевых страниц с телефона</li><li>Скорость, первый экран, WhatsApp</li><li>Приоритет НК: отказы 72,53%</li></ul>
+    </div>
+    <div class="step" style="color:var(--ink)">
+      <div class="num">03 · АНАЛИТИКА</div><h3>Связать охват с продажами</h3>
+      <ul><li>UTM и отдельные WhatsApp-ссылки</li><li>Источник обращения в CRM</li><li>Путь: обращение → замер → продажа</li></ul>
+    </div>
+  </div>
+  <div style="position:relative;z-index:2;margin-top:auto">
+    <div class="kicker">Цель периода</div>
+    <h1 style="font-size:clamp(39px,5.4vw,78px)">Превратить охват<br>в измеримые обращения</h1>
+  </div>
+  <div class="footer"><span>Кадиев Зайнулабид Рамазанович</span><span>09</span></div>
+</section>
+
+</main>
+
+<div class="speaker" id="speaker"></div>
+<div class="controls">
+  <button id="prev" aria-label="Предыдущий слайд">‹</button>
+  <span class="counter" id="counter">1 / 9</span>
+  <button id="next" aria-label="Следующий слайд">›</button>
+  <button id="notes" aria-label="Заметки докладчика" title="Заметки (N)">N</button>
+  <button id="full" aria-label="Полный экран" title="Полный экран (F)">⛶</button>
+</div>
+<div class="progress" id="progress"></div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let current=0, notesOpen=false;
+const counter=document.getElementById('counter');
+const progress=document.getElementById('progress');
+const speaker=document.getElementById('speaker');
+function show(i){
+  current=(i+slides.length)%slides.length;
+  slides.forEach((s,n)=>s.classList.toggle('active',n===current));
+  counter.textContent=(current+1)+' / '+slides.length;
+  progress.style.width=((current+1)/slides.length*100)+'%';
+  speaker.textContent=slides[current].dataset.note||'';
+  history.replaceState(null,'','#slide-'+(current+1));
+}
+function toggleNotes(){
+  notesOpen=!notesOpen;
+  speaker.classList.toggle('show',notesOpen);
+  speaker.textContent=slides[current].dataset.note||'';
+}
+document.getElementById('prev').onclick=()=>show(current-1);
+document.getElementById('next').onclick=()=>show(current+1);
+document.getElementById('notes').onclick=toggleNotes;
+document.getElementById('full').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+document.addEventListener('keydown',e=>{
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(current+1)}
+  if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(current-1)}
+  if(e.key.toLowerCase()==='n')toggleNotes();
+  if(e.key.toLowerCase()==='f')document.getElementById('full').click();
+  if(e.key==='Home')show(0);
+  if(e.key==='End')show(slides.length-1);
+});
+let startX=0;
+document.addEventListener('touchstart',e=>startX=e.changedTouches[0].screenX,{passive:true});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].screenX-startX;if(Math.abs(d)>55)show(current+(d<0?1:-1))},{passive:true});
+const hash=parseInt(location.hash.replace('#slide-',''),10);
+show(Number.isFinite(hash)?Math.max(0,Math.min(slides.length-1,hash-1)):0);
+</script>
+</body>
+</html>
