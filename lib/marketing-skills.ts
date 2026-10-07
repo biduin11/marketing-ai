@@ -3,19 +3,18 @@
  *
  * Единая точка входа: собирает system prompt для AI-вызова из
  *   а) лёгких скилов — грузятся из файла целиком,
- *   б) тяжёлых скилов — top-K релевантных чанков через pgvector,
+ *   б) тяжёлых скилов — top-K фрагментов из файлов (или pgvector),
  *   в) Spiritsa-психотип-профиля клиента.
  */
 
 import fs from "fs";
 import path from "path";
 import { prisma } from "@/lib/prisma";
-import { getOpenAIClient } from "@/lib/ai/client";
-
-const openai = getOpenAIClient(); // тот же клиент/ключ (OPENAI_API_KEY + OPENAI_BASE_URL), что и у GPT-задач в lib/ai
+import { embedTexts } from "@/lib/ai/embeddings";
+import { chunkMarkdown, isVectorRetrievalEnabled } from "./skill-chunks";
+import { rankSkillChunks, type SkillChunk } from "./skill-search";
 
 const SKILLS_DIR = path.join(process.cwd(), "lib/marketing-skills");
-const EMBEDDING_MODEL = "text-embedding-3-small";
 
 // --- Лёгкие скилы: грузятся целиком, без RAG -------------------------------
 
@@ -66,6 +65,7 @@ export const FEATURE_SKILLS: Record<string, string[]> = {
 };
 
 const lightSkillCache = new Map<string, string>();
+const heavySkillCache = new Map<string, SkillChunk[]>();
 
 function loadLightSkill(slug: string): string {
   if (lightSkillCache.has(slug)) return lightSkillCache.get(slug)!;
@@ -75,11 +75,10 @@ function loadLightSkill(slug: string): string {
   return content;
 }
 
-// --- Тяжёлые скилы: RAG-ретривал через pgvector -----------------------------
+// --- Тяжёлые скилы: поиск в файлах или pgvector -----------------------------
 
 async function embedQuery(query: string): Promise<number[]> {
-  const res = await openai.embeddings.create({ model: EMBEDDING_MODEL, input: query });
-  return res.data[0].embedding;
+  return (await embedTexts([query]))[0];
 }
 
 interface RetrievedChunk {
@@ -98,6 +97,19 @@ export async function retrieveChunks(
   opts: { skillSlug?: string; topK?: number } = {}
 ): Promise<RetrievedChunk[]> {
   const { skillSlug, topK = 5 } = opts;
+  if (!isVectorRetrievalEnabled()) {
+    const slugs = skillSlug ? [skillSlug] : [...HEAVY_SKILLS];
+    const chunks = slugs.flatMap((slug) => {
+      if (!HEAVY_SKILLS.has(slug)) throw new Error(`Unknown heavy skill: ${slug}`);
+      if (!heavySkillCache.has(slug)) {
+        heavySkillCache.set(slug, chunkMarkdown(loadLightSkill(slug))
+          .filter((chunk) => chunk.content.length > 30)
+          .map((chunk) => ({ ...chunk, skillSlug: slug })));
+      }
+      return heavySkillCache.get(slug)!;
+    });
+    return rankSkillChunks(query, chunks, topK);
+  }
   const queryEmbedding = await embedQuery(query);
   const vecLiteral = `[${queryEmbedding.join(",")}]`;
 
