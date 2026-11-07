@@ -87,6 +87,43 @@ interface GenerateStructuredWithOpenAIArgs<T extends z.ZodType> {
 const SAVE_TOOL_NAME = "save_result"
 const SAVE_TOOL_DESCRIPTION = "Сохранить структурированный результат анализа"
 
+async function requestSolToolArguments(
+  client: OpenAI,
+  system: string,
+  user: string,
+  parameters: Record<string, unknown>,
+  maxTokens: number,
+): Promise<string> {
+  const response = await client.responses.create({
+    model: OPENAI_MODEL,
+    instructions: system,
+    input: user,
+    max_output_tokens: maxTokens,
+    reasoning: { effort: "low" },
+    store: false,
+    tools: [{
+      type: "function",
+      name: SAVE_TOOL_NAME,
+      description: SAVE_TOOL_DESCRIPTION,
+      parameters,
+      strict: false,
+    }],
+    tool_choice: { type: "function", name: SAVE_TOOL_NAME },
+  })
+
+  if (response.incomplete_details?.reason === "max_output_tokens") {
+    throw new Error(`Ответ OpenAI обрезан лимитом токенов (maxTokens=${maxTokens}) до завершения JSON — увеличьте maxTokens`)
+  }
+
+  const toolCall = response.output.find(
+    (item) => item.type === "function_call" && item.name === SAVE_TOOL_NAME,
+  )
+  if (response.status !== "completed" || toolCall?.type !== "function_call") {
+    throw new Error(`OpenAI не вернул структурированный tool call (status: ${response.status ?? "нет"})`)
+  }
+  return toolCall.arguments
+}
+
 /**
  * OpenAI-compatible provider for structured generation via forced function
  * calling (tool_choice), mirroring the Anthropic tool_use pattern in
@@ -118,7 +155,40 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
   }) as Record<string, unknown>
   delete jsonSchema.$schema
 
-  const response = await (client ?? getOpenAIClient()).chat.completions.create({
+  const openai = client ?? getOpenAIClient()
+  const args = model === OPENAI_MODEL
+    ? await requestSolToolArguments(openai, system, user, jsonSchema, maxTokens)
+    : await requestChatToolArguments(openai, model, system, user, jsonSchema, maxTokens)
+
+  let rawData: unknown
+  try {
+    rawData = JSON.parse(args)
+  } catch {
+    // Some providers wrap the tool arguments in a code fence.
+    rawData = extractJson(args)
+  }
+
+  const parsed = schema.safeParse(rawData)
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0]
+    const path = issue?.path.join(".") || "(root)"
+    throw new Error(
+      `AI-ответ не прошёл валидацию схемы: ${issue?.message ?? "неизвестная ошибка"} (поле: ${path})`
+    )
+  }
+
+  return { data: parsed.data, model }
+}
+
+async function requestChatToolArguments(
+  client: OpenAI,
+  model: string,
+  system: string,
+  user: string,
+  parameters: Record<string, unknown>,
+  maxTokens: number,
+): Promise<string> {
+  const response = await client.chat.completions.create({
     model,
     max_tokens: maxTokens,
     temperature: 0.3,
@@ -128,7 +198,7 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
         function: {
           name: SAVE_TOOL_NAME,
           description: SAVE_TOOL_DESCRIPTION,
-          parameters: jsonSchema,
+          parameters,
         },
       },
     ],
@@ -154,28 +224,7 @@ export async function generateStructuredWithOpenAI<T extends z.ZodType>({
     )
   }
 
-  const args = toolCall.function.arguments
-console.log("RAW TOOL CALL ARGS:", args) // ← временно, для диагностики
-
-  let rawData: unknown
-  try {
-    rawData = JSON.parse(args)
-  } catch {
-    // defense-in-depth: arguments should already be a clean JSON string,
-    // but fall back to lenient extraction if it isn't
-    rawData = extractJson(args)
-  }
-
-  const parsed = schema.safeParse(rawData)
-  if (!parsed.success) {
-    const issue = parsed.error.issues[0]
-    const path = issue?.path.join(".") || "(root)"
-    throw new Error(
-      `AI-ответ не прошёл валидацию схемы: ${issue?.message ?? "неизвестная ошибка"} (поле: ${path})`
-    )
-  }
-
-  return { data: parsed.data, model }
+  return toolCall.function.arguments
 }
 
 interface GenerateTextWithOpenAIArgs {

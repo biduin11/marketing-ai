@@ -252,10 +252,10 @@ ANTHROPIC_BASE_URL=    # URL Anthropic-совместимого эндпоинт
                        # идут на api.anthropic.com напрямую — модель claude-sonnet-4-6 (в том виде,
                        # в каком её раздаёт router.cheap) там не существует.
 OPENAI_API_KEY=        # тот же (или другой) ключ router.cheap — используется задачами на
-                       # gpt-5.4/gpt-5.4-mini в lib/ai/models.ts (CJM, Audience, Product, Offers,
+                       # gpt-6.1-sol/gpt-5.4-mini в lib/ai/models.ts (CJM, Audience, Product, Offers,
                        # Content Plan, Director, Report, чат-ассистент, копирайтинг постов и др.).
 OPENAI_BASE_URL=       # URL OpenAI-совместимого эндпоинта router.cheap. Без него — обращение к
-                       # api.openai.com напрямую, где моделей gpt-5.4/gpt-5.4-mini не существует.
+                       # api.openai.com напрямую. Для gpt-6.1-sol используется /v1/responses.
 GEMINI_API_KEY=        # опционально — используется только при AI_PROVIDER=gemini (чат-ассистент
                        # и генерация текста постов, см. ниже). Больше НЕ автофолбэк роутера
                        # (lib/ai/router.ts) — эту роль занял CLAUDEHUB_API_KEY, см. ниже.
