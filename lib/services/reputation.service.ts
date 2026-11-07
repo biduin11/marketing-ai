@@ -2,7 +2,7 @@ import type { Project, ReputationSnapshot } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { routeAI } from "@/lib/ai/router"
 import type { PlanName } from "@/lib/config/plans"
-import { reputationSchema, type Reputation } from "@/lib/ai/schemas/reputation"
+import { groundGrowthPoints, reputationSchema, type Reputation, type ReputationInput } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
 import { tavilyMultiSearch, formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
 
@@ -20,7 +20,8 @@ function buildReputationQueries(name: string, city: string, yandexMaps?: string,
 
 async function analyzeReputation(
   project: Project,
-  plan: PlanName
+  plan: PlanName,
+  input: ReputationInput
 ): Promise<{ payload: Reputation; model: string }> {
   const city = project.regions[0] ?? ""
   const socials =
@@ -37,11 +38,18 @@ async function analyzeReputation(
 `
 
   const queries = buildReputationQueries(project.name, city, yandexMaps, twogis)
-  const searchResults = await tavilyMultiSearch(queries)
-  const searchContext = `
+  const searchResults = input.mode === "web" ? await tavilyMultiSearch(queries) : {}
+  const evidence = input.mode === "manual"
+    ? [{ text: input.text, url: null }]
+    : Object.values(searchResults).flat().map(({ content, url }) => ({ text: content.slice(0, 500), url }))
 
-РЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:
-${formatSearchResultsForPrompt(searchResults)}`
+  if (input.mode === "web" && evidence.length === 0) {
+    throw new Error("Веб-поиск не вернул материалов. Попробуйте позже или добавьте отзывы вручную.")
+  }
+
+  const reviewContext = input.mode === "manual"
+    ? `РЕЖИМ: ручной ввод. Ниша проекта: ${project.niche}\nОТЗЫВЫ ПОЛЬЗОВАТЕЛЯ:\n${input.text}`
+    : `РЕЖИМ: веб-поиск.\nРЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:\n${formatSearchResultsForPrompt(searchResults)}`
 
   const { data, model } = await routeAI({
     task: "REPUTATION",
@@ -54,19 +62,27 @@ ${formatSearchResultsForPrompt(searchResults)}`
         website: project.website,
       }) +
       companyContext +
-      searchContext,
+      "\n" + reviewContext,
     schema: reputationSchema,
     maxTokens: 8000,
   })
 
-  return { payload: data, model }
+  return {
+    payload: {
+      ...data,
+      growthPoints: groundGrowthPoints(data.growthPoints, evidence),
+      reviewMode: input.mode,
+    },
+    model,
+  }
 }
 
 export async function generateReputationSnapshot(
   project: Project,
-  plan: PlanName
+  plan: PlanName,
+  input: ReputationInput
 ): Promise<ReputationSnapshot> {
-  const { payload, model } = await analyzeReputation(project, plan)
+  const { payload, model } = await analyzeReputation(project, plan, input)
   return prisma.reputationSnapshot.create({
     data: { projectId: project.id, payload, model },
   })

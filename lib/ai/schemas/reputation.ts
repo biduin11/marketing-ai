@@ -1,5 +1,38 @@
 import { z } from "zod"
 
+export const MAX_REVIEW_TEXT_LENGTH = 30_000
+
+export const reputationInputSchema = z.discriminatedUnion("mode", [
+  z.object({ mode: z.literal("web") }),
+  z.object({
+    mode: z.literal("manual"),
+    text: z.string().trim().min(1).max(MAX_REVIEW_TEXT_LENGTH),
+  }),
+])
+
+export type ReputationInput = z.infer<typeof reputationInputSchema>
+
+const growthPointSchema = z.object({
+  quote: z.string().trim().min(8).max(500),
+  issue: z.string().trim().min(1),
+  action: z.string().trim().min(1),
+  url: z.httpUrl().nullable().optional(),
+})
+
+export function groundGrowthPoints(
+  points: z.infer<typeof growthPointSchema>[],
+  evidence: { text: string; url: string | null }[]
+) {
+  const normalize = (text: string) => text.replace(/\s+/g, " ").trim()
+  const sources = evidence.map((source) => ({ ...source, text: normalize(source.text) }))
+  return points.flatMap((point) => {
+    const source = sources.find(({ text }) => text.includes(normalize(point.quote)))
+    return source
+      ? [{ ...point, url: z.httpUrl().safeParse(source.url).data ?? null }]
+      : []
+  })
+}
+
 const reviewSchema = z.object({
   author: z.string().nullable(),
   rating: z.number().min(1).max(5).nullable(),
@@ -44,6 +77,8 @@ export const reputationSchema = z.object({
   topComplaints: z.array(z.string()).default([]),
   recommendations: z.array(recommendationSchema).default([]),
   replyTemplates: z.array(replyTemplateSchema).default([]),
+  growthPoints: z.array(growthPointSchema).max(20).default([]),
+  reviewMode: z.enum(["web", "manual"]).optional(),
   dataConfidence: z.enum(["high", "medium", "low"]),
 })
 

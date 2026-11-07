@@ -1,5 +1,7 @@
 "use server"
 
+import { reputationInputSchema } from "@/lib/ai/schemas/reputation"
+
 import { revalidatePath } from "next/cache"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
@@ -363,16 +365,22 @@ export async function runDirectorAnalysis(
 }
 
 export async function runReputationAnalysis(
-  projectId: string
+  projectId: string,
+  input: unknown = { mode: "web" }
 ): Promise<ActionResult> {
   const project = await ownedProject(projectId)
   if (!project) return { success: false, error: "Нет доступа" }
+
+  const parsed = reputationInputSchema.safeParse(input)
+  if (!parsed.success) {
+    return { success: false, error: "Добавьте текст отзывов объёмом до 30 000 символов." }
+  }
 
   const gate = await checkAiGate(project.userId, "REPUTATION")
   if (!gate.success) return gate
 
   try {
-    await generateReputationSnapshot(project, gate.plan)
+    await generateReputationSnapshot(project, gate.plan, parsed.data)
     revalidatePath("/reputation")
     return { success: true }
   } catch (error) {

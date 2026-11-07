@@ -19,9 +19,10 @@ import { GenerationProgress } from "@/components/shared/generation-progress"
 import { StatCard, StatRow } from "@/components/shared/stat-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { TONE_CLASSES, type StatusTone } from "@/lib/status-variants"
 import { runReputationAnalysis } from "@/lib/actions/ai"
-import type { Reputation, ReputationRecommendation } from "@/lib/ai/schemas/reputation"
+import { MAX_REVIEW_TEXT_LENGTH, type Reputation, type ReputationInput, type ReputationRecommendation } from "@/lib/ai/schemas/reputation"
 import { cn } from "@/lib/utils"
 
 interface ReputationViewProps {
@@ -37,6 +38,8 @@ const GEN_STEPS = [
   { id: "analyze", label: "Анализирую тональность и паттерны" },
   { id: "save", label: "Сохраняю результат" },
 ]
+
+const MANUAL_STEPS = GEN_STEPS.slice(-2)
 
 const URGENCY_TONE: Record<ReputationRecommendation["urgency"], StatusTone> = {
   high: "danger",
@@ -86,6 +89,9 @@ export function ReputationView({
   const [loading, setLoading] = useState(false)
   const [genCompleted, setGenCompleted] = useState(false)
   const [genError, setGenError] = useState<string | null>(null)
+  const [mode, setMode] = useState<ReputationInput["mode"]>(reputation?.reviewMode ?? "web")
+  const [reviewText, setReviewText] = useState("")
+  const [readingFile, setReadingFile] = useState(false)
 
   const allReviews = useMemo(() => {
     if (!reputation) return []
@@ -100,11 +106,13 @@ export function ReputationView({
     reputation?.recommendations.filter((r) => r.urgency === "high").length ?? 0
 
   async function generate() {
+    if (loading || readingFile) return
     setLoading(true)
     setGenCompleted(false)
     setGenError(null)
     try {
-      const result = await runReputationAnalysis(projectId)
+      const input: ReputationInput = mode === "manual" ? { mode, text: reviewText } : { mode }
+      const result = await runReputationAnalysis(projectId, input)
       if (!result.success) {
         setGenError(result.error)
         toast.error(result.error)
@@ -122,29 +130,85 @@ export function ReputationView({
     }
   }
 
+  async function loadReviewFile(file: File) {
+    if (file.size > MAX_REVIEW_TEXT_LENGTH * 4) {
+      toast.error("Файл слишком большой. Максимум 30 000 символов.")
+      return
+    }
+    setReadingFile(true)
+    try {
+      const text = (await file.text()).trim()
+      if (!text || text.length > MAX_REVIEW_TEXT_LENGTH || text.includes("\uFFFD") || text.includes("\0")) {
+        toast.error("Выберите непустой TXT-файл в UTF-8 объёмом до 30 000 символов.")
+        return
+      }
+      setReviewText(text)
+    } catch {
+      toast.error("Не удалось прочитать файл.")
+    } finally {
+      setReadingFile(false)
+    }
+  }
+
   function copyTemplate(text: string) {
     navigator.clipboard.writeText(text)
     toast.success("Шаблон скопирован")
   }
 
   const header = (
-    <div className="flex flex-wrap items-start justify-between gap-3">
+    <div className="space-y-4">
       <div>
         <h1 className="font-heading text-h2 text-foreground">Репутация</h1>
         <p className="text-sm text-muted-foreground">
           {searchedAt
-            ? `Последний анализ: ${fmtDate(searchedAt)}`
-            : "AI ищет реальные отзывы о компании в интернете"}
+            ? `Последний анализ: ${fmtDate(searchedAt)}${reputation?.reviewMode === "manual" ? " · ручная подборка" : ""}`
+            : "Проанализируйте отзывы и найдите точки роста для проекта."}
         </p>
       </div>
-      <Button size="sm" onClick={generate} disabled={loading}>
+      <div role="group" aria-label="Источник отзывов" className="flex flex-wrap gap-2">
+        <Button size="sm" variant={mode === "web" ? "default" : "outline"} aria-pressed={mode === "web"} disabled={loading || readingFile} onClick={() => setMode("web")}>
+          Найти в интернете
+        </Button>
+        <Button size="sm" variant={mode === "manual" ? "default" : "outline"} aria-pressed={mode === "manual"} disabled={loading || readingFile} onClick={() => setMode("manual")}>
+          Добавить вручную
+        </Button>
+      </div>
+      {mode === "manual" && (
+        <div className="space-y-2">
+          <label htmlFor="review-text" className="text-sm font-medium">Отзывы о компании, конкурентах или нише</label>
+          <Textarea
+            id="review-text"
+            rows={6}
+            maxLength={MAX_REVIEW_TEXT_LENGTH}
+            placeholder="Вставьте отзывы, разделяя их пустой строкой."
+            value={reviewText}
+            disabled={loading || readingFile}
+            onChange={(event) => setReviewText(event.target.value)}
+          />
+          <label className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            Загрузить TXT (UTF-8)
+            <input
+              type="file"
+              accept=".txt,text/plain"
+              disabled={loading || readingFile}
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0]
+                event.currentTarget.value = ""
+                if (file) void loadReviewFile(file)
+              }}
+            />
+          </label>
+        </div>
+      )}
+      <Button size="sm" onClick={generate} disabled={loading || readingFile || (mode === "manual" && !reviewText.trim())}>
         {loading ? (
           <Loader2 className="size-3.5 animate-spin" />
         ) : (
           <RefreshCw className="size-3.5" />
         )}
-        {reputation ? "Обновить" : "Запустить анализ"}
+        {mode === "web" ? "Найти и проанализировать" : "Проанализировать отзывы"}
       </Button>
+      {!loading && genError && <p role="alert" className="text-sm text-danger">{genError}</p>}
     </div>
   )
 
@@ -152,7 +216,7 @@ export function ReputationView({
     return (
       <div className="space-y-6">
         {header}
-        <GenerationProgress steps={GEN_STEPS} completed={genCompleted} error={genError} />
+        <GenerationProgress steps={mode === "manual" ? MANUAL_STEPS : GEN_STEPS} completed={genCompleted} error={genError} />
       </div>
     )
   }
@@ -165,7 +229,7 @@ export function ReputationView({
           <EmptyState
             icon={Star}
             title="Анализ ещё не запускался"
-            description="Нажмите «Запустить анализ» — AI найдёт отзывы о компании на Яндекс.Картах, 2ГИС и других площадках через веб-поиск."
+            description="Запустите веб-поиск отзывов о компании или добавьте свою подборку."
           />
         </div>
       </div>
@@ -180,11 +244,51 @@ export function ReputationView({
         <div className="flex items-start gap-3 rounded-2xl border border-warning/20 bg-warning/10 p-4">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
           <p className="text-sm text-warning">
-            Мало данных найдено. Проверьте название компании и город в анкете проекта —
-            это поможет AI точнее найти отзывы.
+            {reputation.reviewMode === "manual"
+              ? "В подборке мало данных для уверенных выводов. Добавьте больше отзывов."
+              : "Мало данных найдено. Проверьте название компании и город в анкете проекта или добавьте отзывы вручную."}
           </p>
         </div>
       )}
+
+      <section className="space-y-3" aria-labelledby="growth-points-heading">
+        <h2 id="growth-points-heading" className="text-base font-semibold text-foreground">Точки роста по отзывам</h2>
+        {reputation.growthPoints.length > 0 ? (
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card">
+            <table className="w-full min-w-[36rem] text-left text-sm">
+              <thead className="border-b border-border bg-muted/40">
+                <tr>
+                  <th scope="col" className="p-3">Негативный отзыв</th>
+                  <th scope="col" className="p-3">Что расстроило клиента</th>
+                  <th scope="col" className="p-3">Действие для бизнеса</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {reputation.growthPoints.map((point, index) => (
+                  <tr key={index} className="align-top">
+                    <td className="w-2/5 p-3 text-muted-foreground">
+                      <p>«{point.quote}»</p>
+                      {point.url && (
+                        <a href={point.url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs underline">
+                          Источник отзыва
+                        </a>
+                      )}
+                    </td>
+                    <td className="w-1/4 p-3">{point.issue}</td>
+                    <td className="p-3">{point.action}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {reputation.reviewMode
+              ? "В этих материалах не удалось подтвердить точки роста. Попробуйте добавить отзывы с конкретными жалобами."
+              : "Запустите анализ ещё раз, чтобы получить таблицу точек роста."}
+          </p>
+        )}
+      </section>
 
       {/* БЛОК 1 — сводка */}
       <StatRow cols={4}>

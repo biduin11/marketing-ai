@@ -39,6 +39,7 @@ export default async function ReputationPage() {
 
   return (
     <ReputationView
+      key={project.id}
       projectId={project.id}
       reputation={parsed?.success ? parsed.data : null}
       searchedAt={snapshot?.createdAt.toISOString() ?? null}
