@@ -60,7 +60,7 @@ export function getDeepSeekClient(): OpenAI {
  * specify one — in practice every task in lib/ai/models.ts passes its own
  * `model` explicitly via routeAI, so this default is rarely hit.
  */
-export const OPENAI_MODEL = "gpt-5.4"
+export const OPENAI_MODEL = "gpt-6.1-sol"
 
 /**
  * OpenAI-compatible client. Lazily instantiated (same reasoning as

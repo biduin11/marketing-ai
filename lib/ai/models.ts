@@ -8,9 +8,8 @@
  * OPENAI_BASE_URL pointed at router.cheap's respective compatible endpoints
  * — see lib/ai/client.ts) covers every task here. "anthropic" tasks get
  * native tool-forced structured output via generate-with-anthropic.ts.
- * "openai" tasks use response_format: json_object with the JSON Schema
- * embedded in the prompt (see generate-with-openai.ts) since that surface
- * has no native schema enforcement.
+ * "openai" tasks pass the JSON Schema to a required function call via
+ * Responses for GPT-6.1 Sol and Chat Completions for the other models.
  *
  * COMPETITORS/REPUTATION/MARKET have `requiresSearch: true` — a marker
  * consumed by the service layer (reputation/competitor/market.service.ts),
@@ -110,7 +109,7 @@ export const AI_TASKS = {
     requiresSearch: false,
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
-      PRO: { provider: "openai", model: "gpt-5.4" },
+      PRO: { provider: "openai", model: "gpt-6.1-sol" },
       MAX: { provider: "openai", model: "gpt-5.6-sol" },
     },
   },
@@ -118,7 +117,7 @@ export const AI_TASKS = {
     requiresSearch: false,
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
-      PRO: { provider: "openai", model: "gpt-5.4" },
+      PRO: { provider: "openai", model: "gpt-6.1-sol" },
       MAX: { provider: "openai", model: "gpt-5.6-sol" },
     },
   },
@@ -126,7 +125,7 @@ export const AI_TASKS = {
     requiresSearch: false,
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
-      PRO: { provider: "openai", model: "gpt-5.4" },
+      PRO: { provider: "openai", model: "gpt-6.1-sol" },
       MAX: { provider: "openai", model: "gpt-5.6-sol" },
     },
   },
@@ -134,7 +133,7 @@ export const AI_TASKS = {
     requiresSearch: false,
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
-      PRO: { provider: "openai", model: "gpt-5.4" },
+      PRO: { provider: "openai", model: "gpt-6.1-sol" },
       MAX: { provider: "openai", model: "gpt-5.5" },
     },
   },
@@ -142,7 +141,7 @@ export const AI_TASKS = {
     requiresSearch: false,
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
-      PRO: { provider: "openai", model: "gpt-5.4" },
+      PRO: { provider: "openai", model: "gpt-6.1-sol" },
       MAX: { provider: "openai", model: "gpt-5.5" },
     },
   },
@@ -153,7 +152,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
   SPRINT: {
@@ -161,7 +160,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
   OFFERS: {
@@ -169,7 +168,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
   CONTENT_PLAN: {
@@ -177,7 +176,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
   DIRECTOR: {
@@ -185,7 +184,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
   REPORT: {
@@ -193,7 +192,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
   PERIOD_COMPARISON: {
@@ -201,7 +200,7 @@ export const AI_TASKS = {
     byPlan: {
       FREE: { provider: "openai", model: "gpt-5.4-mini" },
       PRO: { provider: "openai", model: "gpt-5.4-mini" },
-      MAX: { provider: "openai", model: "gpt-5.4" },
+      MAX: { provider: "openai", model: "gpt-6.1-sol" },
     },
   },
 } as const satisfies Record<string, TaskDefinition>
