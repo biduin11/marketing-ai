@@ -38,8 +38,6 @@ import type {
   BuyerPersona,
   Jtbd,
 } from "@/lib/ai/schemas/audience"
-import type { Cjm } from "@/lib/ai/schemas/cjm"
-import { JourneyView } from "@/components/journey/journey-view"
 
 interface AudienceViewProps {
   projectId: string
@@ -51,9 +49,6 @@ interface AudienceViewProps {
   personaVersion: number | null
   jtbd: Jtbd | null
   jtbdVersion: number | null
-  cjm: Cjm | null
-  cjmVersion: number | null
-  cjmCreatedAt: string | null
 }
 
 type LoadingKey = "segments" | "persona" | "jtbd" | null
@@ -88,9 +83,6 @@ export function AudienceView({
   personaVersion,
   jtbd,
   jtbdVersion,
-  cjm,
-  cjmVersion,
-  cjmCreatedAt,
 }: AudienceViewProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<LoadingKey>(null)
@@ -177,7 +169,6 @@ export function AudienceView({
           <TabsTrigger value="pains">Боли и потребности</TabsTrigger>
           <TabsTrigger value="triggers">Триггеры</TabsTrigger>
           <TabsTrigger value="insights">Инсайты</TabsTrigger>
-          <TabsTrigger value="cjm">CJM</TabsTrigger>
         </TabsList>
 
         {/* ─── ОБЗОР ─── */}
@@ -815,15 +806,6 @@ export function AudienceView({
           </div>
         </TabsContent>
 
-        {/* ─── CJM ─── */}
-        <TabsContent value="cjm" className="mt-6">
-          <JourneyView
-            projectId={projectId}
-            cjm={cjm}
-            version={cjmVersion}
-            cjmCreatedAt={cjmCreatedAt}
-          />
-        </TabsContent>
       </Tabs>
     </div>
   )
