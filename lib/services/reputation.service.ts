@@ -4,19 +4,8 @@ import { routeAI } from "@/lib/ai/router"
 import type { PlanName } from "@/lib/config/plans"
 import { groundGrowthPoints, reputationSchema, type Reputation, type ReputationInput } from "@/lib/ai/schemas/reputation"
 import { reputationSystem, buildReputationInput } from "@/lib/ai/prompts/reputation"
-import { tavilyMultiSearch, formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
-
-function buildReputationQueries(name: string, city: string, yandexMaps?: string, twogis?: string): string[] {
-  const queries = [
-    `${name} ${city} отзывы`.trim(),
-    `${name} ${city} рейтинг Яндекс Карты`.trim(),
-    `${name} ${city} 2ГИС отзывы`.trim(),
-    `${name} отзывы клиентов`.trim(),
-  ]
-  if (yandexMaps) queries.push(yandexMaps)
-  if (twogis) queries.push(twogis)
-  return queries
-}
+import { formatSearchResultsForPrompt } from "@/lib/services/tavily.service"
+import { collectReputationEvidence } from "@/lib/services/reputation-search"
 
 async function analyzeReputation(
   project: Project,
@@ -37,19 +26,29 @@ async function analyzeReputation(
 2ГИС: ${twogis ?? "не указана"}
 `
 
-  const queries = buildReputationQueries(project.name, city, yandexMaps, twogis)
-  const searchResults = input.mode === "web" ? await tavilyMultiSearch(queries) : {}
+  const cardLinks = [yandexMaps?.trim(), twogis?.trim()].filter((url): url is string => Boolean(url))
+  const web = input.mode === "web"
+    ? await collectReputationEvidence(project.name, city, cardLinks)
+    : null
   const evidence = input.mode === "manual"
     ? [{ text: input.text, url: null }]
-    : Object.values(searchResults).flat().map(({ content, url }) => ({ text: content.slice(0, 500), url }))
+    : [...(web?.extracted ?? []), ...(web?.snippets ?? [])]
 
   if (input.mode === "web" && evidence.length === 0) {
     throw new Error("Веб-поиск не вернул материалов. Попробуйте позже или добавьте отзывы вручную.")
   }
 
-  const reviewContext = input.mode === "manual"
-    ? `РЕЖИМ: ручной ввод. Ниша проекта: ${project.niche}\nОТЗЫВЫ ПОЛЬЗОВАТЕЛЯ:\n${input.text}`
-    : `РЕЖИМ: веб-поиск.\nРЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:\n${formatSearchResultsForPrompt(searchResults)}`
+  const reviewContext = web
+    ? [
+        "РЕЖИМ: веб-поиск.",
+        "СОДЕРЖИМОЕ СТРАНИЦ ОТЗЫВОВ:",
+        ...web.extracted.map(({ url, text }) => `URL: ${url}\n${text}`),
+        "РЕЗУЛЬТАТЫ ПОИСКА В ИНТЕРНЕТЕ:",
+        formatSearchResultsForPrompt(web.searchResults),
+      ].join("\n\n")
+    : input.mode === "manual"
+      ? `РЕЖИМ: ручной ввод. Ниша проекта: ${project.niche}\nОТЗЫВЫ ПОЛЬЗОВАТЕЛЯ:\n${input.text}`
+      : ""
 
   const { data, model } = await routeAI({
     task: "REPUTATION",

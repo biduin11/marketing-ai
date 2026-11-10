@@ -51,6 +51,30 @@ export async function tavilyMultiSearch(
   return output
 }
 
+export async function tavilyExtractReviewPages(urls: string[]): Promise<{ url: string; raw_content: string }[]> {
+  if (urls.length === 0) return []
+
+  const response = await fetch("https://api.tavily.com/extract", {
+    method: "POST",
+    signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
+    headers: {
+      Authorization: `Bearer ${process.env.TAVILY_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      urls,
+      query: "Отзывы покупателей о компании, оценки, жалобы, недостатки и текст отзывов",
+      chunks_per_source: 5,
+      extract_depth: "advanced",
+      format: "text",
+    }),
+  })
+  if (!response.ok) throw new Error(`Tavily Extract returned HTTP ${response.status}`)
+
+  const data = (await response.json()) as { results?: { url: string; raw_content: string }[] }
+  return data.results ?? []
+}
+
 export function formatSearchResultsForPrompt(
   searchResults: Record<string, TavilySearchResult[]>
 ): string {
