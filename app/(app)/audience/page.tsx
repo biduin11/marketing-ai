@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { Users } from "lucide-react"
 import { EmptyState } from "@/components/empty-state"
 import { AudienceView } from "@/components/audience/audience-view"
@@ -9,7 +10,6 @@ import {
   buyerPersonaSchema,
   jtbdSchema,
 } from "@/lib/ai/schemas/audience"
-import { cjmSchema } from "@/lib/ai/schemas/cjm"
 
 export default async function AudiencePage({
   searchParams,
@@ -18,6 +18,8 @@ export default async function AudiencePage({
 }) {
   const projectId = await getActiveProjectId()
   const { tab } = await searchParams
+  // Old links to the former CJM tab: CJM now lives on its own page.
+  if (tab === "cjm") redirect("/journey")
 
   if (!projectId) {
     return (
@@ -44,13 +46,11 @@ export default async function AudiencePage({
     )
   }
 
-  const [segmentsArtifact, personaArtifact, jtbdArtifact, cjmArtifact] =
-    await Promise.all([
-      getLatestArtifact(project.id, "AUDIENCE_SEGMENTS"),
-      getLatestArtifact(project.id, "BUYER_PERSONA"),
-      getLatestArtifact(project.id, "JTBD"),
-      getLatestArtifact(project.id, "CJM"),
-    ])
+  const [segmentsArtifact, personaArtifact, jtbdArtifact] = await Promise.all([
+    getLatestArtifact(project.id, "AUDIENCE_SEGMENTS"),
+    getLatestArtifact(project.id, "BUYER_PERSONA"),
+    getLatestArtifact(project.id, "JTBD"),
+  ])
 
   const segmentsParsed = segmentsArtifact
     ? audienceSegmentsSchema.safeParse(segmentsArtifact.payload)
@@ -59,7 +59,6 @@ export default async function AudiencePage({
     ? buyerPersonaSchema.safeParse(personaArtifact.payload)
     : null
   const jtbdParsed = jtbdArtifact ? jtbdSchema.safeParse(jtbdArtifact.payload) : null
-  const cjmParsed = cjmArtifact ? cjmSchema.safeParse(cjmArtifact.payload) : null
 
   return (
     <AudienceView
@@ -72,9 +71,6 @@ export default async function AudiencePage({
       personaVersion={personaArtifact?.version ?? null}
       jtbd={jtbdParsed?.success ? jtbdParsed.data : null}
       jtbdVersion={jtbdArtifact?.version ?? null}
-      cjm={cjmParsed?.success ? cjmParsed.data : null}
-      cjmVersion={cjmArtifact?.version ?? null}
-      cjmCreatedAt={cjmArtifact?.createdAt.toISOString() ?? null}
     />
   )
 }

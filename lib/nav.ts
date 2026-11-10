@@ -1,13 +1,17 @@
 import {
   BarChart3,
+  Bell,
+  Bot,
   Building2,
   CalendarDays,
   ChartLine,
   ClipboardCheck,
   ClipboardList,
   Crosshair,
+  FileText,
   Home,
   LayoutList,
+  Route,
   Settings,
   Star,
   Tag,
@@ -32,6 +36,8 @@ export const navGroups: NavGroup[] = [
     label: "",
     items: [
       { label: "Command Center", href: "/", icon: Home },
+      { label: "AI Директор", href: "/director", icon: Bot },
+      { label: "Входящие", href: "/inbox", icon: Bell },
     ],
   },
   {
@@ -41,6 +47,7 @@ export const navGroups: NavGroup[] = [
       { label: "Бренд", href: "/company", icon: Building2 },
       { label: "Конкуренты", href: "/competitors", icon: Crosshair },
       { label: "Клиент", href: "/audience", icon: Users },
+      { label: "Путь клиента", href: "/journey", icon: Route },
       { label: "Офферы", href: "/offers", icon: Tag },
     ],
   },
@@ -63,6 +70,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { label: "Аналитика", href: "/analytics", icon: BarChart3 },
       { label: "Репутация", href: "/reputation", icon: Star },
+      { label: "Отчёты", href: "/reports", icon: FileText },
     ],
   },
   {

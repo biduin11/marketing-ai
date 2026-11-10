@@ -1,7 +1,7 @@
 # AI Marketing OS — CLAUDE.md
 
 > Этот файл читается Claude Code при старте сессии. Не удалять, не перемещать из корня.
-> Последнее обновление: Итерация 6 завершена.
+> Последнее обновление: Итерация 7 завершена, документ сверен с кодом (ноябрь 2026).
 
 ---
 
@@ -10,21 +10,25 @@
 **Название:** AI Marketing OS
 **Репозиторий:** github.com/biduin11/marketing-ai
 **Деплой:** Vercel (iad1, Next.js framework preset)
-**Текущая итерация:** 6 ✅ — все итерации завершены
+**Текущая итерация:** 7 ✅ — все итерации завершены, идут доработки
 
 ---
 
 ## Стек (фиксированный)
 
-- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Framework:** Next.js 16 (App Router, Turbopack), React 19
 - **Язык:** TypeScript strict — **никаких `any`, `@ts-ignore`, `as any`**
 - **Стили:** Tailwind v4, все токены в `app/globals.css` (@theme)
 - **UI-компоненты:** shadcn/ui (`components/ui/`)
-- **ORM:** Prisma + Postgres (Neon)
+- **ORM:** Prisma 7 (`@prisma/adapter-pg`) + Postgres (Neon), клиент — `lib/prisma.ts`
 - **Auth:** NextAuth v5 — обязательный split:
   - `auth.config.ts` → Edge-совместимый (без Prisma, без bcrypt)
   - `auth.ts` → Node.js (Prisma + bcrypt здесь)
-- **AI:** Anthropic SDK (`lib/ai/client.ts`), structured output через tool use + zod
+- **AI:** мультипровайдерный роутер `lib/ai/router.ts` (`routeAI`): Anthropic SDK и OpenAI SDK
+  через router.cheap, аварийный фолбэк ClaudeHub, опционально Gemini/DeepSeek. Модель под
+  задачу и тариф — `lib/ai/models.ts`. Structured output + zod-валидация
+- **Env-валидация:** `@t3-oss/env-nextjs` (`env.mjs`)
+- **Тесты:** Vitest (`npm test`)
 - **Состояние:** Zustand
 - **Графики:** Recharts (монохром, без градиентов)
 - **Файлы:** Vercel Blob
@@ -39,46 +43,84 @@ app/
   (auth)/           ← login, register — без sidebar
   (app)/            ← защищённые роуты, общий layout с sidebar
     layout.tsx      ← Server Component, sidebar + project switcher
-    dashboard/      ← Главная (AI Директор, метрики)
-    company/        ← Company Intelligence
-    audience/
+    page.tsx        ← Command Center (главная: метрики, AI Директор, онбординг)
+    director/       ← AI Marketing Director (ежедневный анализ)
+    inbox/          ← Входящие (сигналы InboxSignal от cron директора)
+    audit/          ← Экспресс-аудит
+    company/        ← «Бренд»: анализ компании, SWOT, позиционирование, вкладки «Рынок»/«Продукт»
     competitors/
-    offers/
-    journey/        ← CJM
-    content/        ← Content Factory
-    analytics/
-    reports/
-    director/       ← AI Marketing Director
-    settings/
-  api/              ← только webhooks (ЮKassa) и AI-стриминг если нужен
+    audience/       ← «Клиент»: сегменты, портреты, JTBD, боли, триггеры, инсайты
+    journey/        ← «Путь клиента» (CJM) — отдельная страница
+    offers/         ← офферы + УТП под площадку
+    strategy/       ← стратегия 30/90/180/365
+    sprint/         ← спринт-планировщик
+    content/        ← Content Factory (контент-план, площадки, тексты постов)
+    briefs/         ← шаблоны брифов
+    analytics/      ← метрики, сравнение периодов, калькулятор окупаемости
+    reputation/     ← отзывы/упоминания + анализ
+    reports/        ← отчёты (неделя/месяц/квартал)
+    campaigns/      ← заглушка (EmptyState), в меню нет
+    settings/       ← профиль, тариф/оплата, Яндекс.Метрика, доступ клиента
+  client/[token]/   ← кабинет клиента (read-only, вход по токену ClientAccess)
+  api/
+    auth/           ← NextAuth
+    yookassa/webhook/
+    cron/           ← director, generate-sprints, sync-yandex-metrika, expire-plans
+    admin/seed-skills/ ← заливка marketing-skills в pgvector (заголовок x-seed-secret)
 
 lib/
+  nav.ts            ← меню sidebar (группы INTELLIGENCE/STRATEGY/EXECUTION/RESULTS)
+  prisma.ts         ← Prisma client singleton
+  gates.ts          ← проверка тарифа/лимитов перед AI-вызовом
+  marketing-skills.ts, skill-*.ts ← сборка system prompt из lib/marketing-skills/*.md
+  marketing-skills/ ← база знаний маркетинговых скилов (.md)
   ai/
-    client.ts       ← Anthropic SDK singleton
+    router.ts       ← routeAI: выбор провайдера + фолбэк
+    models.ts       ← модель по задаче и тарифу
+    client.ts, *-client.ts, generate-with-*.ts ← провайдеры
     prompts/        ← промты по типу анализа
     schemas/        ← zod-схемы AI-выводов
+    knowledge/      ← psychotypes-skill.md
   actions/          ← Server Actions (вся мутация)
-  services/         ← бизнес-логика
-  db/               ← Prisma client singleton
+  services/         ← бизнес-логика (в т.ч. tavily, reputation-search, yookassa, usage)
+  config/plans.ts   ← тарифы и лимиты
+  security/         ← шифрование токенов
   validations/      ← zod-схемы форм
+  store/            ← Zustand
 
 components/
   ui/               ← shadcn/ui (не трогать вручную)
-  shared/           ← AppSidebar, MetricCard, AiPanel, EmptyState, ScoreCard
+  app-sidebar.tsx, app-header.tsx, empty-state.tsx, upgrade-gate.tsx …
+  shared/           ← общие блоки
   [feature]/        ← компоненты конкретного модуля
 
 prisma/
   schema.prisma
+  migrations/*.sql  ← SQL для ручного применения в Neon
 ```
 
 ---
 
 ## База данных (текущая схема)
 
-### Применённые модели (Итерации 0–4)
+### Применённые модели
 - `User` — id, email, name, passwordHash, plan (Plan), planExpiresAt, createdAt, updatedAt
 - `Project` — id, userId, name, niche, website, socials (Json), regions (String[]),
-  products (String[]), competitors (String[]), budget (Int), goals, status (ProjectStatus), timestamps
+  products (String[]), competitors (String[]), budget (Int?), goals, status (ProjectStatus), timestamps.
+  Расширенный профиль (Итерация 7): industry, dealCycle, brandTone, brandWords, clientType,
+  audienceSegments, clientValues, objections, clientLanguage, currentChannels, marketingGoal,
+  socialLinks, proofFacts, margin, conversionRate, currentCpl, leadsPerMonth, salesPerMonth,
+  avgCheck (Int?), competitorsDetailed (Json?), productsDetailed (Json?)
+- `CustomChannel` — id, projectId, name, createdAt (unique [projectId, name]) — пользовательские
+  каналы для метрик
+- `InboxSignal` — id, projectId, type (SignalType), priority (SignalPriority), title, body,
+  action?, actionHref?, read, createdAt (index [projectId, read]). Сигналы создаёт cron
+  `/api/cron/director` (`createSignal` в `lib/actions/inbox.ts`), показываются на странице
+  «Входящие». SQL: `prisma/migrations/inbox_experiments.sql`
+- `SkillChunk` (таблица `skill_chunks`) — id, skillSlug, section, content, tokenCount,
+  embedding vector(1536). Фрагменты «тяжёлых» marketing-skills для RAG; заполняется через
+  `POST /api/admin/seed-skills`. Нужен только при `SKILL_RETRIEVAL_MODE=vector`
+  (по умолчанию `lexical` — поиск по файлам без эмбеддингов)
 - `AiArtifact` — id, projectId, type (ArtifactType), version, payload (Json),
   model, inputHash, createdAt
 - `StrategyTask` — id, projectId, artifactId, taskKey, done (Boolean), updatedAt
@@ -94,7 +136,8 @@ prisma/
   результаты вставляются текстом в промт, затем анализ через Anthropic/openai-совместимый роутер
   (без интеграций и парсинга сайтов напрямую). Каждый запуск («Обновить» на странице «Репутация»)
   создаёт новый снапшот; версий/кэша по inputHash нет — генерация запускается только вручную,
-  т.к. использует Tavily-поиск.
+  т.к. использует Tavily-поиск. Для карточек на Яндекс.Картах / 2ГИС читается вкладка отзывов
+  (`lib/services/reputation-search.ts`), по отзывам строится анализ точек роста.
 - `Sprint` — id, projectId, weekStart, weekEnd, aiSummary, timestamps
 - `SprintTask` — id, sprintId, title, description, priority, category, estimatedHours,
   completed, dueDay, timestamps
@@ -120,6 +163,8 @@ prisma/
   `lib/gates.ts` и `lib/services/usage.service.ts` при каждой проверке лимитов) и backup-cron
   `/api/cron/expire-plans` (ежедневно 06:00 UTC), который возвращает `plan` на FREE и обнуляет
   `planExpiresAt`. `planExpiresAt: null` означает «без срока» (ручной MAX/PRO), а не «истёк».
+  Тарифы (`PLAN_LIMITS`): FREE — 1 проект, 15 генераций/мес, без веб-поиска; PRO — 1799 ₽,
+  10 проектов, 100 генераций; MAX — 3699 ₽, без лимитов.
 
 > MARKET_ANALYSIS — вкладка «Рынок» на странице «Анализ компании» (`/company`). Размер и рост
   рынка, конкуренты, угрозы/возможности, сезонность спроса и цен, AI-инсайт — поиск через Tavily,
@@ -133,6 +178,14 @@ prisma/
 
 > DIRECTOR_DAILY — ежедневный снапшот AI-анализа (problems/opportunities/risks/priorities).
 > Cron: `/api/cron/director` каждый день в 06:00 UTC (vercel.json). Защита: `CRON_SECRET` env.
+> Тот же cron создаёт сигналы `InboxSignal` для страницы «Входящие».
+
+> CJM — отдельная страница «Путь клиента» (`/journey`). Раньше была вкладкой на `/audience`;
+> старые ссылки `/audience?tab=cjm` редиректят на `/journey`.
+
+> PLATFORM_UTP — генератор УТП под площадку (`lib/services/platform-utp.service.ts`).
+
+> Спринты генерируются автоматически: `/api/cron/generate-sprints` по воскресеньям 18:00 UTC.
 
 > Страницы «Гипотезы» (`/hypotheses`) и «Возражения» (`/objections`) удалены (модели `Hypothesis`,
   `Objection`, `ObjectionResponse` и enum'ы `HypothesisStatus`/`HypothesisResult` — тоже; SQL см.
@@ -145,7 +198,12 @@ prisma/
   STRATEGY_30 | STRATEGY_90 | STRATEGY_180 | STRATEGY_365 |
   AUDIENCE_SEGMENTS | BUYER_PERSONA | JTBD | COMPETITOR_ANALYSIS | OFFER |
   CJM | CONTENT_PLAN | REPORT_WEEKLY | REPORT_MONTHLY | REPORT_QUARTERLY | DIRECTOR_DAILY |
-  REPUTATION_ANALYSIS | MARKET_ANALYSIS | PRODUCT_ANALYSIS (расширяется с каждой итерацией)
+  REPUTATION_ANALYSIS | MARKET_ANALYSIS | PRODUCT_ANALYSIS | PLATFORM_UTP
+**Enum Plan:** FREE | PRO | MAX
+**Enum PaymentStatus:** PENDING | SUCCEEDED | CANCELED | REFUNDED
+**Enum BriefType:** VIDEO | DESIGN_POST | DESIGN_STORY | LANDING | PHOTO | COPYWRITING
+**Enum SignalType:** ANOMALY | MARKET | STRATEGY | CONTENT | COMPETITOR | EXPERIMENT | SYSTEM
+**Enum SignalPriority:** HIGH | MEDIUM | LOW
 
 > Примечание: анализ компании сохраняется одним композитным `COMPANY_ANALYSIS`
 > (payload включает SWOT/позиционирование/точки роста). Активный проект — в cookie
@@ -180,6 +238,14 @@ prisma/
 - Общий блок экспортируется как `psychotypesBlock` из `lib/ai/prompts/audience.ts`
   (единый источник; остальные промты импортируют его)
 - Подключён в модулях: **Аудитория** (segments + buyer persona), **Стратегия**, **Контент-план**, **Офферы**
+
+### Marketing-skills (база знаний в промтах)
+
+`lib/marketing-skills.ts` собирает system prompt из `.md`-файлов `lib/marketing-skills/`:
+лёгкие скилы подставляются целиком, тяжёлые — top-K фрагментов (лексический поиск по файлам,
+либо pgvector при `SKILL_RETRIEVAL_MODE=vector`). Привязка модуль → скилы — в том же файле.
+Подключено к CJM, офферам, контент-плану, аудитории, конкурентам, экспресс-аудиту, брифам,
+спринтам и анализу компании.
 - `buyerPersonaSchema` расширена полями `psychotype` (enum) и `psychotypeReason`
   (оба `.optional()` — для обратной совместимости со старыми артефактами)
 
@@ -210,6 +276,9 @@ Success:       #16A34A (bg #DCFCE7)  Warning: #F59E0B (bg #FEF3C7)  Danger: #EF4
 Карточки: `bg-card rounded-xl shadow-[var(--shadow-card)] p-6` (или через `<Card>` из `components/ui/card.tsx`)
 Sidebar: светлый (`bg-sidebar` = белый), активный пункт — `bg-sidebar-accent rounded-full`
   (тёмная пилюля, белый текст/иконка) — см. `components/app-sidebar.tsx`.
+  Состав меню — `lib/nav.ts`: Command Center, AI Директор, Входящие | INTELLIGENCE (Аудит,
+  Бренд, Конкуренты, Клиент, Путь клиента, Офферы) | STRATEGY (Стратегия, Спринт) |
+  EXECUTION (Контент, Брифы) | RESULTS (Аналитика, Репутация, Отчёты) | Настройки.
 Графики Recharts: `--chart-1` (brand orange, основная серия) → `--chart-2..5` (тёмный→серый),
   без произвольных hex в компонентах — только `var(--chart-N)`.
 
@@ -281,6 +350,14 @@ NEXT_PUBLIC_APP_URL=      # https://твой-домен.vercel.app (исполь
 CRON_SECRET=              # случайная строка для защиты /api/cron/director, /api/cron/sync-yandex-metrika
                           # и /api/cron/expire-plans
 ENCRYPTION_KEY=           # случайная строка (openssl rand -hex 32) — шифрование OAuth-токена Яндекс.Метрики
+DEEPSEEK_API_KEY=         # опционально — провайдер DeepSeek (lib/ai/client.ts); сейчас ни одна задача
+                          # на него не маршрутизируется
+SKILL_RETRIEVAL_MODE=     # "lexical" (по умолчанию) | "vector" — поиск фрагментов marketing-skills
+EMBEDDING_API_KEY=        # опционально, только для vector-режима; по умолчанию = OPENAI_API_KEY
+EMBEDDING_BASE_URL=       # опционально; по умолчанию = OPENAI_BASE_URL
+EMBEDDING_MODEL=          # опционально; по умолчанию text-embedding-3-small (1536 измерений)
+SEED_SECRET=              # секрет заголовка x-seed-secret для POST /api/admin/seed-skills
+SKIP_ENV_VALIDATION=      # "1" — пропустить валидацию env.mjs (локальная сборка/CI)
 ```
 
 ---
@@ -298,7 +375,7 @@ ENCRYPTION_KEY=           # случайная строка (openssl rand -hex 3
 | 6 | SaaS (биллинг, лимиты) | ✅ Завершена |
 | 7 | Дополнительные модули (спринт, брифы, УТП) | ✅ Завершена |
 
-Модули реализованы и задеплоены (7 из исходных 9 — «Трекер гипотез» и «База возражений»
+Модули Итерации 7 реализованы и задеплоены (7 из исходных 9 — «Трекер гипотез» и «База возражений»
 удалены: страницы падали с ошибкой, ценность модулей была неясна):
 ✅ Калькулятор окупаемости
 ✅ Генератор УТП под площадку
@@ -307,6 +384,8 @@ ENCRYPTION_KEY=           # случайная строка (openssl rand -hex 3
 ✅ Спринт-планировщик
 ✅ Экспресс-аудит
 ✅ Кабинет клиента (read-only)
+
+Не реализовано: страница «Кампании» (`/campaigns`) — заглушка, в меню не выведена.
 
 ---
 
