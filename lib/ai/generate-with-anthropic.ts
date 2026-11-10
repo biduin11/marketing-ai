@@ -23,14 +23,7 @@ interface GenerateStructuredWithAnthropicArgs<T extends z.ZodType> {
 const SAVE_TOOL_NAME = "save_result"
 const SAVE_TOOL_DESCRIPTION = "Сохранить структурированный результат анализа"
 
-/**
- * Anthropic's SDK has no request timeout by default (up to ~10min), so a
- * slow/hanging call just runs until Vercel force-kills the whole function at
- * its maxDuration (300s on the routes that call into this) — routeAI's
- * catch-and-fallback-to-Gemini never gets a chance to run, since the await
- * never resolves or rejects in time. This timeout makes the request fail
- * fast enough for that fallback to actually happen, with margin under 300s.
- */
+// Leave time for the router to try the fallback provider within the function limit.
 const REQUEST_TIMEOUT_MS = 90_000
 
 export async function generateStructuredWithAnthropic<T extends z.ZodType>({
@@ -52,6 +45,7 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
     input_schema: inputSchema as never,
   }
 
+  const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS)
   const response = await client.messages.create(
     {
       model,
@@ -61,8 +55,11 @@ export async function generateStructuredWithAnthropic<T extends z.ZodType>({
       tool_choice: { type: "tool", name: SAVE_TOOL_NAME },
       messages: [{ role: "user", content: user }],
     },
-    { timeout: REQUEST_TIMEOUT_MS }
-  )
+    { timeout: REQUEST_TIMEOUT_MS, signal, maxRetries: 0 }
+  ).catch((error: unknown) => {
+    if (signal.aborted) throw new Error("Anthropic request timed out", { cause: error })
+    throw error
+  })
 
   const toolUse = response.content.find((block) => block.type === "tool_use")
   if (!toolUse || toolUse.type !== "tool_use") {

@@ -1,4 +1,5 @@
 const TAVILY_API = "https://api.tavily.com/search"
+const SEARCH_TIMEOUT_MS = 20_000
 
 interface TavilySearchResult {
   title: string
@@ -14,6 +15,7 @@ interface TavilyResponse {
 export async function tavilySearch(query: string): Promise<TavilySearchResult[]> {
   const response = await fetch(TAVILY_API, {
     method: "POST",
+    signal: AbortSignal.timeout(SEARCH_TIMEOUT_MS),
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       api_key: process.env.TAVILY_API_KEY,
